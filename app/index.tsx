@@ -1,7 +1,6 @@
 import { Box } from "@/components/ui/box";
 import { Button, ButtonText } from "@/components/ui/button";
 import { Href, useRouter } from "expo-router";
-import { useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
@@ -17,7 +16,7 @@ export default function Index() {
           variant="solid"
           action="primary"
           className="w-full"
-          onPress={() => goto("/(auth)/login")}
+          onPress={() => goto("/login")}
         >
           <ButtonText>To Login</ButtonText>
         </Button>
@@ -25,7 +24,7 @@ export default function Index() {
           variant="solid"
           action="primary"
           className="w-full"
-          onPress={() => goto("/(app)/(tabs)/home")}
+          onPress={() => goto("/home")}
         >
           <ButtonText>To Home</ButtonText>
         </Button>
@@ -33,7 +32,7 @@ export default function Index() {
           variant="solid"
           action="primary"
           className="w-full"
-          onPress={() => goto("/(app)/settings")}
+          onPress={() => goto("/settings")}
         >
           <ButtonText>To Settings</ButtonText>
         </Button>
@@ -41,7 +40,7 @@ export default function Index() {
           variant="solid"
           action="primary"
           className="w-full"
-          onPress={() => goto("/(app)/settings/previous-flags")}
+          onPress={() => goto("/settings/previous-flags")}
         >
           <ButtonText>To Flags</ButtonText>
         </Button>
@@ -49,7 +48,7 @@ export default function Index() {
           variant="solid"
           action="primary"
           className="w-full"
-          onPress={() => goto("/(auth)/signup/profile-photo")}
+          onPress={() => goto("/signup/profile-photo")}
         >
           <ButtonText>To Profile Photo</ButtonText>
         </Button>

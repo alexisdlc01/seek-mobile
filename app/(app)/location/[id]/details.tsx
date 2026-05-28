@@ -103,7 +103,7 @@ export default function DetailsScreen() {
           statusCode: -1,
         }} />
       })
-      router.replace("/home");
+      router.replace("/(app)/(tabs)/home");
     }
   }, [isError]);
 
@@ -115,7 +115,7 @@ export default function DetailsScreen() {
     <ScrollView decelerationRate={0.9} className="h-full">
       <VStack className="gap-2 p-4 flex-1">
         <HStack className="justify-between w-full items-center gap-4">
-          <Pressable onPressIn={() => router.canGoBack() ? router.back() : router.navigate("/home")}>
+          <Pressable onPressIn={() => router.canGoBack() ? router.back() : router.navigate("/(app)/(tabs)/home")}>
             <Icon as={ArrowLeftIcon} size="xl" />
           </Pressable>
           <Text className="text-2xl text-center font-semibold line-clamp-1 flex-1 text-primary-500">

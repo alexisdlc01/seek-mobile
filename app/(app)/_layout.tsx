@@ -7,7 +7,7 @@ export default function Layout() {
       <Stack.Screen name="filters" />
       <Stack.Screen name="chat" />
       <Stack.Screen name="location" />
-      <Stack.Screen name="(settings)" />
+      <Stack.Screen name="settings" />
     </Stack>
   );
 }

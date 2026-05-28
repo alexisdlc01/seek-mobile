@@ -54,7 +54,7 @@ export default function Login() {
             refreshToken: refresh_token,
           });
           console.log("[LOG] login successful")
-          router.navigate("/(app)/(tabs)/home");
+          router.replace("/home");
         },
         onError: (err) => {
           console.log("[LOG] login failed", err);

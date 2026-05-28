@@ -26,7 +26,7 @@ export default function PersonalInfo() {
   const { data: docs, isLoading: loadingDocs } = useUsersControllerDocumentTypes();
 
   if (isError) {
-    return <Redirect href="/home" />
+    return <Redirect href="/(app)/(tabs)/home" />
   }
   console.log("docs", docs)
 
@@ -276,4 +276,3 @@ function PresentIndicator({ present }: PresentIndicatorProps) {
     return <XCircleIcon />
   }
 }
-

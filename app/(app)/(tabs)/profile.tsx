@@ -24,7 +24,7 @@ import { errorToast } from "@/src/utils/error-toast";
 export default function SettingsScreen() {
   const { data, isLoading, isError } = useAuthControllerCurrentUser();
   if (isError) {
-    return <Redirect href="/home" />
+    return <Redirect href="/(app)/(tabs)/home" />
   }
 
   return (
@@ -173,4 +173,3 @@ function InnerSettingsScreen({
 
   )
 }
-

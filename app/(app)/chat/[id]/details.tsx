@@ -34,7 +34,7 @@ import { getApplicationLink } from "@/components/links";
 export default function ChatDetails() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   if (!id) {
-    return <Redirect href="/messages" />
+    return <Redirect href="/(app)/(tabs)/messages" />
   }
 
   const router = useRouter();
@@ -55,7 +55,7 @@ export default function ChatDetails() {
 
   useEffect(() => {
     if (isError) {
-      router.replace("/messages");
+      router.replace("/(app)/(tabs)/messages");
     }
   }, [isError]);
 
@@ -180,7 +180,7 @@ function DeleteGroupModal({
           placement: "top",
           render: (props) => <SuccessToast {...props} message="Deleted application." />
         });
-        router.replace("/messages");
+        router.replace("/(app)/(tabs)/messages");
       }
     });
   }

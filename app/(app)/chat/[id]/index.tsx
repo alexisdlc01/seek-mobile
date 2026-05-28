@@ -66,7 +66,7 @@ export default function ChatScreen() {
   const { id: conversationId } = useLocalSearchParams<{ id?: string }>();
   if (!conversationId) {
     console.log("no conversation id");
-    return <Redirect href="/home" />;
+    return <Redirect href="/(app)/(tabs)/home" />;
   }
 
   const { data: conversation, isError, isLoading: loadingMessages } = useConversationControllerGetConversation(conversationId, {});
@@ -79,7 +79,7 @@ export default function ChatScreen() {
   useEffect(() => {
     if (isError || isUserError) {
       console.log("failed to get messages")
-      router.navigate("/home");
+      router.navigate("/(app)/(tabs)/home");
     }
   }, [isError, isUserError]);
 

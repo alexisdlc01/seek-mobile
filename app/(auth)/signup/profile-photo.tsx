@@ -94,7 +94,7 @@ export default function ProfilePhoto() {
         </Avatar>
       </Pressable>
 
-      <Link href="/home">
+      <Link href="/(app)/(tabs)/home">
         <LinkText size="lg" className="text-secondary-700">
           Done for now
         </LinkText>

@@ -16,7 +16,7 @@ import { errorToast } from '@/src/utils/error-toast';
 export default function ApplicationAddedPage() {
   const { id } = useLocalSearchParams<{ id?: string }>()
   if (!id) {
-    return <Redirect href="/home" />;
+    return <Redirect href="/(app)/(tabs)/home" />;
   }
 
   const { mutate } = useApplicationControllerJoinApplication();
@@ -29,7 +29,7 @@ export default function ApplicationAddedPage() {
       mutate({ id }, {
         onError(error) {
           errorToast({ toast, data: error.response?.data });
-          router.replace("/home");
+          router.replace("/(app)/(tabs)/home");
         },
         onSettled() {
           setLoadingJoin(false);
@@ -66,7 +66,7 @@ export default function ApplicationAddedPage() {
               <VStack className="w-full mt-8" space="md">
                 <Button
                   className="rounded-xl self-center"
-                  onPress={() => router.replace("/messages")}
+                  onPress={() => router.replace("/(app)/(tabs)/messages")}
                 >
                   <ButtonText className="font-semibold text-lg">
                     Go to Chat

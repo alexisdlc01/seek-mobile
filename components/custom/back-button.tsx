@@ -15,7 +15,7 @@ export function BackButton({ title }: BackButtonProps) {
 
   return (
     <Pressable
-      onPressIn={() => router.canGoBack() ? router.back() : router.navigate("/home")}
+      onPressIn={() => router.canGoBack() ? router.back() : router.navigate("/(app)/(tabs)/home")}
       hitSlop={5}
       className="flex-row gap-3"
     >

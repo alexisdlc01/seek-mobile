@@ -1,13 +1,13 @@
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosRequestConfig, isCancel } from "axios";
 import { useAuth } from "@/src/store/auth-store";
 import { ErrorDto } from "../api/seek-api/model";
 
-export type ErrorType<T> = AxiosError<ErrorDto>;
+export type ErrorType = AxiosError<ErrorDto>;
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 
 export const AXIOS_INSTANCE = axios.create({
-  baseURL: BASE_URL || "http://localhost:3000",
+  baseURL: BASE_URL,
   headers: {
     platform: "mobile",
   },
@@ -32,8 +32,17 @@ AXIOS_INSTANCE.interceptors.response.use(
     return resp;
   },
   async (error) => {
-    const { config, response } = error as ErrorType<never>;
-    console.error("[ERROR] request failed", config?.url, response?.data.message ?? "no message");
+    if (isCancel(error)) {
+      console.log("[LOG] request canceled", error.config?.url);
+      throw error;
+    }
+
+    const { config, response, message } = error as ErrorType;
+    console.error(
+      "[ERROR] request failed",
+      config?.url,
+      response?.data.message ?? message,
+    );
 
     const status = response?.status;
     if (status !== 401) {
@@ -43,16 +52,23 @@ AXIOS_INSTANCE.interceptors.response.use(
     console.log("[LOG] authentication error, attempting refresh");
     try {
       const refreshToken = useAuth.getState().refreshToken;
-      const { data } = await axios.post<{ access_token: string, refresh_token: string }>(`${BASE_URL}/auth/refresh`, {}, {
-        headers: {
-          Authorization: `Bearer ${refreshToken}`,
-          mobile: true
-        }
-      });
+      const { data } = await axios.post<{
+        access_token: string;
+        refresh_token: string;
+      }>(
+        `${BASE_URL}/auth/refresh`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${refreshToken}`,
+            mobile: true,
+          },
+        },
+      );
 
       useAuth.getState().login({
         accessToken: data.access_token,
-        refreshToken: data.refresh_token
+        refreshToken: data.refresh_token,
       });
       console.log("[LOG] refresh successful");
     } catch {

@@ -1,7 +1,6 @@
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { FlatList, Pressable, Share } from "react-native";
-import { Dimensions } from "react-native";
+import { Dimensions, FlatList, Pressable, Share } from "react-native";
 import { Listing } from "@/src/api/seek-api/model";
 import { Box } from "@/components/ui/box";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
@@ -9,7 +8,7 @@ import { Image } from "expo-image";
 import { Settings2Icon, ShareIcon, UsersIcon } from "lucide-react-native";
 import { VStack } from "@/components/ui/vstack/index";
 import { useMemo, useState } from "react";
-import { useListingsControllerGetAllVerifiedListings, useListingsControllerGetFilteredListings } from "@/src/api/seek-api/listings";
+import { useListingsControllerGetFilteredListings } from "@/src/api/seek-api/listings";
 import { RefreshControl } from "react-native-gesture-handler";
 import { ScrollDots } from "@/components/custom/scroll-dots";
 import { Text } from "@/components/ui/text"
@@ -27,6 +26,8 @@ export default function HomeScreen() {
   const {
     refetch,
     data: listings,
+    isLoading,
+    isError,
     isRefetching,
   } = useListingsControllerGetFilteredListings(filters);
 
@@ -43,7 +44,17 @@ export default function HomeScreen() {
           progressViewOffset={top}
         />
       }
-      ListEmptyComponent={<Box className="w-full h-full bg-red-500" />}
+      ListEmptyComponent={
+        <Box className="flex-1 items-center justify-center px-6 bg-secondary-50">
+          <Text className="text-center text-lg font-semibold text-secondary-900">
+            {isLoading
+              ? "Loading listings..."
+              : isError
+                ? "Unable to load listings."
+                : "No listings match these filters."}
+          </Text>
+        </Box>
+      }
       data={listings ?? []}
       className="min-h-full"
       pagingEnabled
