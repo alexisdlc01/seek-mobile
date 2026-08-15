@@ -1,108 +1,86 @@
-import { Card } from "@/components/ui/card";
-import { HStack } from "@/components/ui/hstack";
-import { FlatList, Pressable } from "react-native";
+import {
+  ProfileScreen,
+  profileTypography,
+} from "@/components/custom/profile-screen";
 import { Text } from "@/components/ui/text";
-import { Box } from "@/components/ui/box";
+import { PROFILE_COLORS, PROFILE_LAYOUT } from "@/constants/design";
 import { useRouter } from "expo-router";
-import { textStyle } from "@/components/ui/text/styles";
-import { VariantProps } from "@gluestack-ui/utils/nativewind-utils";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { BackButton } from "@/components/custom/back-button";
+import React from "react";
+import { FlatList, Pressable, StyleSheet, View } from "react-native";
 
-type Flag = {
+type FlagRecord = {
   _id: string;
   status: string;
   date: string;
   description: string;
 };
 
-type FlagStatusProps = {
-  status: string;
-  size?: VariantProps<typeof textStyle>["size"];
-};
-
-export function FlagStatusPill({ status, size }: FlagStatusProps) {
-  if (status === "RESOLVED") {
-    return (
-      <Box className="bg-green-500/20 text-white rounded-full px-4 py-1 self-center">
-        <Text
-          size={size}
-          bold
-          className="text-green-800 text-center self-center"
-        >
-          Resolved
-        </Text>
-      </Box>
-    );
+export function getFlagStatusPresentation(status: string) {
+  if (status === "RESOLVED" || status === "ACCOUNT_SUSPENDED") {
+    return { label: "Resolved", color: PROFILE_COLORS.success };
   }
-
   if (status === "UNDER_REVIEW") {
-    return (
-      <Box className="bg-blue-500/20 text-white rounded-full px-4 py-1 self-center">
-        <Text
-          size={size}
-          bold
-          className="text-blue-700 text-center self-center"
-        >
-          Under Review
-        </Text>
-      </Box>
-    );
+    return { label: "Under Review", color: PROFILE_COLORS.review };
   }
-
-  if (status === "NO_ACTION_TAKEN") {
-    return (
-      <Box className="bg-red-500/20 text-white rounded-full px-4 py-1 self-center">
-        <Text
-          size={size}
-          bold
-          className="text-error-600 text-center self-center"
-        >
-          No Action Taken
-        </Text>
-      </Box>
-    );
+  if (status === "NO_ACTION" || status === "NO_ACTION_TAKEN") {
+    return { label: "No Action Taken", color: PROFILE_COLORS.noAction };
   }
+  return { label: "Unknown", color: PROFILE_COLORS.mutedText };
+}
 
+export function FlagStatusPill({
+  status,
+  large = false,
+}: {
+  status: string;
+  large?: boolean;
+}) {
+  const presentation = getFlagStatusPresentation(status);
   return (
-    <Box className="bg-red-gray/50 text-white rounded-full px-4 py-1 self-center">
-      <Text size={size} bold className="text-center self-center">
-        Unknwon
+    <View
+      style={[
+        styles.statusPill,
+        { borderColor: presentation.color },
+        large && styles.largePill,
+      ]}
+    >
+      <Text
+        style={[
+          styles.statusText,
+          { color: presentation.color },
+          large && styles.largeStatusText,
+        ]}
+      >
+        {presentation.label}
       </Text>
-    </Box>
+    </View>
   );
 }
 
-type FlagCardProps = {
-  id: string;
-  status: string;
-  date: string;
-  description: string;
-};
-
-function FlagCard({ id, status, date, description }: FlagCardProps) {
+function FlagCard({ item }: { item: FlagRecord }) {
   const router = useRouter();
-  const gotoDetails = () => {
-    router.navigate(`/(app)/settings/${id}/flag-details`);
-  };
+  const presentation = getFlagStatusPresentation(item.status);
 
   return (
-    <Pressable onPress={() => gotoDetails()}>
-      <Card className="border-[1px] border-background-400 rounded-xl gap-4">
-        <HStack className="justify-between">
-          <FlagStatusPill status={status} />
-          <Text numberOfLines={2} className="color-secondary-800">
-            {date}
-          </Text>
-        </HStack>
-        <Text>{description}</Text>
-      </Card>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Open ${presentation.label} flag from ${item.date}`}
+      onPress={() =>
+        router.navigate(`/(app)/settings/${item._id}/flag-details`)
+      }
+      style={[styles.card, { borderColor: presentation.color }]}
+    >
+      <View style={styles.cardHeader}>
+        <FlagStatusPill status={item.status} />
+        <Text style={profileTypography.metadata}>{item.date}</Text>
+      </View>
+      <Text style={profileTypography.body}>{item.description}</Text>
     </Pressable>
   );
 }
 
 export default function PreviousFlagsScreen() {
-  const data: Array<Flag> = [
+  const data: FlagRecord[] = [
     {
       _id: "1",
       status: "RESOLVED",
@@ -124,21 +102,55 @@ export default function PreviousFlagsScreen() {
   ];
 
   return (
-    <SafeAreaView className="p-6 gap-3">
-      <BackButton />
+    <ProfileScreen title="Previous Flags" scroll={false}>
       <FlatList
-        contentContainerClassName="gap-6 bg-background-0 h-full"
         data={data}
-        renderItem={({ item }) => (
-          <FlagCard
-            key={item._id}
-            id={item._id}
-            status={item.status}
-            date={item.date}
-            description={item.description}
-          />
-        )}
+        keyExtractor={(item) => item._id}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.list}
+        renderItem={({ item }) => <FlagCard item={item} />}
       />
-    </SafeAreaView>
+    </ProfileScreen>
   );
 }
+
+const styles = StyleSheet.create({
+  list: {
+    gap: 14,
+    paddingBottom: 28,
+  },
+  card: {
+    gap: 16,
+    padding: 18,
+    borderWidth: 1.5,
+    borderRadius: PROFILE_LAYOUT.cardRadius,
+    backgroundColor: "transparent",
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  statusPill: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderWidth: 1,
+    borderRadius: 999,
+    backgroundColor: "transparent",
+  },
+  largePill: {
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+  },
+  statusText: {
+    fontSize: 13,
+    lineHeight: 17,
+    fontWeight: "700",
+  },
+  largeStatusText: {
+    fontSize: 16,
+    lineHeight: 21,
+  },
+});

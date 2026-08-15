@@ -1,20 +1,14 @@
-import { BackButton } from "@/components/custom/back-button";
+import { ProfileScreen } from "@/components/custom/profile-screen";
 import { Box } from "@/components/ui/box";
 import { Divider } from "@/components/ui/divider";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import { ScrollView } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function TermsOfServiceScreen() {
   return (
-    <SafeAreaView>
-      <Box className="px-4">
-        <BackButton />
-      </Box>
-      <ScrollView className="h-full">
-        <VStack space="lg" className="p-6 pb-20">
+    <ProfileScreen title="Privacy Policy">
+        <VStack space="lg" className="pb-8">
 
           {/* Header Section */}
           <VStack space="xs">
@@ -199,7 +193,7 @@ export default function TermsOfServiceScreen() {
             <Heading size="md" className="font-bold text-slate-900">
               Contact Us
             </Heading>
-            <Box className="bg-slate-100 p-4 rounded-lg">
+            <Box className="rounded-2xl border border-primary-500 bg-transparent p-4">
               <Text className="font-bold text-slate-800">Seek IT Ltd</Text>
               <Text className="text-slate-700">Email: privacy@seekapp.uk</Text>
               <Text className="text-slate-700">11 Crail’s Lane, KY16 9NR, Scotland</Text>
@@ -207,9 +201,6 @@ export default function TermsOfServiceScreen() {
           </VStack>
 
         </VStack>
-      </ScrollView>
-
-    </SafeAreaView >
+    </ProfileScreen>
   );
 }
-

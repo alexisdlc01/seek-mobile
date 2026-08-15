@@ -1,36 +1,44 @@
-import { VStack } from "@/components/ui/vstack";
-import { Href, useRouter } from "expo-router";
-import { Divider } from "@/components/ui/divider";
-import { FlatButton } from "@/components/custom/flat-button";
-import { BackButton } from "@/components/custom/back-button";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  ProfileActionRow,
+  ProfileScreen,
+} from "@/components/custom/profile-screen";
+import { PROFILE_COLORS } from "@/constants/design";
+import { useRouter } from "expo-router";
+import {
+  FlagIcon,
+  HistoryIcon,
+  MessagesSquareIcon,
+} from "lucide-react-native";
+import React from "react";
+import { View } from "react-native";
 
 export default function HelpScreen() {
   const router = useRouter();
-  const goto = (path: Href) => {
-    router.navigate(path);
+  const iconProps = {
+    color: PROFILE_COLORS.accent,
+    size: 22,
+    strokeWidth: 2,
   };
 
   return (
-    <SafeAreaView>
-      <VStack className="p-6 gap-2">
-        <BackButton title="Help" />
-        <FlatButton
-          onPress={() => goto("/(app)/settings/contact")}
-          text="Contact"
+    <ProfileScreen title="Help" scroll={false}>
+      <View style={{ gap: 12 }}>
+        <ProfileActionRow
+          title="Contact"
+          icon={<MessagesSquareIcon {...iconProps} />}
+          onPress={() => router.navigate("/(app)/settings/contact")}
         />
-        <Divider />
-        <FlatButton
-          onPress={() => goto("/(app)/settings/flag-issue")}
-          text="Flag an Issue"
+        <ProfileActionRow
+          title="Flag an Issue"
+          icon={<FlagIcon {...iconProps} />}
+          onPress={() => router.navigate("/(app)/settings/flag-issue")}
         />
-        <Divider />
-        <FlatButton
-          onPress={() => goto("/(app)/settings/previous-flags")}
-          text="Previous Flags"
+        <ProfileActionRow
+          title="Previous Flags"
+          icon={<HistoryIcon {...iconProps} />}
+          onPress={() => router.navigate("/(app)/settings/previous-flags")}
         />
-        <Divider />
-      </VStack>
-    </SafeAreaView>
+      </View>
+    </ProfileScreen>
   );
 }

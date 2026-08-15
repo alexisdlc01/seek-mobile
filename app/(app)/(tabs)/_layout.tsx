@@ -1,16 +1,16 @@
 import { Tabs } from "expo-router";
 import React from "react";
 import { HapticTab } from "@/components/haptic-tab";
-import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { HouseIcon, UserIcon, MessagesSquareIcon, StarIcon, MapIcon } from "lucide-react-native";
+import { HeartIcon, HouseIcon, UserIcon, MessagesSquareIcon, MapIcon } from "lucide-react-native";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
   return (
     <Tabs
+      initialRouteName="home"
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         headerShown: false,
@@ -59,7 +59,7 @@ export default function TabLayout() {
         options={{
           title: "Saved Listings",
           tabBarIcon: ({ color }) => (
-            <StarIcon size={28} color={color} />
+            <HeartIcon size={28} color={color} />
           ),
         }}
       />

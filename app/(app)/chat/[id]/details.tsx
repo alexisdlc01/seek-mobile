@@ -3,14 +3,14 @@ import { CloseIcon, Icon } from "@/components/ui/icon";
 import { VStack } from "@/components/ui/vstack";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text } from "@/components/ui/text";
-import { PlusIcon, ArrowLeftIcon, UserCircleIcon } from "lucide-react-native";
+import { PlusIcon, ArrowLeftIcon } from "lucide-react-native";
 import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
 import { Pressable } from "@/components/ui/pressable";
 import { useConversationControllerGetConversation } from "@/src/api/seek-api/conversation";
 import { Loader } from "@/components/custom/loader";
 import { Divider } from "@/components/ui/divider";
 import { FlatList, Share } from "react-native";
-import { Button, ButtonSpinner, ButtonText } from "@/components/ui/button";
+import { Button, ButtonText } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack/index";
 import { Avatar } from "@/components/ui/avatar";
 import { Image } from "expo-image"
@@ -24,7 +24,7 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@/components/ui/modal";
-import { getApplicationControllerGetAllMyApplicationsQueryKey, useApplicationControllerDeleteApplication, useApplicationControllerGetApplication, useApplicationControllerGetByConversation } from "@/src/api/seek-api/application";
+import { getApplicationControllerGetAllMyApplicationsQueryKey, useApplicationControllerDeleteApplication, useApplicationControllerGetByConversation } from "@/src/api/seek-api/application";
 import { queryClient } from "@/app/_layout";
 import { errorToast } from "@/src/utils/error-toast";
 import { useToast } from "@/components/ui/toast";
@@ -32,12 +32,10 @@ import { SuccessToast } from "@/components/custom/success-toast";
 import { getApplicationLink } from "@/components/links";
 
 export default function ChatDetails() {
-  const { id } = useLocalSearchParams<{ id?: string }>();
-  if (!id) {
-    return <Redirect href="/(app)/(tabs)/messages" />
-  }
-
+  const { id: idParam } = useLocalSearchParams<{ id?: string }>();
+  const id = idParam ?? "";
   const router = useRouter();
+  const [open, setOpen] = useState<boolean>(false);
 
   const {
     data: conversation,
@@ -57,9 +55,7 @@ export default function ChatDetails() {
     if (isError) {
       router.replace("/(app)/(tabs)/messages");
     }
-  }, [isError]);
-
-  const [open, setOpen] = useState<boolean>(false);
+  }, [isError, router]);
 
   function handleShare() {
     if (!id) return;
@@ -67,6 +63,10 @@ export default function ChatDetails() {
       message: `Check out this listing on Seek!`,
       url: getApplicationLink(id),
     });
+  }
+
+  if (!id) {
+    return <Redirect href="/(app)/(tabs)/messages" />;
   }
 
   return (

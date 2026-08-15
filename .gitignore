@@ -2,10 +2,15 @@
 
 # dependencies
 node_modules/
+
+# Environment files and private credentials
 .env
+.env.*
+!.env.example
 
 # Expo
 .expo/
+.expo-shared/
 dist/
 web-build/
 expo-env.d.ts
@@ -16,8 +21,12 @@ expo-env.d.ts
 *.jks
 *.p8
 *.p12
+*.pfx
 *.key
 *.mobileprovision
+*.apk
+*.aab
+*.ipa
 
 # Metro
 .metro-health-check*
@@ -27,15 +36,25 @@ npm-debug.*
 yarn-debug.*
 yarn-error.*
 
+# tests and tool caches
+coverage/
+.cache/
+.npm/
+.eslintcache
+.turbo/
+
 # macOS
 .DS_Store
 *.pem
 
-# local env files
-.env*.local
-
-# typescript
+# TypeScript
 *.tsbuildinfo
+
+# editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
 
 app-example
 

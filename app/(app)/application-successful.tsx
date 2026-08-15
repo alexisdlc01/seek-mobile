@@ -11,7 +11,7 @@ function ApplicationSuccess() {
   const navigation = useRouter();
 
   return (
-    <Box className="flex-1 bg-white p-6">
+    <Box className="flex-1 bg-primary-0 p-6">
       <Center className="flex-1">
         <VStack space="xl" className="items-center text-center">
           {/* Success Icon */}
@@ -21,15 +21,15 @@ function ApplicationSuccess() {
 
           {/* Message */}
           <VStack space="xs" className="items-center">
-            <Heading size="2xl" className="text-typography-900 text-center">
+            <Heading size="2xl" className="text-primary-500 text-center">
               Application Sent!
             </Heading>
           </VStack>
 
           {/* Info Card */}
-          <Box className="bg-background-50 p-4 rounded-lg w-full border border-outline-100">
-            <Text size="sm" className="text-typography-600 text-center">
-              The landlord in St Andrews will review your profile and documents shortly. You'll receive a push notification once they respond.
+          <Box className="bg-primary-0 p-4 rounded-3xl w-full">
+            <Text size="sm" className="text-neutral-800 text-center">
+              The landlord in St Andrews will review your profile and documents shortly. You&apos;ll receive a push notification once they respond.
             </Text>
           </Box>
         </VStack>
@@ -41,6 +41,7 @@ function ApplicationSuccess() {
           size="lg"
           variant="solid"
           action="primary"
+          className="rounded-full"
           onPress={() => navigation.navigate("/saved-listings")}
         >
           <ButtonText>View My Applications</ButtonText>
@@ -49,6 +50,7 @@ function ApplicationSuccess() {
           size="lg"
           variant="outline"
           action="secondary"
+          className="rounded-full bg-primary-0"
           onPress={() => navigation.navigate('/home')}
         >
           <ButtonText>Back to Search</ButtonText>
@@ -59,4 +61,3 @@ function ApplicationSuccess() {
 };
 
 export default ApplicationSuccess;
-

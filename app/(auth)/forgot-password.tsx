@@ -1,50 +1,60 @@
 import { Button, ButtonText } from "@/components/ui/button";
-import {
-  FormControl,
-  FormControlLabel,
-  FormControlLabelText,
-} from "@/components/ui/form-control";
-import { Input, InputField, InputSlot } from "@/components/ui/input";
+import { FormControl } from "@/components/ui/form-control";
 import { VStack } from "@/components/ui/vstack";
-import { Text } from "@/components/ui/text";
-import { Pressable } from "@/components/ui/pressable";
-import { Icon } from "@/components/ui/icon/index.web";
-import { ArrowLeftIcon } from "@/components/ui/icon";
-import { useRouter } from "expo-router";
-import { HStack } from "@/components/ui/hstack";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { BackButton } from "@/components/custom/back-button";
+import { EmailInput } from "@/components/custom/email-input";
+import { useState } from "react";
+import { isValidEmail, normalizeEmail } from "@/src/utils/validate-email";
+import { useAuthControllerForgotPassword } from "@/src/api/seek-api/auth";
+import { useToast } from "@/components/ui/toast";
+import { ErrorToast } from "@/components/custom/error-toast";
+import { SuccessToast } from "@/components/custom/success-toast";
 
 export default function ForgotPassword() {
-  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const { mutate, isPending } = useAuthControllerForgotPassword();
+  const toast = useToast();
+
+  const handleSubmit = () => {
+    mutate(
+      { data: { email: normalizeEmail(email) } },
+      {
+        onSuccess({ message }) {
+          toast.show({
+            placement: "top",
+            render: (props) => <SuccessToast {...props} message={message} />,
+          });
+        },
+        onError(error) {
+          toast.show({
+            placement: "top",
+            render: (props) => (
+              <ErrorToast {...props} error={error.response?.data} />
+            ),
+          });
+        },
+      },
+    );
+  };
 
   return (
-    <SafeAreaView>
-      <VStack className="gap-8 p-4">
-        <Pressable onPress={() => router.navigate("/(auth)/login")}>
-          <HStack className="items-center gap-2">
-            <Icon as={ArrowLeftIcon} size="xl" />
-            <Text underline size="xl" className="text-primary-900">
-              Back
-            </Text>
-          </HStack>
-        </Pressable>
+    <SafeAreaView className="h-full bg-background-0">
+      <VStack className="gap-8 p-6">
+        <BackButton title="Reset Password" fallbackHref="/(auth)/login" />
 
-        {/* Email */}
-        <FormControl>
-          <FormControlLabel>
-            <FormControlLabelText size="lg">Email</FormControlLabelText>
-          </FormControlLabel>
-          <Input size="lg">
-            <InputField placeholder="Enter your email" />
-            <InputSlot style={{ paddingRight: 10 }}>
-              <Text bold>@st-andrews.ac.uk</Text>
-            </InputSlot>
-          </Input>
-        </FormControl>
+        <EmailInput email={email} setEmail={setEmail} />
 
         <FormControl>
-          <Button className="rounded-xl" size="lg">
-            <ButtonText>Send Reset Link</ButtonText>
+          <Button
+            className="rounded-xl"
+            size="lg"
+            onPress={handleSubmit}
+            isDisabled={!isValidEmail(email) || isPending}
+          >
+            <ButtonText>
+              {isPending ? "Sending…" : "Send Reset Link"}
+            </ButtonText>
           </Button>
         </FormControl>
       </VStack>

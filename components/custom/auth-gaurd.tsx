@@ -1,48 +1,29 @@
 import { PropsWithChildren, useEffect } from "react";
 import { useAuth } from "@/src/store/auth-store";
-import { useRootNavigationState, useRouter, useSegments } from "expo-router";
+import { useRouter } from "expo-router";
 
 type AuthGaurdProps = PropsWithChildren;
 
-const DISABLE_AUTH_GUARD = true;
-
 export function AuthGaurd({ children }: AuthGaurdProps) {
-  console.log("[LOG] AuthGaurd rendering");
   const router = useRouter();
-  const rootNavigationState = useRootNavigationState();
-  const { _hasHydrated, accessToken, refreshToken } = useAuth((state) => state);
-  const [rootSegment] = useSegments();
+  const hasHydrated = useAuth((state) => state._hasHydrated);
+  const isLoggedIn = useAuth(
+    (state) => Boolean(state.accessToken) && Boolean(state.refreshToken),
+  );
 
   useEffect(() => {
-    if (DISABLE_AUTH_GUARD) {
+    if (!hasHydrated) {
       return;
     }
 
-    if (!_hasHydrated || !rootNavigationState?.key) {
-      return;
+    if (!isLoggedIn) {
+      router.replace("/(auth)/login");
     }
+  }, [hasHydrated, isLoggedIn, router]);
 
-    console.log("[LOG] auth state changed");
-    const isAppRoute = rootSegment === "(app)";
-
-    const isLoggedIn: boolean =
-      accessToken !== undefined && refreshToken !== undefined;
-    console.log(isLoggedIn, accessToken, refreshToken);
-    if (!isLoggedIn && isAppRoute) {
-      console.log("[LOG] redirecting to main");
-      router.replace("/");
-    } else if (isLoggedIn && !isAppRoute) {
-      console.log("[LOG] redirecting to home");
-      router.replace("/(app)/(tabs)/home");
-    }
-  }, [
-    accessToken,
-    refreshToken,
-    _hasHydrated,
-    rootNavigationState?.key,
-    rootSegment,
-    router,
-  ]);
+  if (!hasHydrated || !isLoggedIn) {
+    return null;
+  }
 
   return <>{children}</>;
 }

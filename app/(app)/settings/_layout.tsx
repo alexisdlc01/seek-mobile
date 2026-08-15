@@ -1,8 +1,16 @@
-import { Slot } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Stack } from "expo-router";
 
 export default function StackLayout() {
   return (
-    <Slot />
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        animation: "slide_from_right",
+        animationDuration: 260,
+        gestureEnabled: true,
+        fullScreenGestureEnabled: true,
+        contentStyle: { backgroundColor: "#FFFFFF" },
+      }}
+    />
   );
 }

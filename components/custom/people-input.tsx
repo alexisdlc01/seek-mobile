@@ -3,7 +3,6 @@ import { Pressable } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Box } from "@/components/ui/box";
 
-
 type PeopleInputProps = {
   value: number;
   onChange: (value: number) => void;
@@ -12,15 +11,24 @@ type PeopleInputProps = {
 export function PeopleInput({ value, onChange }: PeopleInputProps) {
   const selected = value;
 
-  function Dot({ label, value }: { label: string; value: number }) {
+  function PeopleButton({ label, value }: { label: string; value: number }) {
+    const isSelected = value === selected;
+
     return (
       <Pressable
-        onPressIn={() => onChange(value)}
-        className={`border-[1px] border-white rounded-xl w-10 h-10 items-center justify-center ${value === selected ? "bg-white" : ""}`}
+        accessibilityLabel={`${label} ${label === "1" ? "person" : "people"}`}
+        accessibilityRole="button"
+        accessibilityState={{ selected: isSelected }}
+        onPress={() => onChange(value)}
+        className={`h-12 min-w-12 flex-1 items-center justify-center rounded-full border ${
+          isSelected
+            ? "border-primary-500 bg-primary-500"
+            : "border-primary-200 bg-white"
+        }`}
       >
         <Text
           size="lg"
-          className={`align-baseline text-center ${value === selected ? "text-black" : ""}`}
+          className={`text-center font-semibold ${isSelected ? "text-white" : "text-black"}`}
         >
           {label}
         </Text>
@@ -29,14 +37,16 @@ export function PeopleInput({ value, onChange }: PeopleInputProps) {
   }
 
   return (
-    <Box className="gap-2">
-      <Text size="lg">Number of People</Text>
-      <HStack className="justify-between">
-        <Dot label="1" value={1} />
-        <Dot label="2" value={2} />
-        <Dot label="3" value={3} />
-        <Dot label="4" value={4} />
-        <Dot label="5+" value={5} />
+    <Box className="gap-3">
+      <Text size="lg" className="font-semibold text-primary-500">
+        Number of people
+      </Text>
+      <HStack className="gap-2">
+        <PeopleButton label="1" value={1} />
+        <PeopleButton label="2" value={2} />
+        <PeopleButton label="3" value={3} />
+        <PeopleButton label="4" value={4} />
+        <PeopleButton label="5+" value={5} />
       </HStack>
     </Box>
   );

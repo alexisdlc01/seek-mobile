@@ -6,10 +6,11 @@ import {
   FormControlLabelText,
 } from "@/components/ui/form-control";
 import { Input, InputField, InputIcon, InputSlot } from "../ui/input";
-import { isValidPassword } from "@/src/utils/validate-password";
-import { Button } from "@/components/ui/button/index";
-import { EyeOffIcon, Icon, InfoIcon, EyeIcon } from "../ui/icon";
-import { Pressable } from "react-native";
+import {
+  isValidPassword,
+  PASSWORD_REQUIREMENTS,
+} from "@/src/utils/validate-password";
+import { EyeOffIcon, EyeIcon } from "../ui/icon";
 import { useState } from "react";
 
 type PasswordInputProps = {
@@ -17,18 +18,24 @@ type PasswordInputProps = {
   setPassword: (password: string) => void;
   label?: string;
   placeholder?: string;
+  validateStrength?: boolean;
 };
 
 export function PasswordInput({
   password,
   setPassword,
   label = "Password",
-  placeholder = "Enter your password"
+  placeholder = "Enter your password",
+  validateStrength = false,
 }: PasswordInputProps) {
   const [show, setShow] = useState<boolean>(false);
 
   return (
-    <FormControl isInvalid={password.length > 0 && !isValidPassword(password)}>
+    <FormControl
+      isInvalid={
+        validateStrength && password.length > 0 && !isValidPassword(password)
+      }
+    >
       <FormControlLabel>
         <FormControlLabelText size="lg">{label}</FormControlLabelText>
       </FormControlLabel>
@@ -49,7 +56,7 @@ export function PasswordInput({
       </Input>
       <FormControlHelper>
         <FormControlHelperText size="lg">
-          TODO password info.
+          {validateStrength ? PASSWORD_REQUIREMENTS : "Enter your password."}
         </FormControlHelperText>
       </FormControlHelper>
     </FormControl>

@@ -1,48 +1,69 @@
+import {
+  ProfilePrimaryButton,
+  ProfileScreen,
+  ProfileTextField,
+  profileTypography,
+} from "@/components/custom/profile-screen";
 import { Text } from "@/components/ui/text";
-import { VStack } from "@/components/ui/vstack";
-import { Href, useRouter } from "expo-router";
-import { Divider } from "@/components/ui/divider";
-import { FlatButton } from "@/components/custom/flat-button";
-import { Card } from "@/components/ui/card";
-import { Box } from "@/components/ui/box";
-import { Input, InputField } from "@/components/ui/input";
-import { Button, ButtonText } from "@/components/ui/button";
+import { ErrorToast } from "@/components/custom/error-toast";
+import { SuccessToast } from "@/components/custom/success-toast";
+import { useToast } from "@/components/ui/toast";
+import { useAuthControllerForgotPassword } from "@/src/api/seek-api/auth";
+import { isValidEmail, normalizeEmail } from "@/src/utils/validate-email";
+import React, { useState } from "react";
 
 export default function ResetPasswordScreen() {
-  const router = useRouter();
-  const goto = (path: Href) => {
-    router.navigate(path);
+  const [email, setEmail] = useState("");
+  const { mutate, isPending } = useAuthControllerForgotPassword();
+  const toast = useToast();
+
+  const handleSubmit = () => {
+    mutate(
+      { data: { email: normalizeEmail(email) } },
+      {
+        onSuccess({ message }) {
+          toast.show({
+            placement: "top",
+            render: (props) => <SuccessToast {...props} message={message} />,
+          });
+        },
+        onError(error) {
+          toast.show({
+            placement: "top",
+            render: (props) => (
+              <ErrorToast {...props} error={error.response?.data} />
+            ),
+          });
+        },
+      },
+    );
   };
 
   return (
-    <Box className="p-6">
-      <Card className="w-full p-6 rounded-xl border-2 gap-6 border-primary-900 items-center">
-        <Box className="items-center gap-2">
-          <Text size="lg" bold>
-            Reset Password
-          </Text>
-          <Text className="text-center px-6">
-            Forgot your password? We'll send you a reset link.
-          </Text>
-        </Box>
-
-        <Input variant="rounded" className="border-primary-900" size="lg">
-          <InputField placeholder="Enter your email" />
-        </Input>
-
-        <Button
-          variant="solid"
-          action="primary"
-          size="lg"
-          className="w-full rounded-full"
-        >
-          <ButtonText>Send Link</ButtonText>
-        </Button>
-
-        <Button variant="link" action="secondary" size="md">
-          <ButtonText className="underline font-normal">Resend</ButtonText>
-        </Button>
-      </Card>
-    </Box>
+    <ProfileScreen title="Reset Password">
+      <Text style={profileTypography.body}>
+        Enter your email and we’ll send you a password reset link.
+      </Text>
+      <ProfileTextField
+        label="Email"
+        value={email}
+        onChangeText={setEmail}
+        placeholder="you@example.com"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoCorrect={false}
+        error={
+          email.length > 0 && !isValidEmail(email)
+            ? "Enter a valid email address."
+            : undefined
+        }
+      />
+      <ProfilePrimaryButton
+        title="Send Link"
+        onPress={handleSubmit}
+        loading={isPending}
+        disabled={!isValidEmail(email)}
+      />
+    </ProfileScreen>
   );
 }

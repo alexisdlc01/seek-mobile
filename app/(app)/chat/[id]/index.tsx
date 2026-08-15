@@ -7,20 +7,19 @@ import {
 } from "react-native-safe-area-context";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import { FlatList, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import { FlatList, KeyboardAvoidingView, Platform } from "react-native";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
 import { Pressable } from "react-native-gesture-handler";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "@/src/store/auth-store";
-import { useFocusEffect } from "@react-navigation/native";
 import { errorToast } from "@/src/utils/error-toast";
 import { useToast } from "@/components/ui/toast";
 import { getConversationControllerGetConversationQueryKey, useConversationControllerGetConversation, useConversationControllerSendMessage } from "@/src/api/seek-api/conversation";
 import { useAuthControllerCurrentUser } from "@/src/api/seek-api/auth";
 import { queryClient } from "@/app/_layout";
-import { ConversationDto, MessageDto, MessageDtoMessageType, UserDto } from "@/src/api/seek-api/model";
+import { ConversationDto, ErrorDto, MessageDto, UserDto } from "@/src/api/seek-api/model";
 import { Loader } from "@/components/custom/loader";
 
 enum EventNames {
@@ -63,17 +62,14 @@ export default function ChatScreen() {
   const toast = useToast();
 
 
-  const { id: conversationId } = useLocalSearchParams<{ id?: string }>();
-  if (!conversationId) {
-    console.log("no conversation id");
-    return <Redirect href="/(app)/(tabs)/home" />;
-  }
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  const conversationId = id ?? "";
 
   const { data: conversation, isError, isLoading: loadingMessages } = useConversationControllerGetConversation(conversationId, {});
   const { data: user, isError: isUserError, isLoading: loadingUser } = useAuthControllerCurrentUser();
   const isLoading = loadingMessages || loadingUser;
 
-  const { mutate } = useSendMessage(user!, conversationId);
+  const { mutate } = useSendMessage(user, conversationId);
   const addMessage = useAddMessage(conversationId);
 
   useEffect(() => {
@@ -81,7 +77,7 @@ export default function ChatScreen() {
       console.log("failed to get messages")
       router.navigate("/(app)/(tabs)/home");
     }
-  }, [isError, isUserError]);
+  }, [isError, isUserError, router]);
 
   const [message, setMessage] = useState<string>("");
   function sendMessage(id: string) {
@@ -102,32 +98,38 @@ export default function ChatScreen() {
       }
     }, {
       onError(error) {
-        errorToast({ toast, data: error.response?.data })
+        errorToast({
+          toast,
+          data: error.response?.data as ErrorDto | undefined,
+        });
       }
     });
   }
 
   useEffect(() => {
-    const client = io(`${BACKEND_URL}/converstaion`, {
+    if (!conversationId || !accessToken) return;
+
+    const client = io(`${BACKEND_URL}/conversation`, {
       extraHeaders: {
         Authorization: `Bearer ${accessToken}`,
-        // @ts-ignore
-        mobile: true,
+        platform: "mobile",
       },
       transports: ["websocket"]
     });
 
     clientRef.current = client;
 
-    client.emit(EventNames.JOIN, () => {
-      console.log("join emitted")
-    })
+    client.emit(EventNames.JOIN, conversationId);
     client.on(EventNames.NEW_MESSAGE, (message: MessageDto) => {
       addMessage(message);
     });
 
     return () => { client.disconnect(); };
-  }, []);
+  }, [accessToken, addMessage, conversationId]);
+
+  if (!conversationId) {
+    return <Redirect href="/(app)/(tabs)/home" />;
+  }
 
   return (
     <Loader isLoading={isLoading}>
@@ -142,7 +144,11 @@ export default function ChatScreen() {
               className="line-clamp-1 text-ellipsis flex-shrink">
               {conversation?.name ?? "Chat"}
             </Text>
-            <Pressable onPressIn={() => router.push(`/chat/${conversationId}/details`)}>
+            <Pressable
+              onPress={() =>
+                router.push(`/(app)/chat/${conversationId}/details`)
+              }
+            >
               <Icon as={InfoIcon} size="xl" />
             </Pressable>
           </Box>
@@ -193,13 +199,14 @@ export default function ChatScreen() {
 }
 
 
-function useSendMessage(user: UserDto, conversationId: string) {
+function useSendMessage(user: UserDto | undefined, conversationId: string) {
   return useConversationControllerSendMessage({
     mutation: {
       async onMutate(newMessage) {
+        if (!user) throw new Error("Cannot send a message without a user");
         const tempDto: MessageDto = {
           _id: new Date().toString(),
-          sender: user!,
+          sender: user,
           messageType: "Text",
           data: newMessage.data.message,
           createdAt: new Date().toString(),
@@ -241,7 +248,7 @@ function useSendMessage(user: UserDto, conversationId: string) {
 }
 
 function useAddMessage(conversationId: string) {
-  return (message: MessageDto) => {
+  return useCallback((message: MessageDto) => {
     queryClient.setQueryData<ConversationDto>(
       getConversationControllerGetConversationQueryKey(conversationId),
       (last) => {
@@ -253,5 +260,5 @@ function useAddMessage(conversationId: string) {
         }
       }
     );
-  }
+  }, [conversationId]);
 }

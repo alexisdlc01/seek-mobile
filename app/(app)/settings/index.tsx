@@ -1,117 +1,157 @@
-import { VStack } from "@/components/ui/vstack";
-import { Divider } from "@/components/ui/divider";
-import { Box } from "@/components/ui/box";
-import { FlatButton } from "@/components/custom/flat-button";
-import { Href, useRouter } from "expo-router";
+import {
+  ProfileActionRow,
+  ProfileScreen,
+  profileTypography,
+} from "@/components/custom/profile-screen";
+import { queryClient } from "@/app/_layout";
 import { Button, ButtonText } from "@/components/ui/button";
 import {
   Modal,
   ModalBackdrop,
   ModalBody,
-  ModalCloseButton,
   ModalContent,
   ModalFooter,
   ModalHeader,
 } from "@/components/ui/modal";
-import { useState } from "react";
 import { Text } from "@/components/ui/text";
-import React from "react";
-import { CloseIcon, Icon } from "@/components/ui/icon";
-import { View } from "react-native";
+import { PROFILE_COLORS } from "@/constants/design";
+import { useAuthControllerLogout } from "@/src/api/seek-api/auth";
 import { useAuth } from "@/src/store/auth-store";
-import { BackButton } from "@/components/custom/back-button";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import {
+  KeyRoundIcon,
+  LogOutIcon,
+  RotateCcwIcon,
+  ShieldCheckIcon,
+  Trash2Icon,
+} from "lucide-react-native";
+import React, { useState } from "react";
+import { StyleSheet, View } from "react-native";
 
 export default function SettingsScreen() {
-  const [open, setOpen] = useState(false);
-  const logout = useAuth((val) => val.logout);
-
   const router = useRouter();
-  const goto = (path: Href) => {
-    router.navigate(path);
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+  const logout = useAuth((state) => state.logout);
+  const { mutate: logoutServer, isPending: isLoggingOut } =
+    useAuthControllerLogout();
+  const iconProps = {
+    color: PROFILE_COLORS.accent,
+    size: 22,
+    strokeWidth: 2,
+  };
+
+  const handleLogout = () => {
+    if (isLoggingOut) {
+      return;
+    }
+
+    logoutServer(undefined, {
+      onSettled: () => {
+        logout();
+        queryClient.clear();
+        router.replace("/(app)/(tabs)/home");
+      },
+    });
   };
 
   return (
-    <SafeAreaView className="bg-background-0 h-full">
-      <VStack className="px-6 gap-2">
-        <BackButton />
-        <FlatButton
-          onPress={() => goto("/(app)/settings/modify-password")}
-          text="Modify Password"
-        />
-        <Divider />
-
-        <FlatButton onPress={() => goto("/(app)/settings/flag-issue")} text="Flags" />
-        <Divider />
-
-        <FlatButton
-          onPress={() => goto("/(app)/settings/permissions")}
-          text="Permissions"
-        />
-        <Divider />
-        <FlatButton
-          onPress={() => goto("/(app)/settings/privacy-policy")}
-          text="Privacy Policy"
-        />
-        <Divider />
-        <FlatButton
-          onPress={() => goto("/(app)/settings/terms-of-service")}
-          text="Terms of Service"
-        />
-        <Divider />
-        <Box className="items-start gap-2 pt-2">
-          <Button
-            onPress={() => logout()}
-            variant="link"
-            action="secondary"
-            size="lg"
-          >
-            <ButtonText>Logout</ButtonText>
-          </Button>
-          <Button
-            variant="link"
-            action="negative"
-            size="lg"
-            onPress={() => setOpen(true)}
-          >
-            <ButtonText>Delete Account</ButtonText>
-          </Button>
-        </Box>
-      </VStack>
-      <Modal
-        isOpen={open}
-        onClose={() => setOpen(false)}
-        closeOnOverlayClick
-        size="xs"
-      >
-        <ModalBackdrop
-          style={{ backgroundColor: "rgba(80, 80, 80, 0.5)" }}
-        />
-        <ModalContent className="gap-2 w-[80%] rounded-xl">
-          <ModalHeader>
-            <Text size="xl" bold>
-              Confirm Account Deletion
-            </Text>
-            <ModalCloseButton hitSlop={4} onPress={() => setOpen(false)}>
-              <Icon
-                size="lg"
-                as={CloseIcon}
-                className="stroke-background-500"
+    <>
+      <ProfileScreen title="Settings" scroll={false}>
+        <View style={styles.rows}>
+          <ProfileActionRow
+            title="Modify Password"
+            icon={<KeyRoundIcon {...iconProps} />}
+            onPress={() => router.navigate("/(app)/settings/modify-password")}
+          />
+          <ProfileActionRow
+            title="Reset Password"
+            subtitle="Send a reset link to your email"
+            icon={<RotateCcwIcon {...iconProps} />}
+            onPress={() => router.navigate("/(app)/settings/reset-password")}
+          />
+          <ProfileActionRow
+            title="Permissions"
+            icon={<ShieldCheckIcon {...iconProps} />}
+            onPress={() => router.navigate("/(app)/settings/permissions")}
+          />
+          <ProfileActionRow
+            title={isLoggingOut ? "Logging out…" : "Log Out"}
+            icon={<LogOutIcon {...iconProps} />}
+            showChevron={false}
+            onPress={handleLogout}
+          />
+          <ProfileActionRow
+            title="Delete Account"
+            icon={
+              <Trash2Icon
+                color={PROFILE_COLORS.danger}
+                size={22}
+                strokeWidth={2}
               />
-            </ModalCloseButton>
+            }
+            destructive
+            showChevron={false}
+            onPress={() => setShowDeleteAccount(true)}
+          />
+        </View>
+      </ProfileScreen>
+
+      <Modal
+        isOpen={showDeleteAccount}
+        onClose={() => setShowDeleteAccount(false)}
+        closeOnOverlayClick
+        size="sm"
+      >
+        <ModalBackdrop />
+        <ModalContent style={styles.modalContent}>
+          <ModalHeader>
+            <Text style={profileTypography.sectionTitle}>Delete account?</Text>
           </ModalHeader>
           <ModalBody>
-            <Text className="text-center">
-              Are you sure you want to delete your account?
+            <Text style={profileTypography.body}>
+              Account deletion is permanent. Are you sure you want to continue?
             </Text>
           </ModalBody>
-          <ModalFooter className="justify-center">
-            <Button action="negative" size="lg" onPress={() => setOpen(false)}>
-              <ButtonText className="text-white">Delete Account</ButtonText>
+          <ModalFooter style={styles.modalFooter}>
+            <Button
+              variant="outline"
+              action="secondary"
+              onPress={() => setShowDeleteAccount(false)}
+              style={styles.modalButton}
+            >
+              <ButtonText>Cancel</ButtonText>
+            </Button>
+            <Button
+              action="negative"
+              onPress={() => setShowDeleteAccount(false)}
+              style={styles.modalButton}
+            >
+              <ButtonText style={styles.deleteText}>Delete Account</ButtonText>
             </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
-    </SafeAreaView>
+    </>
   );
 }
+
+const styles = StyleSheet.create({
+  rows: {
+    gap: 12,
+  },
+  modalContent: {
+    width: "88%",
+    borderRadius: 20,
+    backgroundColor: PROFILE_COLORS.surface,
+  },
+  modalFooter: {
+    justifyContent: "flex-end",
+    gap: 10,
+  },
+  modalButton: {
+    borderRadius: 999,
+  },
+  deleteText: {
+    color: PROFILE_COLORS.surface,
+  },
+});

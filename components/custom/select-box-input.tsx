@@ -8,27 +8,34 @@ type SelectBoxOption = {
 };
 
 type SelectBoxInputProps = {
-  opions: SelectBoxOption[];
+  options?: SelectBoxOption[];
+  /** @deprecated Use `options`. Kept for compatibility with the example app. */
+  opions?: SelectBoxOption[];
   value: string;
   onChange: (value: string) => void;
+  className?: string;
 };
 
 export function SelectBoxInput({
+  options,
   opions,
   value,
   onChange,
+  className,
 }: SelectBoxInputProps) {
+  const resolvedOptions = options ?? opions ?? [];
+
   return (
-    <HStack className="gap-2 w-full">
-      {opions.map((option) => (
+    <HStack className={`w-full flex-wrap gap-2 ${className ?? ""}`}>
+      {resolvedOptions.map((option) => (
         <Pressable
           key={option.value}
           onPressIn={() => onChange(option.value)}
-          className={`border-[1px] border-white rounded-xl flex-1 py-1 items-center justify-center ${option.value === value ? "bg-white" : ""}`}
+          className={`h-10 w-[31%] grow-0 items-center justify-center rounded-full border border-primary-500 ${option.value === value ? "bg-primary-500" : "bg-white"}`}
         >
           <Text
-            size="lg"
-            className={`align-baseline text-center ${option.value === value ? "text-black" : ""}`}
+            numberOfLines={2}
+            className={`px-2 text-center text-sm font-semibold leading-4 ${option.value === value ? "text-white" : "text-black"}`}
           >
             {option.label}
           </Text>

@@ -1,20 +1,13 @@
-import { BackButton } from "@/components/custom/back-button";
-import { Box } from "@/components/ui/box";
+import { ProfileScreen } from "@/components/custom/profile-screen";
 import { Divider } from "@/components/ui/divider";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import { ScrollView } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function TermsOfServiceScreen() {
   return (
-    <SafeAreaView>
-      <ScrollView className="h-full">
-        <Box className="px-4">
-          <BackButton />
-        </Box>
-        <VStack space="lg" className="p-6 pb-20">
+    <ProfileScreen title="Terms of Service">
+        <VStack space="lg" className="pb-8">
 
           {/* Header Section */}
           <VStack space="xs">
@@ -152,7 +145,6 @@ export default function TermsOfServiceScreen() {
             </Text>
           </VStack>
         </VStack>
-      </ScrollView>
-    </SafeAreaView>
+    </ProfileScreen>
   );
 }

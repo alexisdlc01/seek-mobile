@@ -2,6 +2,7 @@
  * import { AxiosError, AxiosResponse } from 'axios';
  */
 
-export interface ResendOtpDto {
-  email: string;
-}
+export type ResendOtpDto =
+  | { userId: string; email?: never }
+  /** @deprecated The backend now requires userId. */
+  | { email: string; userId?: never };

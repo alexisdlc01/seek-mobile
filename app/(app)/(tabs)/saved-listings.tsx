@@ -1,6 +1,8 @@
-import { Text } from "@/components/ui/text";
-import { FlatList, Share } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { shareListing } from "@/components/links";
+import { PROFILE_COLORS } from "@/constants/design";
+import { LikeButton } from "@/components/custom/like-button";
+import { ListingCard } from "@/components/custom/listing-card";
+import { ShareButton } from "@/components/custom/share-button";
 import {
   Accordion,
   AccordionContent,
@@ -10,91 +12,87 @@ import {
   AccordionTitleText,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-} from "@/components/ui/icon";
+import { Box } from "@/components/ui/box";
 import { HStack } from "@/components/ui/hstack";
-import { Listing } from "@/src/api/seek-api/model";
-import { ListingCard } from "@/components/custom/listing-card";
-import { useListingsControllerGetLiked } from "@/src/api/seek-api/listings";
-import { useApplicationControllerGetAllMyApplications } from "@/src/api/seek-api/application";
-import { LikeButton } from "@/components/custom/like-button";
-import { useAuthControllerCurrentUser } from "@/src/api/seek-api/auth";
-import { useCallback, useMemo } from "react";
-import { useLike, useUnlike } from "@/hooks/like";
+import { ChevronDownIcon, ChevronUpIcon } from "@/components/ui/icon";
+import { Text } from "@/components/ui/text";
 import { useToast } from "@/components/ui/toast";
 import { ErrorToast } from "@/components/custom/error-toast";
-import { Box } from "@/components/ui/box";
-import { ShareButton } from "@/components/custom/share-button";
-import { getListingLink } from "@/components/links";
-import { useFocusEffect } from "@react-navigation/native";
+import { useLike, useUnlike } from "@/hooks/like";
+import { useApplicationControllerGetAllMyApplications } from "@/src/api/seek-api/application";
+import { useListingsControllerGetLiked } from "@/src/api/seek-api/listings";
+import type { Listing } from "@/src/api/seek-api/model";
+import { FlatList } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { AuthRequiredScreen } from "@/components/custom/auth-required";
+import { useListingLiked } from "@/hooks/use-listing-liked";
+
+const APP_BACKGROUND_COLOR = PROFILE_COLORS.background;
 
 type TriggerProps = {
   isExpanded: boolean;
 };
 
 export default function SavedListings() {
+  return (
+    <AuthRequiredScreen
+      title="Sign up to save homes"
+      description="Create an account to keep a shortlist and track your applications."
+    >
+      <AuthenticatedSavedListings />
+    </AuthRequiredScreen>
+  );
+}
+
+function AuthenticatedSavedListings() {
   const { data: liked } = useListingsControllerGetLiked();
   const { data: applied } = useApplicationControllerGetAllMyApplications();
-  useFocusEffect(
-    useCallback(() => {
-      console.log(applied);
-    }, [])
-  );
 
   return (
-    <SafeAreaView className="p-8 bg-background-0 h-full">
-      <Accordion type="single">
+    <SafeAreaView
+      className="h-full px-6"
+      style={{ backgroundColor: APP_BACKGROUND_COLOR }}
+    >
+      <Accordion className="bg-transparent" type="single" variant="unfilled">
         <AccordionItem value="liked">
           <AccordionHeader>
-            <AccordionTrigger className="border-b-2 border-white">
+            <AccordionTrigger className="mb-3 rounded-full bg-transparent px-2 py-4">
               {({ isExpanded }: TriggerProps) => (
                 <CustomTriggerInner isExpanded={isExpanded} title="Liked" />
               )}
             </AccordionTrigger>
           </AccordionHeader>
-          <AccordionContent className="pt-4 gap-4">
+          <AccordionContent className="gap-4 px-0 pt-4">
             <FlatList
               contentContainerClassName="gap-3"
               data={liked?.data ?? []}
-              renderItem={({ item }) => (
-                <LikedListingCard data={item} />
-              )}
-              ListEmptyComponent={
-                <Box>
-                  <Text className="text-secondary-800 text-center text-xl">
-                    No liked listings yet
-                  </Text>
-                </Box>
-              }
+              keyExtractor={(item) => item._id}
+              renderItem={({ item }) => <SavedListingCard data={item} />}
+              ListEmptyComponent={<EmptyState text="No liked listings yet" />}
             />
           </AccordionContent>
         </AccordionItem>
+
         <AccordionItem value="applications">
-          <AccordionTrigger className="border-b-2 border-white">
-            {({ isExpanded }: TriggerProps) => (
-              <CustomTriggerInner
-                isExpanded={isExpanded}
-                title="Applications"
-              />
-            )}
-          </AccordionTrigger>
-          <AccordionContent className="pt-4 gap-4">
-            <FlatList
-              data={applied ?? []}
-              contentContainerClassName="gap-2"
-              keyExtractor={item => item._id}
-              renderItem={({ item }) => (
-                <AppliedListingCard data={item.listing} />
+          <AccordionHeader>
+            <AccordionTrigger className="mb-3 rounded-full bg-transparent px-2 py-4">
+              {({ isExpanded }: TriggerProps) => (
+                <CustomTriggerInner
+                  isExpanded={isExpanded}
+                  title="Applications"
+                />
               )}
-              ListEmptyComponent={
-                <Box>
-                  <Text className="text-secondary-800 text-center text-xl">
-                    No applications yet
-                  </Text>
-                </Box>
-              }
+            </AccordionTrigger>
+          </AccordionHeader>
+          <AccordionContent className="gap-4 px-0 pt-4">
+            <FlatList
+              contentContainerClassName="gap-3"
+              data={applied ?? []}
+              keyExtractor={(item) => item._id}
+              renderItem={({ item }) => (
+                <SavedListingCard data={item.listing} />
+              )}
+              ListEmptyComponent={<EmptyState text="No applications yet" />}
             />
           </AccordionContent>
         </AccordionItem>
@@ -109,141 +107,96 @@ type CustomTriggerInnerProps = {
 };
 
 function CustomTriggerInner({ isExpanded, title }: CustomTriggerInnerProps) {
-  console.log(isExpanded);
   return (
     <>
-      <AccordionTitleText className="text-2xl font-normal">
+      <AccordionTitleText className="text-2xl font-semibold text-primary-500">
         {title}
       </AccordionTitleText>
-      {isExpanded ? (
-        <AccordionIcon as={ChevronUpIcon} />
-      ) : (
-        <AccordionIcon as={ChevronDownIcon} />
-      )}
+      <AccordionIcon
+        as={isExpanded ? ChevronUpIcon : ChevronDownIcon}
+        className="text-primary-500"
+      />
     </>
   );
 }
 
-type LikedListingCardProps = {
-  data: Listing;
-};
-
-function LikedListingCard({ data }: LikedListingCardProps) {
-  const { data: user } = useAuthControllerCurrentUser();
-  const { mutate: like } = useLike();
-  const { mutate: unlike } = useUnlike();
-  const toast = useToast();
-  const liked = useMemo(() => (user && data.likedBy?.includes(user._id)) ?? false, [data, user])
-
-  async function handleUnlike() {
-    unlike({ id: data._id }, {
-      onError(error) {
-        toast.show({
-          placement: "top",
-          render: (props) => (
-            <ErrorToast {...props} error={error.response?.data} />
-          )
-        })
-      }
-    });
-  }
-
-  async function handleLike() {
-    like({ id: data._id }, {
-      onError(error) {
-        toast.show({
-          render: (props) => (
-            <ErrorToast {...props} error={error.response?.data} />
-          )
-        })
-      }
-    });
-  }
-
-  function handleShare() {
-    const id = data._id;
-    Share.share({
-      message: `Check out this listing on Seek!`,
-      url: getListingLink(id),
-    });
-  }
-
-
+function EmptyState({ text }: { text: string }) {
   return (
-    <ListingCard
-      data={data}
-      left={
-        <HStack className="gap-3">
-          <LikeButton unlike={handleLike}
-            size={20}
-            like={handleUnlike}
-            liked={liked} />
-          <ShareButton size={20} share={handleShare} />
-        </HStack>
-      }
-    />
+    <Box className="rounded-3xl border border-primary-500 bg-transparent p-6">
+      <Text className="text-center text-lg font-medium text-primary-500">{text}</Text>
+    </Box>
   );
 }
 
-type AppliedListindCardProps = {
+type SavedListingCardProps = {
   data: Listing;
 };
 
-function AppliedListingCard({ data }: AppliedListindCardProps) {
-  const { data: user } = useAuthControllerCurrentUser();
-  const { mutate: like } = useLike();
-  const { mutate: unlike } = useUnlike();
+function SavedListingCard({ data }: SavedListingCardProps) {
+  const { mutate: like, isPending: isLiking } = useLike();
+  const { mutate: unlike, isPending: isUnliking } = useUnlike();
   const toast = useToast();
-
-  const liked = useMemo(() =>
-    (user && data.likedBy?.includes(user._id)) ?? false
-    , [data, user])
+  const liked = useListingLiked(data._id);
 
   async function handleUnlike() {
-    unlike({ id: data._id }, {
-      onError(error) {
-        toast.show({
-          render: (props) => (
-            <ErrorToast {...props} error={error.response?.data} />
-          )
-        })
-      }
-    });
+    unlike(
+      { id: data._id },
+      {
+        onError(error) {
+          toast.show({
+            placement: "top",
+            render: (props) => (
+              <ErrorToast {...props} error={error.response?.data} />
+            ),
+          });
+        },
+      },
+    );
   }
 
   async function handleLike() {
-    like({ id: data._id }, {
-      onError(error) {
-        toast.show({
-          render: (props) => (
-            <ErrorToast {...props} error={error.response?.data} />
-          )
-        })
-      }
-    });
+    like(
+      { id: data._id },
+      {
+        onError(error) {
+          toast.show({
+            placement: "top",
+            render: (props) => (
+              <ErrorToast {...props} error={error.response?.data} />
+            ),
+          });
+        },
+      },
+    );
   }
 
-  function handleShare() {
-    const id = data._id;
-    Share.share({
-      message: `Check out this listing on Seek!`,
-      url: getListingLink(id),
-    });
+  async function handleShare() {
+    await shareListing({ id: data._id, title: data.propertyTitle });
   }
 
   return (
     <ListingCard
       data={data}
       left={
-        <HStack className="gap-3">
-          <LikeButton unlike={handleUnlike}
-            size={20}
+        <HStack className="items-center gap-1">
+          <LikeButton
+            activeColor={PROFILE_COLORS.accent}
+            containerClassName="bg-transparent"
+            disabled={isLiking || isUnliking}
+            iconColor={PROFILE_COLORS.accent}
             like={handleLike}
-            liked={liked} />
-          <ShareButton size={20} share={handleShare} />
+            liked={liked}
+            size={21}
+            unlike={handleUnlike}
+          />
+          <ShareButton
+            containerClassName="bg-transparent"
+            iconColor={PROFILE_COLORS.accent}
+            share={handleShare}
+            size={21}
+          />
         </HStack>
       }
     />
   );
 }
-
