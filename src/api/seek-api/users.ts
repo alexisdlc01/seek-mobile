@@ -27,6 +27,7 @@ import type {
   ErrorDto,
   SetProfilePicDto,
   SetUsernameDto,
+  UpdateUserProfileDto,
   UserDto
 } from './model';
 
@@ -324,6 +325,54 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
       return useMutation(mutationOptions, queryClient);
     }
+    export const usersControllerUpdateCurrentUser = (
+    updateUserProfileDto: UpdateUserProfileDto,
+ options?: SecondParameter<typeof customInstance>,) => {
+      return customInstance<UserDto>(
+      {url: `/users/me`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: updateUserProfileDto
+    },
+      options);
+    }
+
+
+export const getUsersControllerUpdateCurrentUserMutationOptions = <TError = ErrorType<ErrorDto>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerUpdateCurrentUser>>, TError,{data: UpdateUserProfileDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof usersControllerUpdateCurrentUser>>, TError,{data: UpdateUserProfileDto}, TContext> => {
+
+const mutationKey = ['usersControllerUpdateCurrentUser'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+const mutationFn: MutationFunction<Awaited<ReturnType<typeof usersControllerUpdateCurrentUser>>, {data: UpdateUserProfileDto}> = (props) => {
+  const {data} = props ?? {};
+  return usersControllerUpdateCurrentUser(data, requestOptions);
+}
+
+return { mutationFn, ...mutationOptions };
+}
+
+export type UsersControllerUpdateCurrentUserMutationResult = NonNullable<Awaited<ReturnType<typeof usersControllerUpdateCurrentUser>>>
+export type UsersControllerUpdateCurrentUserMutationBody = UpdateUserProfileDto
+export type UsersControllerUpdateCurrentUserMutationError = ErrorType<ErrorDto>
+
+export const useUsersControllerUpdateCurrentUser = <TError = ErrorType<ErrorDto>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerUpdateCurrentUser>>, TError,{data: UpdateUserProfileDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof usersControllerUpdateCurrentUser>>,
+        TError,
+        {data: UpdateUserProfileDto},
+        TContext
+      > => {
+
+      const mutationOptions = getUsersControllerUpdateCurrentUserMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
     export const usersControllerSetUsername = (
     setUsernameDto: SetUsernameDto,
  options?: SecondParameter<typeof customInstance>,) => {
@@ -521,6 +570,5 @@ export function useUsersControllerGetUser<TData = Awaited<ReturnType<typeof user
 
   return query;
 }
-
 
 

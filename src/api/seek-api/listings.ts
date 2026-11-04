@@ -873,7 +873,7 @@ export const listingsControllerGetFilteredListings = (
 ) => {
       
       
-      return customInstance<void>(
+      return customInstance<Listing[]>(
       {url: `/listings/filter`, method: 'GET',
         params, signal
     },
@@ -1203,4 +1203,3 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
       return useMutation(mutationOptions, queryClient);
     }
-    

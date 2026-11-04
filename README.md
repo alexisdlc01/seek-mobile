@@ -1,50 +1,15 @@
-# Welcome to your Expo app 👋
+# Seek mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Expo / React Native mobile client for Seek.
 
-## Get started
+## Local setup
 
-1. Install dependencies
+1. Install Node.js 20.19 or newer (the version in `.nvmrc` is supported), then run `npm install`.
+2. Copy `.env.example` to `.env` and fill in the Google Maps SDK and Places API keys. The native Maps key must be valid for the platform and app identifier being built; the Places key must allow the Places requests used by the app. These keys are embedded in the app, so use appropriately restricted keys, not secrets.
+3. Start an accessible Seek backend and set `EXPO_PUBLIC_API_URL` to its URL. `http://localhost:3000` works for a backend on the same Mac when using the iOS simulator. Use `http://10.0.2.2:3000` for the Android emulator, or an address reachable from a physical device for device testing. Backend setup and service credentials are maintained in the backend repository.
+4. Install Xcode and an iOS simulator for iOS, or Android Studio and an emulator for Android. Run `npm run ios` or `npm run android` to build and install a development client. Native Maps configuration changes require rebuilding the client.
+5. For subsequent sessions run `npm start`, then open the development client. Restart Metro after changing public environment variables. `npm run ios` also starts Metro and opens the app; it uses an already booted simulator or the first available one. Set `IOS_SIMULATOR_NAME` to select a particular simulator. `npm run ios:install` lets Expo prompt for a device.
 
-   ```bash
-   npm install
-   ```
+The app requires native modules and a development build; Expo Go is not sufficient. EAS builds and release updates use the Seek Expo project configured in `app.json` and require access to that project, its credentials, and the corresponding environment variables. Local builds do not require publishing to EAS.
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Run `npm run lint` and `npx tsc --noEmit` for static checks.

@@ -1,35 +1,29 @@
 import { PropsWithChildren, useEffect } from "react";
 import { useAuth } from "@/src/store/auth-store";
-import { useRouter, useSegments } from "expo-router";
-import { useNavigationState } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 
-type AuthGaurdProps = PropsWithChildren<{}>;
+type AuthGaurdProps = PropsWithChildren;
 
 export function AuthGaurd({ children }: AuthGaurdProps) {
-  console.log("[LOG] AuthGaurd rendering");
   const router = useRouter();
-  const { _hasHydrated, accessToken, refreshToken } = useAuth((state) => state);
+  const hasHydrated = useAuth((state) => state._hasHydrated);
+  const isLoggedIn = useAuth(
+    (state) => Boolean(state.accessToken) && Boolean(state.refreshToken),
+  );
 
-  const segements = useSegments();
   useEffect(() => {
-    if (!_hasHydrated) {
+    if (!hasHydrated) {
       return;
     }
 
-    console.log("[LOG] auth state changed");
-    const isAuth = segements[0] == "(app)";
-
-    const isLoggedIn: boolean =
-      accessToken != undefined && refreshToken != undefined;
-    console.log(isLoggedIn, accessToken, refreshToken);
-    if (!isLoggedIn && isAuth) {
-      console.log("[LOG] redirecting to main");
-      router.replace("/");
-    } else if (isLoggedIn && !isAuth) {
-      console.log("[LOG] redirecting to home");
-      router.replace("/(app)/(tabs)/home");
+    if (!isLoggedIn) {
+      router.replace("/(auth)/login");
     }
-  }, [accessToken, refreshToken, _hasHydrated, segements]);
+  }, [hasHydrated, isLoggedIn, router]);
+
+  if (!hasHydrated || !isLoggedIn) {
+    return null;
+  }
 
   return <>{children}</>;
 }

@@ -3,8 +3,7 @@ import {
   FormControlLabel,
   FormControlLabelText,
 } from "@/components/ui/form-control";
-import { Input, InputField, InputSlot } from "@/components/ui/input";
-import { Text } from "@/components/ui/text";
+import { Input, InputField } from "@/components/ui/input";
 
 type EmailInputProps = {
   email: string;
@@ -20,13 +19,14 @@ export function EmailInput({ setEmail, email }: EmailInputProps) {
       <Input size="lg">
         <InputField
           type="text"
-          placeholder="Enter your email"
+          placeholder="you@example.com"
           value={email}
           onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
+          textContentType="emailAddress"
         />
-        <InputSlot style={{ paddingRight: 10 }}>
-          <Text bold>@st-andrews.ac.uk</Text>
-        </InputSlot>
       </Input>
     </FormControl>
   );

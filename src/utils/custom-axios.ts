@@ -1,63 +1,135 @@
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, {
+  AxiosError,
+  AxiosHeaders,
+  AxiosRequestConfig,
+  isCancel,
+} from "axios";
 import { useAuth } from "@/src/store/auth-store";
+import { queryClient } from "@/app/_layout";
 import { ErrorDto } from "../api/seek-api/model";
 
-export type ErrorType<T> = AxiosError<ErrorDto>;
+export type ErrorType<TError = ErrorDto> = AxiosError<TError>;
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 
 export const AXIOS_INSTANCE = axios.create({
-  baseURL: BASE_URL || "http://localhost:3000",
+  baseURL: BASE_URL,
   headers: {
     platform: "mobile",
   },
+  // Send arrays as `amenities=a&amenities=b`. Axios's default `amenities[]=a`
+  // is not understood by Express 5's query parser, so the API rejects it.
+  paramsSerializer: { indexes: null },
 });
 
-AXIOS_INSTANCE.interceptors.request.use((config) => {
-  const { _hasHydrated, accessToken } = useAuth.getState();
-  if (!_hasHydrated) {
-    console.error("[ERROR] attempt to access auth state before hydration");
-    return config;
+type TokenPair = {
+  access_token: string;
+  refresh_token: string;
+};
+
+type RetryableRequest = AxiosRequestConfig & { _retry?: boolean };
+
+let refreshPromise: Promise<TokenPair> | null = null;
+
+const AUTH_REQUESTS_THAT_MUST_NOT_REFRESH = new Set([
+  "/auth/login",
+  "/auth/signup",
+  "/auth/verify-email",
+  "/auth/resend-otp",
+  "/auth/forgot-password",
+  "/auth/confirmPasswordReset",
+  "/auth/refresh",
+]);
+
+async function refreshSession(refreshToken: string): Promise<TokenPair> {
+  const { data } = await axios.post<TokenPair>(
+    `${BASE_URL}/auth/refresh`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${refreshToken}`,
+        platform: "mobile",
+      },
+    },
+  );
+
+  if (useAuth.getState().refreshToken !== refreshToken) {
+    throw new Error("The authenticated session changed while refreshing.");
   }
+
+  useAuth.getState().login({
+    accessToken: data.access_token,
+    refreshToken: data.refresh_token,
+  });
+
+  return data;
+}
+
+function getRefreshPromise(refreshToken: string): Promise<TokenPair> {
+  if (!refreshPromise) {
+    refreshPromise = refreshSession(refreshToken).finally(() => {
+      refreshPromise = null;
+    });
+  }
+
+  return refreshPromise;
+}
+
+AXIOS_INSTANCE.interceptors.request.use((config) => {
+  const { accessToken } = useAuth.getState();
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
   }
-  console.log("[LOG] starting request");
   return config;
 });
 
 AXIOS_INSTANCE.interceptors.response.use(
-  (resp) => {
-    console.log("[LOG] request successful", resp.status);
-    return resp;
-  },
+  (response) => response,
   async (error) => {
-    const { config, response } = error as ErrorType<never>;
-    console.error("[ERROR] request failed", config?.url, response?.data.message ?? "no message");
-
-    const status = response?.status;
-    if (status !== 401) {
+    if (isCancel(error)) {
       throw error;
     }
 
-    console.log("[LOG] authentication error, attempting refresh");
-    try {
-      const refreshToken = useAuth.getState().refreshToken;
-      const { data } = await axios.post<{ access_token: string, refresh_token: string }>(`${BASE_URL}/auth/refresh`, {}, {
-        headers: {
-          Authorization: `Bearer ${refreshToken}`,
-          mobile: true
-        }
-      });
+    const { code, config, response, message } = error as ErrorType;
+    const status = response?.status;
+    const originalRequest = config as RetryableRequest | undefined;
+    const requestPath = originalRequest?.url?.split("?")[0];
+    if (
+      status !== 401 ||
+      !originalRequest ||
+      originalRequest._retry ||
+      (requestPath && AUTH_REQUESTS_THAT_MUST_NOT_REFRESH.has(requestPath))
+    ) {
+      console.error(
+        "[ERROR] request failed",
+        `${config?.baseURL ?? ""}${config?.url ?? ""}`,
+        response?.data?.message ?? `${code ?? "NETWORK_ERROR"}: ${message}`,
+      );
+      throw error;
+    }
+    originalRequest._retry = true;
 
-      useAuth.getState().login({
-        accessToken: data.access_token,
-        refreshToken: data.refresh_token
-      });
-      console.log("[LOG] refresh successful");
-    } catch {
-      console.log("[LOG] refresh failed, logging out");
-      useAuth.getState().logout();
+    const refreshToken = useAuth.getState().refreshToken;
+    if (!refreshToken) {
+      throw error;
+    }
+
+    try {
+      const data = await getRefreshPromise(refreshToken);
+      originalRequest.headers = AxiosHeaders.from(
+        originalRequest.headers as Parameters<typeof AxiosHeaders.from>[0],
+      );
+      originalRequest.headers.set(
+        "Authorization",
+        `Bearer ${data.access_token}`,
+      );
+      return AXIOS_INSTANCE(originalRequest);
+    } catch (refreshError) {
+      if (useAuth.getState().refreshToken === refreshToken) {
+        useAuth.getState().logout();
+        queryClient.clear();
+      }
+      throw refreshError;
     }
   },
 );

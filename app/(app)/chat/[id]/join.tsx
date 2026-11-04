@@ -4,41 +4,52 @@ import { Heading } from '@/components/ui/heading';
 import { CheckCircleIcon, Icon } from '@/components/ui/icon';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text'
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Button, ButtonText } from '@/components/ui/button';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Redirect, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { useApplicationControllerGetApplication, useApplicationControllerGetByConversation, useApplicationControllerJoinApplication } from '@/src/api/seek-api/application';
+import { useApplicationControllerJoinApplication } from '@/src/api/seek-api/application';
 import { Loader } from '@/components/custom/loader';
 import { useToast } from '@/components/ui/toast';
 import { errorToast } from '@/src/utils/error-toast';
 
 export default function ApplicationAddedPage() {
-  const { id } = useLocalSearchParams<{ id?: string }>()
-  if (!id) {
-    return <Redirect href="/home" />;
-  }
-
-  const { mutate } = useApplicationControllerJoinApplication();
+  const { id: idParam, invite: inviteParam } = useLocalSearchParams<{
+    id?: string;
+    invite?: string;
+  }>();
+  const id = idParam ?? "";
+  const invite = Array.isArray(inviteParam)
+    ? (inviteParam[0] ?? "")
+    : (inviteParam ?? "");
+  // The invite secret rides in the shared link; the API rejects a join without it.
+  const { mutate } = useApplicationControllerJoinApplication({
+    request: { params: { invite } },
+  });
   const [isLoadingJoin, setLoadingJoin] = useState<boolean>(true);
   const toast = useToast();
   const router = useRouter();
 
   useFocusEffect(
     useCallback(() => {
+      if (!id || !invite) return;
       mutate({ id }, {
         onError(error) {
           errorToast({ toast, data: error.response?.data });
-          router.replace("/home");
+          router.replace("/(app)/(tabs)/map");
         },
         onSettled() {
           setLoadingJoin(false);
         }
       });
-    }, [])
+    }, [id, invite, mutate, router, toast])
   );
 
   const isLoading = isLoadingJoin;
+
+  if (!id || !invite) {
+    return <Redirect href="/(app)/(tabs)/map" />;
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
@@ -66,7 +77,7 @@ export default function ApplicationAddedPage() {
               <VStack className="w-full mt-8" space="md">
                 <Button
                   className="rounded-xl self-center"
-                  onPress={() => router.replace("/messages")}
+                  onPress={() => router.replace("/(app)/(tabs)/messages")}
                 >
                   <ButtonText className="font-semibold text-lg">
                     Go to Chat

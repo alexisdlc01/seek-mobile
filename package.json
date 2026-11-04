@@ -3,13 +3,17 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
-    "start": "expo start",
+    "start": "expo start --dev-client",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
-    "ios": "expo run:ios",
+    "ios": "node ./scripts/ios-dev-client.js",
+    "ios:dev": "node ./scripts/ios-dev-client.js",
+    "ios:build": "expo run:ios",
+    "ios:install": "expo run:ios --device",
     "web": "expo start --web",
     "lint": "expo lint",
-    "build:dev": "eas build --platform ios --profile development"
+    "build:dev": "eas build --platform ios --profile development",
+    "security:audit": "npm audit --omit=dev --audit-level=high"
   },
   "dependencies": {
     "@expo/html-elements": "^0.12.5",
@@ -34,6 +38,7 @@
     "expo-haptics": "~15.0.8",
     "expo-image": "~3.0.11",
     "expo-image-picker": "~17.0.10",
+    "expo-linear-gradient": "~15.0.8",
     "expo-linking": "~8.0.11",
     "expo-location": "~19.0.8",
     "expo-router": "~6.0.21",

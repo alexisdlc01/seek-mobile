@@ -2,50 +2,36 @@ import { FormControl } from "@/components/ui/form-control";
 import { Button, ButtonText } from "@/components/ui/button";
 import { VStack } from "@/components/ui/vstack";
 import { LinkText } from "@/components/ui/link";
-import { Link, useRouter } from "expo-router";
-import { create } from "zustand";
+import { Link, Redirect, useRouter } from "expo-router";
 import { useAuthControllerLogin } from "@/src/api/seek-api/auth";
-import { isValidPassword } from "@/src/utils/validate-password";
 import { PasswordInput } from "@/components/custom/password-input";
 import { useToast } from "@/components/ui/toast";
 import { ErrorToast } from "@/components/custom/error-toast";
 import { EmailInput } from "@/components/custom/email-input";
 import { useAuth } from "@/src/store/auth-store";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-interface LoginForm {
-  email: string;
-  password: string;
-  setEmail: (email: string) => void;
-  setPassword: (password: string) => void;
-}
-
-const useLogin = create<LoginForm>((set) => ({
-  email: "",
-  password: "",
-  setEmail: (email: string) => {
-    set({ email });
-  },
-  setPassword: (password: string) => {
-    set({ password });
-  },
-}));
+import { useState } from "react";
+import { isValidEmail, normalizeEmail } from "@/src/utils/validate-email";
+import { useSignupState } from "@/src/store/signup-store";
 
 export default function Login() {
-  const { email, password, setEmail, setPassword } = useLogin((state) => state);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const normalizedEmail = normalizeEmail(email);
 
-  function isValid() {
-    return email.length > 0 && password.length > 0 && isValidPassword(password);
-  }
-
-  const { mutate } = useAuthControllerLogin();
+  const { mutate, isPending } = useAuthControllerLogin();
   const toast = useToast();
   const login = useAuth((state) => state.login);
+  const clearSignupState = useSignupState((state) => state.clear);
+  const hasHydrated = useAuth((state) => state._hasHydrated);
+  const isLoggedIn = useAuth(
+    (state) => Boolean(state.accessToken) && Boolean(state.refreshToken),
+  );
   const router = useRouter();
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     mutate(
-      { data: { email: email + "@st-andrews.ac.uk", password } },
+      { data: { email: normalizedEmail, password } },
       {
         onSuccess: (data) => {
           const { access_token, refresh_token } = data;
@@ -53,11 +39,10 @@ export default function Login() {
             accessToken: access_token,
             refreshToken: refresh_token,
           });
-          console.log("[LOG] login successful")
-          router.navigate("/(app)/(tabs)/home");
+          clearSignupState();
+          router.replace("/(app)/(tabs)/map");
         },
         onError: (err) => {
-          console.log("[LOG] login failed", err);
           toast.show({
             placement: "top",
             render: (props) => (
@@ -69,8 +54,16 @@ export default function Login() {
     );
   };
 
+  if (!hasHydrated) {
+    return null;
+  }
+
+  if (isLoggedIn) {
+    return <Redirect href="/(app)/(tabs)/map" />;
+  }
+
   return (
-    <SafeAreaView>
+    <SafeAreaView className="flex-1">
       <VStack className="gap-8 p-4">
         {/* Email */}
         <EmailInput setEmail={setEmail} email={email} />
@@ -83,9 +76,11 @@ export default function Login() {
             className="rounded-xl"
             size="lg"
             onPress={handleSubmit}
-            isDisabled={!isValid()}
+            isDisabled={
+              !isValidEmail(email) || password.length === 0 || isPending
+            }
           >
-            <ButtonText>Login</ButtonText>
+            <ButtonText>{isPending ? "Logging in…" : "Login"}</ButtonText>
           </Button>
         </FormControl>
 
@@ -96,10 +91,6 @@ export default function Login() {
 
           <Link href="/(auth)/signup">
             <LinkText size="lg">No account yet? Sign up.</LinkText>
-          </Link>
-
-          <Link href="/">
-            <LinkText size="lg">DEV: Back to root</LinkText>
           </Link>
         </VStack>
       </VStack>

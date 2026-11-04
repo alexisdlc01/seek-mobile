@@ -24,12 +24,15 @@ import type {
   AuthControllerLogin201,
   AuthControllerSignup201,
   AuthControllerVerifyEmail201,
+  ChangePasswordDto,
   ConfirmPasswordResetDto,
   CreateUserDto,
   ErrorDto,
   ForgotPasswordDto,
   LoginDto,
+  MessageResponseDto,
   ResendOtpDto,
+  ResendOtpResponseDto,
   UserDto,
   VerifyEmailDto
 } from './model';
@@ -223,7 +226,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 ) => {
       
       
-      return customInstance<void>(
+      return customInstance<MessageResponseDto>(
       {url: `/auth/forgot-password`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: forgotPasswordDto, signal
@@ -281,7 +284,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 ) => {
       
       
-      return customInstance<void>(
+      return customInstance<MessageResponseDto>(
       {url: `/auth/confirmPasswordReset`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: confirmPasswordResetDto, signal
@@ -333,6 +336,22 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
       return useMutation(mutationOptions, queryClient);
     }
+
+export const authControllerChangePassword = (
+  changePasswordDto: ChangePasswordDto,
+  options?: SecondParameter<typeof customInstance>,
+) => {
+  return customInstance<MessageResponseDto>(
+    {
+      url: `/auth/password`,
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      data: changePasswordDto,
+    },
+    options,
+  );
+};
+
     export const authControllerGoogleAuth = (
     
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
@@ -594,7 +613,7 @@ export const authControllerRefreshToken = (
 ) => {
       
       
-      return customInstance<UserDto>(
+      return customInstance<AuthControllerLogin201>(
       {url: `/auth/refresh`, method: 'POST', signal
     },
       options);
@@ -649,7 +668,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  options?: SecondParameter<typeof customInstance>,) => {
       
       
-      return customInstance<void>(
+      return customInstance<ResendOtpResponseDto>(
       {url: `/auth/resend-otp`, method: 'PATCH',
       headers: {'Content-Type': 'application/json', },
       data: resendOtpDto
@@ -757,4 +776,3 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
       return useMutation(mutationOptions, queryClient);
     }
-    

@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "config": {
-        "googleMapsApiKey":  "process.env.GOOGLE_MAPS_API_KEY"
+        "googleMapsApiKey": "process.env.GOOGLE_MAPS_API_KEY"
       },
       "associatedDomains": [
         "applinks:www.seekapp.uk"
@@ -37,9 +37,25 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.seek.seekapp",
       "permissions": [
-        "android.permission.RECORD_AUDIO",
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "www.seekapp.uk",
+              "pathPrefix": "/link"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
       ]
     },
     "web": {

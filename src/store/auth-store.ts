@@ -3,8 +3,8 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { SecureStorage } from "./persist/secure";
 
 type Tokens = {
-  accessToken: string | undefined;
-  refreshToken: string | undefined;
+  accessToken: string;
+  refreshToken: string;
 };
 
 interface AuthState {
@@ -14,6 +14,10 @@ interface AuthState {
   login: (tokens: Tokens) => void;
   logout: () => void;
   setHydrated: () => void;
+}
+
+function isPlausibleJwt(token: string | undefined): boolean {
+  return Boolean(token && token.split(".").length === 3);
 }
 
 export const useAuth = create<AuthState>()(
@@ -39,16 +43,22 @@ export const useAuth = create<AuthState>()(
         refreshToken: state.refreshToken,
       }),
       onRehydrateStorage() {
-        console.log("[LOG] attempting rehydration auth state from storage");
         return (state, error) => {
+          const hasAnyToken = Boolean(state?.accessToken || state?.refreshToken);
+          const hasUsableTokenPair =
+            isPlausibleJwt(state?.accessToken) &&
+            isPlausibleJwt(state?.refreshToken);
+
+          if (hasAnyToken && !hasUsableTokenPair) {
+            state?.logout();
+          }
+
           state?.setHydrated();
           if (error) {
             console.error(
               "[ERROR] error rehydrating auth state from storage:",
               error,
             );
-          } else {
-            console.log("[LOG] auth state rehydrated from storage:", state);
           }
         };
       },

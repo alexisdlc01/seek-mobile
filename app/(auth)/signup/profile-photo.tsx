@@ -8,118 +8,137 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useProfilePicture } from "@/hooks/use-profile-photo";
 import { UserPlusIcon } from "lucide-react-native";
 import { errorToast } from "@/src/utils/error-toast";
-import { useSignupState } from "./state";
+import { useSignupState } from "@/src/store/signup-store";
 import { uploadFile } from "@/src/utils/upload-file";
 import { useToast } from "@/components/ui/toast";
-import { Actionsheet, ActionsheetBackdrop, ActionsheetContent, ActionsheetDragIndicator, ActionsheetDragIndicatorWrapper, ActionsheetItem, ActionsheetItemText } from "@/components/ui/actionsheet";
-import axios from "axios";
-import { SetProfilePicDto } from "@/src/api/seek-api/model";
+import {
+  Actionsheet,
+  ActionsheetBackdrop,
+  ActionsheetContent,
+  ActionsheetDragIndicator,
+  ActionsheetDragIndicatorWrapper,
+  ActionsheetItem,
+  ActionsheetItemText,
+} from "@/components/ui/actionsheet";
+import { useAuth } from "@/src/store/auth-store";
+import { AuthGaurd } from "@/components/custom/auth-gaurd";
+import { usersControllerSetProfilePic } from "@/src/api/seek-api/users";
 
 export default function ProfilePhoto() {
   const { setProgress } = useProgress();
   useEffect(() => {
     setProgress(0.95);
-  }, []);
+  }, [setProgress]);
 
-  const { userId, access_token } = useSignupState(state => state.data);
+  const userId = useSignupState((state) => state.data.userId);
+  const clearSignupState = useSignupState((state) => state.clear);
+  const accessToken = useAuth((state) => state.accessToken);
   const toast = useToast();
   const { pickImage, image } = useProfilePicture();
-  const [show, setShow] = useState<boolean>(false)
-  const handlePick = useCallback(async (camera: boolean) => {
-    const image = await pickImage(camera);
-    if (image == null) {
-      errorToast({ toast, data: { message: "No file data found.", statusCode: -1 } })
+  const [show, setShow] = useState(false);
+  const handlePick = useCallback(
+    async (camera: boolean) => {
+      if (!accessToken || !userId) {
+        errorToast({
+          toast,
+          data: {
+            message: "Your signup session is incomplete.",
+            statusCode: 401,
+          },
+        });
+        return;
+      }
+
+      const image = await pickImage(camera);
+      if (image == null) {
+        errorToast({
+          toast,
+          data: { message: "No file data found.", statusCode: -1 },
+        });
+        setShow(false);
+        return;
+      }
+
+      const mimeType = image.mimeType ?? "image/*";
+      let fileUrl: string;
+      try {
+        const data = await uploadFile({
+          uri: image.uri,
+          mimeType,
+          name: `${userId}-profile`,
+          folder: "public",
+          access_token: accessToken,
+        });
+        fileUrl = data.fileUrl;
+      } catch {
+        errorToast({
+          toast,
+          data: { message: "Failed to upload file.", statusCode: -1 },
+        });
+        return;
+      }
+
+      try {
+        await usersControllerSetProfilePic({ url: fileUrl });
+      } catch {
+        errorToast({
+          toast,
+          data: {
+            message: "Failed to update profile photo.",
+            statusCode: -1,
+          },
+        });
+      }
       setShow(false);
-      return;
-    }
-
-    // upload the file
-    const mimeType = image.mimeType ?? "image/*";
-    let fileUrl: string;
-    try {
-      const data = await uploadFile({
-        uri: image.uri,
-        mimeType,
-        name: `${userId}-profile`,
-        folder: "public",
-        access_token
-      });
-      fileUrl = data.fileUrl;
-    } catch {
-      errorToast({ toast, data: { message: "Failed to upload file.", statusCode: -1 } });
-      return;
-    }
-
-    // update the user profile
-    try {
-      const BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-      await axios.put<any, any, SetProfilePicDto>(`${BASE_URL}/users/setProfilePic`, {
-        url: fileUrl
-      }, {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          platform: "mobile"
-        }
-      });
-    } catch (error) {
-      console.error(error);
-      errorToast({ toast, data: { message: "Failed to update profile photo", statusCode: -1 } });
-    }
-    setShow(false);
-  }, []);
-
+    },
+    [accessToken, pickImage, toast, userId],
+  );
 
   return (
-    <VStack className="gap-8 px-4 py-20 items-center h-full justify-between">
+    <AuthGaurd>
+      <VStack className="gap-8 px-4 py-20 items-center h-full justify-between">
+        <Pressable onPress={() => setShow(true)}>
+          <Avatar
+            size="2xl"
+            style={{
+              justifyContent: "center",
+              alignItems: "center",
+              overflow: "hidden",
+            }}
+            className="bg-background-200 items-center justify-center overflow-hidden"
+          >
+            {image ? (
+              <AvatarImage
+                source={{ uri: image }}
+                alt="Profile Photo"
+                resizeMode="cover"
+              />
+            ) : (
+              <UserPlusIcon size="33%" color="white" />
+            )}
+          </Avatar>
+        </Pressable>
 
-      <Pressable onPress={() => setShow(true)}>
-        <Avatar
-          size="2xl"
-          style={{
-            justifyContent: "center",
-            alignItems: "center",
-            overflow: "hidden",
-          }}
-          className="bg-background-200 items-center justify-center overflow-hidden"
-        >
-          {image ? (
-            <AvatarImage
-              source={{ uri: image }}
-              alt="Profile Photo"
-              resizeMode="cover"
-            />
-          ) : (
-            <UserPlusIcon size="33%" color="white" />
-          )}
-        </Avatar>
-      </Pressable>
-
-      <Link href="/home">
-        <LinkText size="lg" className="text-secondary-700">
-          Done for now
-        </LinkText>
-      </Link>
-      <Link href="/(auth)/signup/otp">
-        <LinkText size="lg" className="text-secondary-700">
-          DEV: Back
-        </LinkText>
-      </Link>
-
-      <Actionsheet isOpen={show} onClose={() => setShow(false)} useRNModal>
-        <ActionsheetBackdrop />
-        <ActionsheetContent>
-          <ActionsheetDragIndicatorWrapper>
-            <ActionsheetDragIndicator />
-          </ActionsheetDragIndicatorWrapper>
-          <ActionsheetItem onPress={() => handlePick(true)}>
-            <ActionsheetItemText>Take Photo</ActionsheetItemText>
-          </ActionsheetItem>
-          <ActionsheetItem onPress={() => handlePick(false)}>
-            <ActionsheetItemText>Choose from Library</ActionsheetItemText>
-          </ActionsheetItem>
-        </ActionsheetContent>
-      </Actionsheet>
-
-    </VStack>
+        <Link href="/(app)/(tabs)/map" onPress={clearSignupState}>
+          <LinkText size="lg" className="text-secondary-700">
+            Done for now
+          </LinkText>
+        </Link>
+        <Actionsheet isOpen={show} onClose={() => setShow(false)} useRNModal>
+          <ActionsheetBackdrop />
+          <ActionsheetContent>
+            <ActionsheetDragIndicatorWrapper>
+              <ActionsheetDragIndicator />
+            </ActionsheetDragIndicatorWrapper>
+            <ActionsheetItem onPress={() => handlePick(true)}>
+              <ActionsheetItemText>Take Photo</ActionsheetItemText>
+            </ActionsheetItem>
+            <ActionsheetItem onPress={() => handlePick(false)}>
+              <ActionsheetItemText>Choose from Library</ActionsheetItemText>
+            </ActionsheetItem>
+          </ActionsheetContent>
+        </Actionsheet>
+      </VStack>
+    </AuthGaurd>
   );
 }

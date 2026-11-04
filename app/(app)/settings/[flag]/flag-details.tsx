@@ -1,93 +1,102 @@
-import { VStack } from "@/components/ui/vstack";
-import { FlagStatusPill } from "../previous-flags";
-import { Card } from "@/components/ui/card";
-import { HStack } from "@/components/ui/hstack";
+import {
+  ProfileScreen,
+  profileTypography,
+} from "@/components/custom/profile-screen";
 import { Text } from "@/components/ui/text";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { Divider } from "@/components/ui/divider";
-import { ScrollView } from "react-native";
+import { PROFILE_COLORS, PROFILE_LAYOUT } from "@/constants/design";
+import { useLocalSearchParams } from "expo-router";
+import React from "react";
+import { StyleSheet, View } from "react-native";
+import { FlagStatusPill } from "../previous-flags";
 
-type FlagDetailRecordProps = {
-  label: string;
-  value: string;
-};
-
-function FlagDetailRecord({ label, value }: FlagDetailRecordProps) {
+function DetailRow({ label, value }: { label: string; value: string }) {
   return (
-    <HStack className="justify-between">
-      <Text className="color-secondary-800">{label}</Text>
-      <Text>{value}</Text>
-    </HStack>
+    <View style={styles.detailRow}>
+      <Text style={styles.detailLabel}>{label}</Text>
+      <Text style={styles.detailValue}>{value}</Text>
+    </View>
   );
 }
 
 export default function FlagDetailsScreen() {
-  const params = useLocalSearchParams<{ flag: string }>();
-  const flag = params.flag;
+  const { flag } = useLocalSearchParams<{ flag: string }>();
 
   return (
-    <ScrollView>
-      <VStack className="p-6 gap-8 bg-background-0">
-        <FlagStatusPill status="RESOLVED" size="xl" />
+    <ProfileScreen title="Flag Details">
+      <View style={styles.centered}>
+        <FlagStatusPill status="RESOLVED" large />
+      </View>
 
-        <Card className="border-[1px] border-background-400 rounded-xl gap-3 p-6">
-          <FlagDetailRecord label="Flag ID" value={flag} />
-          <Divider />
-          <FlagDetailRecord
-            label="Date Submitted"
-            value="This is a description"
-          />
-          <Divider />
-          <FlagDetailRecord label="Category" value="This is a description" />
-          <Divider />
-          <FlagDetailRecord
-            label="Reported User"
-            value="This is a description"
-          />
-          <Divider />
-          <FlagDetailRecord
-            label="Resolution Date"
-            value="This is a description"
-          />
-        </Card>
+      <View style={styles.card}>
+        <DetailRow label="Flag ID" value={flag ?? "—"} />
+        <View style={styles.divider} />
+        <DetailRow label="Date submitted" value="This is a description" />
+        <View style={styles.divider} />
+        <DetailRow label="Category" value="This is a description" />
+        <View style={styles.divider} />
+        <DetailRow label="Reported user" value="This is a description" />
+        <View style={styles.divider} />
+        <DetailRow label="Resolution date" value="This is a description" />
+      </View>
 
-        <Card className="border-[1px] border-background-400 rounded-xl gap-2 p-6">
-          <Text className="text-center" bold size="lg">
-            Your Report
-          </Text>
-          <Text className="text-primary-100 text-center">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
-            ullamcorper, nisl in tincidunt aliquet, lorem justo aliquam lectus,
-            quis aliquam nisi nisl in nisi. Sed ullamcorper, nisl in tincidunt
-            aliquet, lorem justo aliquam lectus, quis aliquam nisi nisl in nisi.
-            Sed ullamcorper, nisl in tincidunt aliquet, lorem justo aliquam
-            lectus, quis aliquam nisi nisl in nisi.
-          </Text>
-        </Card>
+      <View style={styles.card}>
+        <Text style={profileTypography.sectionTitle}>Your Report</Text>
+        <Text style={profileTypography.body}>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
+          ullamcorper, nisl in tincidunt aliquet, lorem justo aliquam lectus,
+          quis aliquam nisi nisl in nisi.
+        </Text>
+      </View>
 
-        <Card className="border-[1px] border-background-400 rounded-xl gap-2 p-6">
-          <Text className="text-center" bold size="lg">
-            Seek Support Response
-          </Text>
-          <VStack className="gap-4">
-            <Text className="text-primary-100 text-center">
-              Thank you for reporting this incident. After reviewing the case
-              and speaking with both parties, we have taken the following
-              actions:
-            </Text>
-
-            <Text className="text-primary-100 text-center">
-              - We have suspended the reported user's account.
-            </Text>
-
-            <Text className="text-primary-100 text-center">
-              We take flags seriously and appreciate your detailed report. If
-              you need any further assistance, please don't hesitate to contact
-              us.
-            </Text>
-          </VStack>
-        </Card>
-      </VStack>
-    </ScrollView>
+      <View style={styles.card}>
+        <Text style={profileTypography.sectionTitle}>Seek Support Response</Text>
+        <Text style={profileTypography.body}>
+          Thank you for reporting this incident. After reviewing the case and
+          speaking with both parties, we have taken the appropriate action.
+        </Text>
+        <Text style={profileTypography.body}>
+          We take flags seriously and appreciate your detailed report. Contact
+          us if you need further assistance.
+        </Text>
+      </View>
+    </ProfileScreen>
   );
 }
+
+const styles = StyleSheet.create({
+  centered: {
+    alignItems: "center",
+  },
+  card: {
+    gap: 14,
+    padding: 18,
+    borderWidth: 1.25,
+    borderColor: PROFILE_COLORS.border,
+    borderRadius: PROFILE_LAYOUT.cardRadius,
+    backgroundColor: PROFILE_COLORS.surface,
+  },
+  detailRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: 16,
+  },
+  detailLabel: {
+    flex: 1,
+    color: PROFILE_COLORS.mutedText,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  detailValue: {
+    flex: 1,
+    color: PROFILE_COLORS.text,
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: "600",
+    textAlign: "right",
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: "#B8B8B8",
+  },
+});

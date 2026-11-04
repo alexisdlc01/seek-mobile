@@ -1,27 +1,29 @@
 import { Box } from "@/components/ui/box";
 import { Icon } from "@/components/ui/icon/index";
-import { ArrowUpIcon, InfoIcon, ArrowLeftIcon } from "lucide-react-native";
+import { ArrowUpIcon, ArrowLeftIcon, EllipsisVerticalIcon } from "lucide-react-native";
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import { FlatList, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import { Alert, FlatList, KeyboardAvoidingView, Platform, Pressable as RNPressable, Share } from "react-native";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
 import { Pressable } from "react-native-gesture-handler";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "@/src/store/auth-store";
-import { useFocusEffect } from "@react-navigation/native";
 import { errorToast } from "@/src/utils/error-toast";
 import { useToast } from "@/components/ui/toast";
 import { getConversationControllerGetConversationQueryKey, useConversationControllerGetConversation, useConversationControllerSendMessage } from "@/src/api/seek-api/conversation";
 import { useAuthControllerCurrentUser } from "@/src/api/seek-api/auth";
 import { queryClient } from "@/app/_layout";
-import { ConversationDto, MessageDto, MessageDtoMessageType, UserDto } from "@/src/api/seek-api/model";
+import { ConversationDto, ErrorDto, MessageDto, UserDto } from "@/src/api/seek-api/model";
 import { Loader } from "@/components/custom/loader";
+import { getApplicationControllerGetAllMyApplicationsQueryKey, useApplicationControllerGetByConversation } from "@/src/api/seek-api/application";
+import { createApplicationInvite, isApplicationAdmin, leaveApplication } from "@/src/utils/application-invite";
+import { getApplicationLink } from "@/components/links";
 
 enum EventNames {
   NEW_MESSAGE = "message:new",
@@ -63,25 +65,23 @@ export default function ChatScreen() {
   const toast = useToast();
 
 
-  const { id: conversationId } = useLocalSearchParams<{ id?: string }>();
-  if (!conversationId) {
-    console.log("no conversation id");
-    return <Redirect href="/home" />;
-  }
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  const conversationId = id ?? "";
 
   const { data: conversation, isError, isLoading: loadingMessages } = useConversationControllerGetConversation(conversationId, {});
   const { data: user, isError: isUserError, isLoading: loadingUser } = useAuthControllerCurrentUser();
   const isLoading = loadingMessages || loadingUser;
 
-  const { mutate } = useSendMessage(user!, conversationId);
-  const addMessage = useAddMessage(conversationId);
+  const { mutate } = useSendMessage(user, conversationId);
+  const addMessage = useAddMessage(conversationId, user?._id);
+  const listRef = useRef<FlatList<MessageDto>>(null);
 
   useEffect(() => {
     if (isError || isUserError) {
       console.log("failed to get messages")
-      router.navigate("/home");
+      router.navigate("/(app)/(tabs)/map");
     }
-  }, [isError, isUserError]);
+  }, [isError, isUserError, router]);
 
   const [message, setMessage] = useState<string>("");
   function sendMessage(id: string) {
@@ -95,6 +95,8 @@ export default function ChatScreen() {
     }
 
     setMessage("");
+    // Jump straight to the newest message rather than animating there.
+    listRef.current?.scrollToOffset({ offset: 0, animated: false });
     mutate({
       id,
       data: {
@@ -102,38 +104,44 @@ export default function ChatScreen() {
       }
     }, {
       onError(error) {
-        errorToast({ toast, data: error.response?.data })
+        errorToast({
+          toast,
+          data: error.response?.data as ErrorDto | undefined,
+        });
       }
     });
   }
 
   useEffect(() => {
-    const client = io(`${BACKEND_URL}/converstaion`, {
+    if (!conversationId || !accessToken) return;
+
+    const client = io(`${BACKEND_URL}/conversation`, {
       extraHeaders: {
         Authorization: `Bearer ${accessToken}`,
-        // @ts-ignore
-        mobile: true,
+        platform: "mobile",
       },
       transports: ["websocket"]
     });
 
     clientRef.current = client;
 
-    client.emit(EventNames.JOIN, () => {
-      console.log("join emitted")
-    })
+    client.emit(EventNames.JOIN, conversationId);
     client.on(EventNames.NEW_MESSAGE, (message: MessageDto) => {
       addMessage(message);
     });
 
     return () => { client.disconnect(); };
-  }, []);
+  }, [accessToken, addMessage, conversationId]);
+
+  if (!conversationId) {
+    return <Redirect href="/(app)/(tabs)/map" />;
+  }
 
   return (
     <Loader isLoading={isLoading}>
       <SafeAreaView className="p-6">
         <VStack className="h-full gap-2">
-          <Box className="flex items-center justify-between flex-row gap-4">
+          <Box className="z-10 flex items-center justify-between flex-row gap-4">
             <Pressable onPressIn={() => router.back()}>
               <Icon as={ArrowLeftIcon} size="xl" />
             </Pressable>
@@ -142,21 +150,16 @@ export default function ChatScreen() {
               className="line-clamp-1 text-ellipsis flex-shrink">
               {conversation?.name ?? "Chat"}
             </Text>
-            <Pressable onPressIn={() => router.push(`/chat/${conversationId}/details`)}>
-              <Icon as={InfoIcon} size="xl" />
-            </Pressable>
+            <ChatMenu conversationId={conversationId} userId={user?._id} />
           </Box>
 
           {/* Messages */}
           <FlatList
+            ref={listRef}
             showsVerticalScrollIndicator={false}
             className="h-full"
             contentContainerClassName="gap-2"
             decelerationRate="fast"
-            maintainVisibleContentPosition={{
-              minIndexForVisible: 0,
-              autoscrollToTopThreshold: 10
-            }}
             inverted
             data={conversation?.messages ?? []}
             keyExtractor={item => item._id}
@@ -193,13 +196,14 @@ export default function ChatScreen() {
 }
 
 
-function useSendMessage(user: UserDto, conversationId: string) {
+function useSendMessage(user: UserDto | undefined, conversationId: string) {
   return useConversationControllerSendMessage({
     mutation: {
       async onMutate(newMessage) {
+        if (!user) throw new Error("Cannot send a message without a user");
         const tempDto: MessageDto = {
-          _id: new Date().toString(),
-          sender: user!,
+          _id: `${PENDING_PREFIX}${Date.now()}`,
+          sender: user,
           messageType: "Text",
           data: newMessage.data.message,
           createdAt: new Date().toString(),
@@ -218,7 +222,7 @@ function useSendMessage(user: UserDto, conversationId: string) {
             if (!last) return last;
             return {
               ...last,
-              messages: [...last.messages, tempDto]
+              messages: [tempDto, ...last.messages]
             }
           }
         );
@@ -240,18 +244,150 @@ function useSendMessage(user: UserDto, conversationId: string) {
   })
 }
 
-function useAddMessage(conversationId: string) {
-  return (message: MessageDto) => {
+const PENDING_PREFIX = "pending-";
+
+function useAddMessage(conversationId: string, userId: string | undefined) {
+  return useCallback((message: MessageDto) => {
     queryClient.setQueryData<ConversationDto>(
       getConversationControllerGetConversationQueryKey(conversationId),
       (last) => {
         if (!last) return last;
         if (last.messages.find(el => el._id === message._id)) return last;
+
+        // Our own message coming back from the server: swap it in for the
+        // optimistic copy in place, so the list doesn't add a row and jump.
+        if (message.sender._id === userId) {
+          const pendingIndex = findLastIndex(last.messages, (el) =>
+            el._id.startsWith(PENDING_PREFIX) && el.data === message.data
+          );
+          if (pendingIndex !== -1) {
+            const messages = [...last.messages];
+            messages[pendingIndex] = message;
+            return { ...last, messages };
+          }
+        }
+
         return {
           ...last,
-          messages: [...last.messages, message]
+          messages: [message, ...last.messages]
         }
       }
     );
+  }, [conversationId, userId]);
+}
+
+function findLastIndex<T>(items: T[], predicate: (item: T) => boolean) {
+  for (let i = items.length - 1; i >= 0; i--) {
+    if (predicate(items[i])) return i;
   }
+  return -1;
+}
+
+type ChatMenuProps = {
+  conversationId: string;
+  userId: string | undefined;
+};
+
+/** The ⋮ menu in a group chat's header. */
+function ChatMenu({ conversationId, userId }: ChatMenuProps) {
+  const router = useRouter();
+  const toast = useToast();
+  const [open, setOpen] = useState(false);
+  const { data: application } = useApplicationControllerGetByConversation(conversationId);
+
+  const isOwner = Boolean(userId) && application?.owner === userId;
+  const canInvite = isApplicationAdmin(application, userId);
+  const canLeave =
+    Boolean(userId) && !isOwner && Boolean(application?.applicants.includes(userId!));
+
+  function close() {
+    setOpen(false);
+  }
+
+  function openDetails() {
+    close();
+    router.push(`/(app)/chat/${conversationId}/details`);
+  }
+
+  async function invite() {
+    close();
+    if (!application) return;
+    try {
+      // A fresh invite each time, so any link shared before stops working.
+      const { inviteToken } = await createApplicationInvite(application._id);
+      await Share.share({
+        message: "Join my application on Seek!",
+        url: getApplicationLink(application._id, inviteToken),
+      });
+    } catch {
+      errorToast({
+        toast,
+        data: { message: "Could not create an invite link.", statusCode: -1 },
+      });
+    }
+  }
+
+  function leave() {
+    close();
+    if (!application) return;
+    Alert.alert("Leave group?", "You'll stop seeing this application's chat.", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Leave",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await leaveApplication(application._id);
+            await queryClient.invalidateQueries({
+              queryKey: getApplicationControllerGetAllMyApplicationsQueryKey(),
+            });
+            router.replace("/(app)/(tabs)/messages");
+          } catch {
+            errorToast({
+              toast,
+              data: { message: "Could not leave the group.", statusCode: -1 },
+            });
+          }
+        },
+      },
+    ]);
+  }
+
+  return (
+    <Box>
+      <Pressable onPress={() => setOpen(value => !value)} hitSlop={8}>
+        <Icon as={EllipsisVerticalIcon} size="xl" />
+      </Pressable>
+      {open ? (
+        <>
+          {/* Tapping anywhere else closes the menu. */}
+          <RNPressable
+            onPress={close}
+            style={{ position: "absolute", top: -1000, left: -2000, width: 4000, height: 4000 }}
+          />
+          <VStack className="absolute right-0 top-8 z-50 w-48 rounded-xl bg-white py-1 shadow-hard-5">
+            <MenuItem label="Group details" onPress={openDetails} />
+            {canInvite ? <MenuItem label="Invite" onPress={() => void invite()} /> : null}
+            {canLeave ? <MenuItem label="Leave group" onPress={leave} destructive /> : null}
+          </VStack>
+        </>
+      ) : null}
+    </Box>
+  );
+}
+
+function MenuItem({
+  label,
+  onPress,
+  destructive = false,
+}: {
+  label: string;
+  onPress: () => void;
+  destructive?: boolean;
+}) {
+  return (
+    <RNPressable onPress={onPress} className="px-4 py-3">
+      <Text className={destructive ? "text-red-600" : "text-primary-500"}>{label}</Text>
+    </RNPressable>
+  );
 }

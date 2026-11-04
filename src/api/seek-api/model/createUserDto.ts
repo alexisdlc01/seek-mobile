@@ -5,10 +5,13 @@
 export interface CreateUserDto {
   name: string;
   email: string;
-  role: string;
-  imageUrl: string;
   password: string;
-  emailVerificationToken: string;
-  otpVerificationCode: string;
-  emailVerificationTokenExpires: string;
+  role?: "STUDENT";
+  imageUrl?: string;
+  /** @deprecated Server-generated verification values must not be sent. */
+  emailVerificationToken?: string;
+  /** @deprecated Server-generated verification values must not be sent. */
+  otpVerificationCode?: string;
+  /** @deprecated Server-generated verification values must not be sent. */
+  emailVerificationTokenExpires?: string;
 }

@@ -12,10 +12,23 @@ import { Pressable } from "@/components/ui/pressable";
 import { useRouter } from "expo-router";
 import { useApplicationControllerGetAllMyApplications } from "@/src/api/seek-api/application";
 import { Loader } from "@/components/custom/loader";
-import { ApplicationDto, Conversation, ConversationDto } from "@/src/api/seek-api/model";
+import { ApplicationDto } from "@/src/api/seek-api/model";
 import { useMemo } from "react";
+import { PROFILE_COLORS } from "@/constants/design";
+import { AuthRequiredScreen } from "@/components/custom/auth-required";
 
 export default function MessagesScreen() {
+  return (
+    <AuthRequiredScreen
+      title="Sign up to start messaging"
+      description="Create an account to join application groups and message about listings."
+    >
+      <AuthenticatedMessagesScreen />
+    </AuthRequiredScreen>
+  );
+}
+
+function AuthenticatedMessagesScreen() {
   const { data: applications, isLoading } = useApplicationControllerGetAllMyApplications();
 
   return (
@@ -73,7 +86,12 @@ function MessageItem({ data }: MessageItemProps) {
       <Pressable onPress={() => router.push(`/(app)/chat/${data.conversation._id}`)}>
         <HStack className="p-4 gap-6">
           <Box className="bg-background-400 w-10 h-10 rounded-full items-center justify-center text-center">
-            <Icon as={Users2Icon} color="black" fill="black" size="xl" />
+            <Icon
+              as={Users2Icon}
+              color={PROFILE_COLORS.accent}
+              fill={PROFILE_COLORS.accent}
+              size="xl"
+            />
           </Box>
           <Box className="bg-primary-100" />
           <VStack className="flex-1">

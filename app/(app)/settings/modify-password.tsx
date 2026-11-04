@@ -1,57 +1,110 @@
-import { Text } from "@/components/ui/text";
-import { Card } from "@/components/ui/card";
-import { Box } from "@/components/ui/box";
-import { Input, InputField } from "@/components/ui/input";
-import { Button, ButtonText } from "@/components/ui/button";
-import { PasswordInput } from "@/components/custom/password-input";
-import { create } from "zustand";
-import { View } from "react-native";
-import { VStack } from "@/components/ui/vstack/index.web";
-import { BackButton } from "@/components/custom/back-button";
-
-type InputState = {
-  password: string;
-  confirmPassword: string;
-  setPassword: (password: string) => void;
-  setConfirmPassword: (confirmPassword: string) => void;
-};
-
-const useInputState = create<InputState>((set) => ({
-  password: "",
-  confirmPassword: "",
-  setPassword: (password: string) => set({ password }),
-  setConfirmPassword: (confirmPassword: string) => set({ confirmPassword }),
-}));
+import {
+  ProfilePrimaryButton,
+  ProfileScreen,
+  ProfileTextField,
+} from "@/components/custom/profile-screen";
+import { queryClient } from "@/app/_layout";
+import { ErrorToast } from "@/components/custom/error-toast";
+import { SuccessToast } from "@/components/custom/success-toast";
+import { useToast } from "@/components/ui/toast";
+import { authControllerChangePassword } from "@/src/api/seek-api/auth";
+import type {
+  ChangePasswordDto,
+  MessageResponseDto,
+} from "@/src/api/seek-api/model";
+import { useAuth } from "@/src/store/auth-store";
+import type { ErrorType } from "@/src/utils/custom-axios";
+import {
+  isValidPassword,
+  PASSWORD_REQUIREMENTS,
+} from "@/src/utils/validate-password";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
 
 export default function ModifyPasswordScreen() {
-  const { password, confirmPassword, setPassword, setConfirmPassword } =
-    useInputState();
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const toast = useToast();
+  const logout = useAuth((state) => state.logout);
+  const router = useRouter();
+  const { mutate, isPending } = useMutation<
+    MessageResponseDto,
+    ErrorType,
+    ChangePasswordDto
+  >({
+    mutationFn: (data) => authControllerChangePassword(data),
+    onSuccess({ message }) {
+      logout();
+      queryClient.clear();
+      toast.show({
+        placement: "top",
+        render: (props) => <SuccessToast {...props} message={message} />,
+      });
+      router.replace("/(auth)/login");
+    },
+    onError(error) {
+      toast.show({
+        placement: "top",
+        render: (props) => (
+          <ErrorToast {...props} error={error.response?.data} />
+        ),
+      });
+    },
+  });
+  const passwordError =
+    password.length > 0 && !isValidPassword(password)
+      ? PASSWORD_REQUIREMENTS
+      : undefined;
+  const confirmationError =
+    confirmPassword.length > 0 && confirmPassword !== password
+      ? "Passwords do not match."
+      : undefined;
 
   return (
-    <View className="p-6 bg-background-0 h-full gap-4">
-      <BackButton />
-      <Card className="w-full rounded-xl p-6 border-2 gap-6 border-primary-900 items-center">
-        <Text size="xl" bold>
-          Modify Password
-        </Text>
-
-        <Input variant="rounded" className="border-primary-900" size="lg">
-          <InputField placeholder="New Password" />
-        </Input>
-
-        <Input variant="rounded" className="border-primary-900" size="lg">
-          <InputField placeholder="Confirm password" />
-        </Input>
-
-        <Button
-          variant="solid"
-          action="primary"
-          size="lg"
-          className="w-full rounded-full"
-        >
-          <ButtonText>Confirm</ButtonText>
-        </Button>
-      </Card>
-    </View>
+    <ProfileScreen title="Modify Password">
+      <ProfileTextField
+        label="Current password"
+        value={currentPassword}
+        onChangeText={setCurrentPassword}
+        placeholder="Enter your current password"
+        secureTextEntry
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
+      <ProfileTextField
+        label="New password"
+        value={password}
+        onChangeText={setPassword}
+        placeholder="Enter your new password"
+        secureTextEntry
+        autoCapitalize="none"
+        autoCorrect={false}
+        error={passwordError}
+        helperText={PASSWORD_REQUIREMENTS}
+      />
+      <ProfileTextField
+        label="Confirm password"
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+        placeholder="Confirm your new password"
+        secureTextEntry
+        autoCapitalize="none"
+        autoCorrect={false}
+        error={confirmationError}
+      />
+      <ProfilePrimaryButton
+        title="Confirm"
+        onPress={() => mutate({ currentPassword, newPassword: password })}
+        loading={isPending}
+        disabled={
+          currentPassword.length === 0 ||
+          !isValidPassword(password) ||
+          confirmPassword !== password ||
+          Boolean(passwordError || confirmationError)
+        }
+      />
+    </ProfileScreen>
   );
 }

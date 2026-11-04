@@ -1,7 +1,6 @@
-import { View, Text, Alert } from 'react-native';
-import { OTPInput, type SlotProps } from 'input-otp-native';
-import type { OTPInputRef } from 'input-otp-native';
-import { useRef } from 'react';
+import { View, Text } from 'react-native';
+import { OTPInput, type OTPInputRef, type SlotProps } from 'input-otp-native';
+import { useEffect, useRef } from 'react';
 
 import Animated, {
   useAnimatedStyle,
@@ -10,8 +9,8 @@ import Animated, {
   withSequence,
   useSharedValue,
 } from 'react-native-reanimated';
-import { useEffect } from 'react';
 import { cn } from '@gluestack-ui/utils/nativewind-utils';
+import { PROFILE_COLORS } from '@/constants/design';
 
 
 type AppleOTPInputProps = {
@@ -44,7 +43,7 @@ function Slot({ char, isActive, hasFakeCaret }: SlotProps) {
       className={cn(
         'w-[50px] h-[50px] items-center justify-center border border-gray-200 rounded-lg bg-white',
         {
-          'border-black border-2': isActive,
+          'border-primary-500 border-2': isActive,
         }
       )}
     >
@@ -77,7 +76,7 @@ function FakeCaret() {
   const baseStyle = {
     width: 2,
     height: 28,
-    backgroundColor: '#000',
+    backgroundColor: PROFILE_COLORS.accent,
     borderRadius: 1,
   };
 

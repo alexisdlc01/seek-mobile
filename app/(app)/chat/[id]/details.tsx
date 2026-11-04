@@ -3,14 +3,14 @@ import { CloseIcon, Icon } from "@/components/ui/icon";
 import { VStack } from "@/components/ui/vstack";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text } from "@/components/ui/text";
-import { PlusIcon, ArrowLeftIcon, UserCircleIcon } from "lucide-react-native";
+import { PlusIcon, ArrowLeftIcon } from "lucide-react-native";
 import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
 import { Pressable } from "@/components/ui/pressable";
 import { useConversationControllerGetConversation } from "@/src/api/seek-api/conversation";
 import { Loader } from "@/components/custom/loader";
 import { Divider } from "@/components/ui/divider";
 import { FlatList, Share } from "react-native";
-import { Button, ButtonSpinner, ButtonText } from "@/components/ui/button";
+import { Button, ButtonText } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack/index";
 import { Avatar } from "@/components/ui/avatar";
 import { Image } from "expo-image"
@@ -24,20 +24,21 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@/components/ui/modal";
-import { getApplicationControllerGetAllMyApplicationsQueryKey, useApplicationControllerDeleteApplication, useApplicationControllerGetApplication, useApplicationControllerGetByConversation } from "@/src/api/seek-api/application";
+import { getApplicationControllerGetAllMyApplicationsQueryKey, useApplicationControllerDeleteApplication, useApplicationControllerGetByConversation } from "@/src/api/seek-api/application";
 import { queryClient } from "@/app/_layout";
 import { errorToast } from "@/src/utils/error-toast";
 import { useToast } from "@/components/ui/toast";
 import { SuccessToast } from "@/components/custom/success-toast";
 import { getApplicationLink } from "@/components/links";
+import { createApplicationInvite, isApplicationAdmin } from "@/src/utils/application-invite";
+import { useAuthControllerCurrentUser } from "@/src/api/seek-api/auth";
 
 export default function ChatDetails() {
-  const { id } = useLocalSearchParams<{ id?: string }>();
-  if (!id) {
-    return <Redirect href="/messages" />
-  }
-
+  const { id: idParam } = useLocalSearchParams<{ id?: string }>();
+  const id = idParam ?? "";
   const router = useRouter();
+  const shareToast = useToast();
+  const [open, setOpen] = useState<boolean>(false);
 
   const {
     data: conversation,
@@ -49,24 +50,42 @@ export default function ChatDetails() {
     isLoading: loadingApplication,
     isError: errorApplication
   } = useApplicationControllerGetByConversation(id);
+  const { data: currentUser } = useAuthControllerCurrentUser();
+
+  // Only group admins (creator, and landlord once sent) may mint an invite,
+  // so only they are shown the control that does it.
+  const canInvite = isApplicationAdmin(application, currentUser?._id);
 
   const isLoading = loadingApplication || loadingConversation;
   const isError = errorApplication || errorConversation;
 
   useEffect(() => {
     if (isError) {
-      router.replace("/messages");
+      router.replace("/(app)/(tabs)/messages");
     }
-  }, [isError]);
+  }, [isError, router]);
 
-  const [open, setOpen] = useState<boolean>(false);
+  async function handleShare() {
+    if (!application) return;
+    try {
+      // Mint a fresh invite so the shared link carries a secret, and so any
+      // previously shared link stops working. The route id is the
+      // conversation; invites and joins work on the application.
+      const { inviteToken } = await createApplicationInvite(application._id);
+      await Share.share({
+        message: `Join my application on Seek!`,
+        url: getApplicationLink(application._id, inviteToken),
+      });
+    } catch {
+      errorToast({
+        toast: shareToast,
+        data: { message: "Could not create an invite link.", statusCode: -1 },
+      });
+    }
+  }
 
-  function handleShare() {
-    if (!id) return;
-    Share.share({
-      message: `Check out this listing on Seek!`,
-      url: getApplicationLink(id),
-    });
+  if (!id) {
+    return <Redirect href="/(app)/(tabs)/messages" />;
   }
 
   return (
@@ -80,9 +99,13 @@ export default function ChatDetails() {
             <Text bold size="xl" className="text-ellipsis line-clamp-1 flex-shrink">
               {conversation?.name ?? "Chat"}
             </Text>
-            <Pressable onPress={handleShare}>
-              <Icon as={PlusIcon} size="xl" />
-            </Pressable>
+            {canInvite ? (
+              <Pressable onPress={handleShare} accessibilityLabel="Share an invite">
+                <Icon as={PlusIcon} size="xl" />
+              </Pressable>
+            ) : (
+              <Box className="w-6" />
+            )}
           </Box>
 
           <Box className="flex-row">
@@ -120,18 +143,13 @@ export default function ChatDetails() {
                     {item.name}
                   </Text>
                 </Box>
-                <Box className="flex-row items-center border-0 rounded-xl bg-transparent overflow-hidden">
-                  <Pressable>
-                    <Text size="md" bold className="bg-red-500 text-white p-2">
-                      Make Admin
+                {item._id === application?.owner || item._id === application?.landlord ? (
+                  <Box className="rounded-full bg-primary-500 px-3 py-1">
+                    <Text size="sm" bold className="text-white">
+                      Admin
                     </Text>
-                  </Pressable>
-                  <Pressable>
-                    <Text size="md" bold className="bg-gray-300 text-black p-2">
-                      Kick Out
-                    </Text>
-                  </Pressable>
-                </Box>
+                  </Box>
+                ) : null}
               </HStack>
             )}
           />
@@ -180,7 +198,7 @@ function DeleteGroupModal({
           placement: "top",
           render: (props) => <SuccessToast {...props} message="Deleted application." />
         });
-        router.replace("/messages");
+        router.replace("/(app)/(tabs)/messages");
       }
     });
   }
