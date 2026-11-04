@@ -42,7 +42,6 @@ import React, { useCallback, useMemo, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
 const USERNAME_PATTERN = /^[A-Za-z0-9._-]{3,30}$/;
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_PATTERN = /^[0-9+()\-\s]{5,30}$/;
 
 function isValidCalendarDate(value: string) {
@@ -85,7 +84,7 @@ function EditBasicInformationForm({
   const accessToken = useAuth((state) => state.accessToken);
   const [name, setName] = useState(user.name ?? "");
   const [username, setUsername] = useState(user.username ?? "");
-  const [email, setEmail] = useState(user.email ?? "");
+  const [email] = useState(user.email ?? "");
   const [phone, setPhone] = useState(user.phone ?? "");
   const [dateOfBirth, setDateOfBirth] = useState(
     user.dateOfBirth?.slice(0, 10) ?? "",
@@ -107,9 +106,6 @@ function EditBasicInformationForm({
         username.trim() && !USERNAME_PATTERN.test(username.trim())
           ? "Use 3–30 letters, numbers, dots, underscores, or hyphens."
           : undefined,
-      email: EMAIL_PATTERN.test(email.trim())
-        ? undefined
-        : "Enter a valid email address.",
       phone:
         phone.trim() && !PHONE_PATTERN.test(phone.trim())
           ? "Enter a valid phone number."
@@ -123,7 +119,7 @@ function EditBasicInformationForm({
           ? "University details must be 200 characters or fewer."
           : undefined,
     };
-  }, [dateOfBirth, email, name, phone, universityDetails, username]);
+  }, [dateOfBirth, name, phone, universityDetails, username]);
 
   const hasErrors = Object.values(errors).some(Boolean);
 
@@ -171,7 +167,6 @@ function EditBasicInformationForm({
         data: {
           name: name.trim(),
           username: username.trim(),
-          email: email.trim(),
           phone: phone.trim(),
           dateOfBirth: dateOfBirth.trim(),
           universityDetails: universityDetails.trim(),
@@ -237,17 +232,17 @@ function EditBasicInformationForm({
           onChangeText={setUsername}
           autoCapitalize="none"
           autoCorrect={false}
-          placeholder="e.g. rinat.dev"
+          placeholder="e.g. alex.smith"
           error={errors.username}
         />
         <ProfileTextField
           label="Email"
           value={email}
-          onChangeText={setEmail}
+          editable={false}
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
-          error={errors.email}
+          helperText="Changing your email needs confirmation from the new address. Use Settings to start that."
         />
         <ProfileTextField
           label="Phone"

@@ -19,6 +19,9 @@ export async function uploadFile({ uri, mimeType, name, folder, access_token }: 
     params: {
       fileType: mimeType,
       filename: name,
+      // Signed into the upload URL as an exact Content-Length, so the PUT below
+      // must send a body of precisely this size.
+      fileSize: blob.size,
       folder: folder,
     },
     headers: {

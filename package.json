@@ -3,16 +3,17 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
-    "start": "expo start",
+    "start": "expo start --dev-client",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
     "ios": "node ./scripts/ios-dev-client.js",
     "ios:dev": "node ./scripts/ios-dev-client.js",
     "ios:build": "expo run:ios",
-    "ios:install": "expo run:ios --device \"Seek iPhone 17 Pro\"",
+    "ios:install": "expo run:ios --device",
     "web": "expo start --web",
     "lint": "expo lint",
-    "build:dev": "eas build --platform ios --profile development"
+    "build:dev": "eas build --platform ios --profile development",
+    "security:audit": "npm audit --omit=dev --audit-level=high"
   },
   "dependencies": {
     "@expo/html-elements": "^0.12.5",

@@ -30,11 +30,14 @@ import { errorToast } from "@/src/utils/error-toast";
 import { useToast } from "@/components/ui/toast";
 import { SuccessToast } from "@/components/custom/success-toast";
 import { getApplicationLink } from "@/components/links";
+import { createApplicationInvite, isApplicationAdmin } from "@/src/utils/application-invite";
+import { useAuthControllerCurrentUser } from "@/src/api/seek-api/auth";
 
 export default function ChatDetails() {
   const { id: idParam } = useLocalSearchParams<{ id?: string }>();
   const id = idParam ?? "";
   const router = useRouter();
+  const shareToast = useToast();
   const [open, setOpen] = useState<boolean>(false);
 
   const {
@@ -47,6 +50,11 @@ export default function ChatDetails() {
     isLoading: loadingApplication,
     isError: errorApplication
   } = useApplicationControllerGetByConversation(id);
+  const { data: currentUser } = useAuthControllerCurrentUser();
+
+  // Only group admins (creator, and landlord once sent) may mint an invite,
+  // so only they are shown the control that does it.
+  const canInvite = isApplicationAdmin(application, currentUser?._id);
 
   const isLoading = loadingApplication || loadingConversation;
   const isError = errorApplication || errorConversation;
@@ -57,12 +65,23 @@ export default function ChatDetails() {
     }
   }, [isError, router]);
 
-  function handleShare() {
-    if (!id) return;
-    Share.share({
-      message: `Check out this listing on Seek!`,
-      url: getApplicationLink(id),
-    });
+  async function handleShare() {
+    if (!application) return;
+    try {
+      // Mint a fresh invite so the shared link carries a secret, and so any
+      // previously shared link stops working. The route id is the
+      // conversation; invites and joins work on the application.
+      const { inviteToken } = await createApplicationInvite(application._id);
+      await Share.share({
+        message: `Join my application on Seek!`,
+        url: getApplicationLink(application._id, inviteToken),
+      });
+    } catch {
+      errorToast({
+        toast: shareToast,
+        data: { message: "Could not create an invite link.", statusCode: -1 },
+      });
+    }
   }
 
   if (!id) {
@@ -80,9 +99,13 @@ export default function ChatDetails() {
             <Text bold size="xl" className="text-ellipsis line-clamp-1 flex-shrink">
               {conversation?.name ?? "Chat"}
             </Text>
-            <Pressable onPress={handleShare}>
-              <Icon as={PlusIcon} size="xl" />
-            </Pressable>
+            {canInvite ? (
+              <Pressable onPress={handleShare} accessibilityLabel="Share an invite">
+                <Icon as={PlusIcon} size="xl" />
+              </Pressable>
+            ) : (
+              <Box className="w-6" />
+            )}
           </Box>
 
           <Box className="flex-row">
@@ -120,18 +143,13 @@ export default function ChatDetails() {
                     {item.name}
                   </Text>
                 </Box>
-                <Box className="flex-row items-center border-0 rounded-xl bg-transparent overflow-hidden">
-                  <Pressable>
-                    <Text size="md" bold className="bg-red-500 text-white p-2">
-                      Make Admin
+                {item._id === application?.owner || item._id === application?.landlord ? (
+                  <Box className="rounded-full bg-primary-500 px-3 py-1">
+                    <Text size="sm" bold className="text-white">
+                      Admin
                     </Text>
-                  </Pressable>
-                  <Pressable>
-                    <Text size="md" bold className="bg-gray-300 text-black p-2">
-                      Kick Out
-                    </Text>
-                  </Pressable>
-                </Box>
+                  </Box>
+                ) : null}
               </HStack>
             )}
           />

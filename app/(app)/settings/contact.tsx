@@ -10,6 +10,10 @@ import { useToast } from "@/components/ui/toast";
 import { useAuthControllerCurrentUser } from "@/src/api/seek-api/auth";
 import { useContactControllerContact } from "@/src/api/seek-api/contact";
 import React, { useState } from "react";
+import { Linking, Pressable } from "react-native";
+import { Text } from "@/components/ui/text";
+
+const CONTACT_EMAIL = "admin@seekapp.uk";
 
 export default function ContactScreen() {
   const { data: user, isLoading } = useAuthControllerCurrentUser();
@@ -62,6 +66,15 @@ export default function ContactScreen() {
           disabled={!message.trim()}
           loading={isPending}
         />
+        <Pressable
+          accessibilityRole="link"
+          onPress={() => void Linking.openURL(`mailto:${CONTACT_EMAIL}`)}
+          hitSlop={8}
+        >
+          <Text className="text-center text-primary-500">
+            Or email us at <Text className="font-semibold underline">{CONTACT_EMAIL}</Text>
+          </Text>
+        </Pressable>
       </ProfileScreen>
     </Loader>
   );

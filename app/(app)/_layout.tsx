@@ -47,6 +47,7 @@ export default function Layout() {
       <Stack.Screen name="personal-info" />
       <Stack.Screen name="edit-basic-information" />
       <Stack.Screen name="legal" />
+      <Stack.Screen name="profile" />
       <Stack.Screen name="application-successful" />
     </Stack>
   );

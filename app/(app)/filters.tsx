@@ -38,18 +38,19 @@ const PROPERTY_TYPES = [
   { label: "Other", value: "OTHER" },
 ];
 
+// Values must match exactly what the website's listing form saves.
 const ALL_AMENITIES = [
-  { label: "Wi-Fi", value: "WiFi" },
-  { label: "Washing machine", value: "Washing_Machine" },
+  { label: "Wi-Fi", value: "Wi-Fi" },
+  { label: "Washing machine", value: "Washing Machine" },
   { label: "Dryer", value: "Dryer" },
   { label: "Dishwasher", value: "Dishwasher" },
-  { label: "Pets allowed", value: "Pets_Allowed" },
+  { label: "Pets allowed", value: "Pets Allowed" },
   { label: "Bike storage", value: "Bike Storage" },
   { label: "Parking", value: "Parking" },
   { label: "Garden", value: "Garden" },
-  { label: "Smoke alarm", value: "Smoke_Alarm" },
+  { label: "Smoke alarm", value: "Smoke Alarm" },
   { label: "Fireplace", value: "Fireplace" },
-  { label: "Carbon monoxide alarm", value: "Monoxide_Alarm" },
+  { label: "Carbon monoxide alarm", value: "Monoxide Alarm" },
 ];
 
 export default function Filters() {

@@ -3,35 +3,18 @@
 const { spawn, spawnSync } = require("node:child_process");
 const { existsSync, readdirSync } = require("node:fs");
 const { createConnection } = require("node:net");
-const { homedir, networkInterfaces } = require("node:os");
+const { homedir } = require("node:os");
 const { dirname, join } = require("node:path");
 
-const simulatorName = process.env.IOS_SIMULATOR_NAME || "Seek iPhone 17 Pro";
+const simulatorName = process.env.IOS_SIMULATOR_NAME;
 const bundleId = process.env.IOS_BUNDLE_ID || "com.seek.seekapp.dev";
-const backendPort = process.env.SEEK_BACKEND_PORT || "3000";
 const expoPort = Number(process.env.EXPO_PORT || 8081);
-
-function getLanAddress() {
-  const interfaces = networkInterfaces();
-  for (const addresses of Object.values(interfaces)) {
-    for (const address of addresses ?? []) {
-      if (address.family === "IPv4" && !address.internal) {
-        return address.address;
-      }
-    }
-  }
-
-  return "localhost";
-}
 
 function getExpoEnv() {
   const nodeBinDirectory = getSupportedNodeBinDirectory();
   return {
     ...process.env,
     PATH: `${nodeBinDirectory}:${process.env.PATH ?? ""}`,
-    EXPO_PUBLIC_API_URL:
-      process.env.EXPO_PUBLIC_API_URL ||
-      `http://${getLanAddress()}:${backendPort}`,
   };
 }
 
@@ -81,90 +64,23 @@ function run(command, args, options = {}) {
   return result;
 }
 
-function findSimulatorId(name) {
-  const result = run("xcrun", ["simctl", "list", "devices", "available"]);
-  const line = result.stdout
-    .split(/\r?\n/)
-    .find((entry) => parseSimulator(entry)?.name === name);
+function selectSimulator(name) {
+  const result = run("xcrun", ["simctl", "list", "devices", "available", "--json"]);
+  const devicesByRuntime = JSON.parse(result.stdout).devices;
+  const simulators = Object.entries(devicesByRuntime)
+    .filter(([runtime]) => runtime.startsWith("com.apple.CoreSimulator.SimRuntime.iOS-"))
+    .flatMap(([, devices]) => devices)
+    .filter((device) => device.isAvailable);
+  const selected = name
+    ? simulators.find((device) => device.name === name)
+    : simulators.find((device) => device.state === "Booted") ?? simulators[0];
 
-  if (!line) {
-    throw new Error(`No available iOS simulator named "${name}" was found.`);
+  if (!selected) {
+    throw new Error(name
+      ? `No available iOS simulator named "${name}" was found.`
+      : "No available iOS simulator was found. Install one in Xcode first.");
   }
-
-  const match = line.match(/\(([0-9A-F-]{36})\)/);
-  if (!match) {
-    throw new Error(`Could not parse simulator ID from: ${line}`);
-  }
-
-  return match[1];
-}
-
-function findBootedSimulator(name) {
-  const result = run("xcrun", ["simctl", "list", "devices", "booted"], {
-    allowFailure: true,
-  });
-
-  if (result.status !== 0) {
-    return undefined;
-  }
-
-  const line = result.stdout
-    .split(/\r?\n/)
-    .find((entry) => {
-      const simulator = parseSimulator(entry);
-      return simulator?.name === name && simulator.state === "Booted";
-    });
-
-  if (!line) {
-    return undefined;
-  }
-
-  const nameMatch = line.match(/^\s*(.*?)\s+\(/);
-  const idMatch = line.match(/\(([0-9A-F-]{36})\)/);
-
-  if (!nameMatch || !idMatch) {
-    return undefined;
-  }
-
-  return {
-    name: nameMatch[1],
-    id: idMatch[1],
-  };
-}
-
-function parseSimulator(line) {
-  const match = line.match(
-    /^\s*(.*?)\s+\(([0-9A-F-]{36})\)\s+\((Booted|Shutdown)\)\s*$/,
-  );
-  if (!match) return undefined;
-
-  return {
-    name: match[1],
-    id: match[2],
-    state: match[3],
-  };
-}
-
-function shutdownOtherSimulators(selectedDeviceId) {
-  const result = run("xcrun", ["simctl", "list", "devices", "booted"], {
-    allowFailure: true,
-  });
-  if (result.status !== 0) return;
-
-  const otherDevices = result.stdout
-    .split(/\r?\n/)
-    .map(parseSimulator)
-    .filter(
-      (simulator) =>
-        simulator?.state === "Booted" && simulator.id !== selectedDeviceId,
-    );
-
-  for (const simulator of otherDevices) {
-    console.log(`Shutting down ${simulator.name} (${simulator.id})`);
-    run("xcrun", ["simctl", "shutdown", simulator.id], {
-      allowFailure: true,
-    });
-  }
+  return { name: selected.name, id: selected.udid, state: selected.state };
 }
 
 function appIsInstalled(deviceId) {
@@ -227,6 +143,10 @@ function openDevClient(deviceId) {
   const metroUrl = `http://127.0.0.1:${expoPort}`;
   const devClientUrl =
     `exp+seek-app://expo-development-client/?url=${encodeURIComponent(metroUrl)}`;
+  run("xcrun", ["simctl", "launch", deviceId, bundleId], {
+    stdio: "inherit",
+    timeout: 60_000,
+  });
   run("xcrun", ["simctl", "openurl", deviceId, devClientUrl], {
     stdio: "inherit",
     timeout: 30_000,
@@ -234,20 +154,22 @@ function openDevClient(deviceId) {
 }
 
 async function main() {
-  const bootedSimulator = findBootedSimulator(simulatorName);
-  const selectedSimulator = bootedSimulator ?? {
-    name: simulatorName,
-    id: findSimulatorId(simulatorName),
-  };
+  const selectedSimulator = selectSimulator(simulatorName);
 
   console.log(`Using ${selectedSimulator.name} (${selectedSimulator.id})`);
-  shutdownOtherSimulators(selectedSimulator.id);
-  if (!bootedSimulator) {
+  if (selectedSimulator.state !== "Booted") {
     run("xcrun", ["simctl", "boot", selectedSimulator.id], {
       allowFailure: true,
     });
   }
   waitUntilBooted(selectedSimulator.id);
+  run("open", [
+    "-a",
+    "Simulator",
+    "--args",
+    "-CurrentDeviceUDID",
+    selectedSimulator.id,
+  ]);
 
   if (!appIsInstalled(selectedSimulator.id)) {
     console.log(`${bundleId} is not installed. Building and installing it now.`);
@@ -264,7 +186,7 @@ async function main() {
   console.log(`${bundleId} is installed. Starting Metro on port ${expoPort}.`);
   const expo = spawn(
     "npx",
-    ["expo", "start", "--localhost", "--port", String(expoPort)],
+    ["expo", "start", "--dev-client", "--localhost", "--port", String(expoPort)],
     {
       stdio: "inherit",
       env: getExpoEnv(),

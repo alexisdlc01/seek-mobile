@@ -51,7 +51,7 @@ function ApplicationSuccess() {
           variant="outline"
           action="secondary"
           className="rounded-full bg-primary-0"
-          onPress={() => navigation.navigate('/home')}
+          onPress={() => navigation.navigate("/(app)/(tabs)/map")}
         >
           <ButtonText>Back to Search</ButtonText>
         </Button>

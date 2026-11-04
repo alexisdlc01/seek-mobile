@@ -17,6 +17,9 @@ export const AXIOS_INSTANCE = axios.create({
   headers: {
     platform: "mobile",
   },
+  // Send arrays as `amenities=a&amenities=b`. Axios's default `amenities[]=a`
+  // is not understood by Express 5's query parser, so the API rejects it.
+  paramsSerializer: { indexes: null },
 });
 
 type TokenPair = {
@@ -88,12 +91,6 @@ AXIOS_INSTANCE.interceptors.response.use(
     }
 
     const { code, config, response, message } = error as ErrorType;
-    console.error(
-      "[ERROR] request failed",
-      `${config?.baseURL ?? ""}${config?.url ?? ""}`,
-      response?.data?.message ?? `${code ?? "NETWORK_ERROR"}: ${message}`,
-    );
-
     const status = response?.status;
     const originalRequest = config as RetryableRequest | undefined;
     const requestPath = originalRequest?.url?.split("?")[0];
@@ -103,6 +100,11 @@ AXIOS_INSTANCE.interceptors.response.use(
       originalRequest._retry ||
       (requestPath && AUTH_REQUESTS_THAT_MUST_NOT_REFRESH.has(requestPath))
     ) {
+      console.error(
+        "[ERROR] request failed",
+        `${config?.baseURL ?? ""}${config?.url ?? ""}`,
+        response?.data?.message ?? `${code ?? "NETWORK_ERROR"}: ${message}`,
+      );
       throw error;
     }
     originalRequest._retry = true;

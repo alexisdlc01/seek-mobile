@@ -24,7 +24,7 @@ export default function Base() {
     !isResetConfirmation &&
     !(isSignupProfileCompletion && hasPendingSignup)
   ) {
-    return <Redirect href="/(app)/(tabs)/home" />;
+    return <Redirect href="/(app)/(tabs)/map" />;
   }
 
   return <Slot initialRouteName="login" />;

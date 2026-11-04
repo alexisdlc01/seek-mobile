@@ -1,6 +1,6 @@
 import { Box } from "@/components/ui/box";
 import { useDebounce } from "use-debounce";
-import { Icon, SearchIcon } from "@/components/ui/icon";
+import { SearchIcon } from "@/components/ui/icon";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { VStack } from "@/components/ui/vstack";
 import { useAutocomplete } from "@/src/api/maps-api/places-api";
@@ -10,6 +10,7 @@ import {
 } from "lucide-react-native";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Keyboard,
   StyleSheet,
@@ -24,7 +25,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlatList } from "react-native-gesture-handler";
 import { Divider } from "@/components/ui/divider";
 import { Text } from "@/components/ui/text";
-import { useListingsControllerGetAllVerifiedListings } from "@/src/api/seek-api/listings";
+import { listingsControllerGetFilteredListings } from "@/src/api/seek-api/listings";
 import { Listing } from "@/src/api/seek-api/model/listing";
 import { Pressable } from "@/components/ui/pressable";
 import * as Location from "expo-location";
@@ -34,24 +35,64 @@ import BottomSheet, {
 import {
   VerticalListingCard,
 } from "@/components/custom/listing-card";
-import { FlashList } from "@shopify/flash-list";
+import { FlashList, FlashListRef } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
 import { PROFILE_COLORS } from "@/constants/design";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { getActiveFilters, useFilterStore } from "@/src/store/filter-store";
+import { RoundIconButton } from "@/components/custom/round-icon-button";
+import { ProfileButton } from "@/components/custom/profile-button";
 
 const BottomSheetFlatList = GFlatList as unknown as typeof FlashList;
 
+const PAGE_SIZE = 5;
+// Used to sort listings by distance until (or unless) we know where the user is.
+const DEFAULT_ORIGIN: LatLng = { latitude: 56.337111, longitude: -2.795107 };
+
 export default function MapScreen() {
+  const filters = useFilterStore((state) => state.data);
+  const clearFilters = useFilterStore((state) => state.clear);
+  const activeFilters = useMemo(() => getActiveFilters(filters), [filters]);
+  const hasActiveFilters = Object.keys(activeFilters).length > 0;
+  const origin = useUserLocation();
+
   const {
-    data: listings,
-  } = useListingsControllerGetAllVerifiedListings();
+    data,
+    isLoading,
+    isError,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["/listings/filter", "nearby", activeFilters, origin],
+    queryFn: ({ pageParam, signal }) =>
+      listingsControllerGetFilteredListings(
+        {
+          ...activeFilters,
+          lat: origin.latitude,
+          lng: origin.longitude,
+          page: pageParam,
+          limit: PAGE_SIZE,
+        },
+        undefined,
+        signal,
+      ),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length < PAGE_SIZE ? undefined : allPages.length + 1,
+  });
+  const listings = useMemo(() => data?.pages.flat() ?? [], [data]);
+
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
-  const selectedListing = useMemo(
-    () => listings?.find((listing) => listing._id === selectedListingId),
-    [listings, selectedListingId],
-  );
+  const sheetListings = useMemo(() => {
+    const selected = listings.find((listing) => listing._id === selectedListingId);
+    if (!selected) return listings;
+    return [selected, ...listings.filter((listing) => listing !== selected)];
+  }, [listings, selectedListingId]);
   const listingMarkers = useMemo(
     () =>
-      (listings ?? []).flatMap((listing) => {
+      listings.flatMap((listing) => {
         const coordinate = getListingCoordinate(listing);
         return coordinate ? [{ listing, coordinate }] : [];
       }),
@@ -62,20 +103,23 @@ export default function MapScreen() {
 
   const mapRef = useRef<MapView>(null);
   const [mapReady, setMapReady] = useState(false);
-  const fittedCoordinatesKey = useRef<string | undefined>(undefined);
+  const fittedFirstPageKey = useRef<string | undefined>(undefined);
 
+  // Frame the first page of results once per search; later pages load
+  // as the user scrolls and should not move the map.
   useEffect(() => {
-    if (!mapReady || listingMarkers.length === 0) return;
+    const firstPage = data?.pages[0] ?? [];
+    if (!mapReady || firstPage.length === 0) return;
 
-    const coordinatesKey = listingMarkers
-      .map(({ listing, coordinate }) =>
-        `${listing._id}:${coordinate.latitude},${coordinate.longitude}`,
-      )
-      .join("|");
-    if (fittedCoordinatesKey.current === coordinatesKey) return;
-    fittedCoordinatesKey.current = coordinatesKey;
+    const firstPageKey = firstPage.map((listing) => listing._id).join("|");
+    if (fittedFirstPageKey.current === firstPageKey) return;
+    fittedFirstPageKey.current = firstPageKey;
 
-    const coordinates = listingMarkers.map(({ coordinate }) => coordinate);
+    const coordinates = firstPage.flatMap((listing) => {
+      const coordinate = getListingCoordinate(listing);
+      return coordinate ? [coordinate] : [];
+    });
+    if (coordinates.length === 0) return;
     if (coordinates.length === 1) {
       mapRef.current?.animateToRegion(
         {
@@ -92,7 +136,7 @@ export default function MapScreen() {
       animated: true,
       edgePadding: { top: 80, right: 50, bottom: 80, left: 50 },
     });
-  }, [listingMarkers, mapReady]);
+  }, [data, mapReady]);
 
   const centerLocation = useCallback(async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -121,7 +165,7 @@ export default function MapScreen() {
   const [searchFocused, setSearchFocused] = useState<boolean>(false);
   const [query, setQuery] = useState("");
   const [debouncedQuery] = useDebounce(query, 500);
-  const { data } = useAutocomplete(
+  const { data: placesData } = useAutocomplete(
     {
       sessiontoken: sessionToken.current,
       input: debouncedQuery,
@@ -135,20 +179,21 @@ export default function MapScreen() {
       },
     },
   );
-  const locations = data?.data.predictions ?? [];
+  const locations = placesData?.data.predictions ?? [];
   const showSearch = searchFocused && locations.length > 0 && query.length > 3;
 
   const sheetRef = useRef<BottomSheet>(null);
+  const listRef = useRef<FlashListRef<Listing>>(null);
 
   function handleMarkerPress(e: MarkerPressEvent, listing: Listing) {
     setSelectedListingId(listing._id);
     sheetRef.current?.snapToIndex(1);
+    listRef.current?.scrollToOffset({ offset: 0, animated: true });
     e.stopPropagation();
   }
 
   function dismissSelectedListing() {
     setSelectedListingId(null);
-    sheetRef.current?.snapToIndex(0);
   }
 
   function handleCardPress(listing: Listing) {
@@ -157,6 +202,12 @@ export default function MapScreen() {
 
   function handleFilterPress() {
     router.push("/(app)/filters")
+  }
+
+  function handleEndReached() {
+    if (hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
   }
 
   return (
@@ -175,8 +226,7 @@ export default function MapScreen() {
           Keyboard.dismiss();
         }}
         initialRegion={{
-          latitude: 56.337111,
-          longitude: -2.795107,
+          ...DEFAULT_ORIGIN,
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         }}
@@ -195,16 +245,16 @@ export default function MapScreen() {
         className="absolute left-0 right-0 z-20"
         pointerEvents="box-none"
         style={{
-          paddingTop: top + 12,
-          paddingHorizontal: 12,
-          paddingBottom: 12,
+          paddingTop: top + 10,
+          paddingHorizontal: 16,
         }}
       >
-        <Box className="px-10">
-          <Box className="w-fit">
+        <Box className="flex-row items-center gap-3" pointerEvents="box-none">
+          <ProfileButton />
+          <Box className="flex-1">
             <Input
               variant="rounded"
-              className="border border-primary-500 bg-secondary-100"
+              className="h-12 border border-primary-500 bg-secondary-100"
             >
               <InputSlot className="pl-3">
                 <InputIcon as={SearchIcon} size="xl" />
@@ -217,7 +267,7 @@ export default function MapScreen() {
               />
             </Input>
             {showSearch && (
-              <Box className="absolute top-12 z-10 w-full px-2">
+              <Box className="absolute top-14 z-10 w-full">
                 <Box className="w-full rounded-xl bg-white p-2">
                   <FlatList
                     data={locations}
@@ -232,50 +282,67 @@ export default function MapScreen() {
               </Box>
             )}
           </Box>
+          <RoundIconButton
+            icon={Settings2Icon}
+            accessibilityLabel="Open listing filters"
+            onPress={handleFilterPress}
+          />
         </Box>
 
-        <Pressable
-          onPressIn={handleFilterPress}
-          className="absolute bottom-3 right-3 h-10 w-10 items-center justify-center rounded-full border border-primary-500 bg-white"
-        >
-          <Icon as={Settings2Icon} size="xl" className="text-primary-500" />
-        </Pressable>
-      </Box>
-
-      <Box className="absolute bottom-7 right-5">
-        <Pressable
-          className="rounded-full aspect-square bg-primary-500 p-3"
-          onPressIn={() => centerLocation()}
-        >
-          <FocusIcon className="text-white text-xl" color="white" />
-        </Pressable>
+        <Box className="mt-3 items-end" pointerEvents="box-none">
+          <RoundIconButton
+            icon={FocusIcon}
+            accessibilityLabel="Center on my location"
+            onPress={() => void centerLocation()}
+          />
+        </Box>
       </Box>
 
       <BottomSheet
-        snapPoints={["3%", "50%"]}
+        snapPoints={["12%", "50%", "88%"]}
+        index={1}
         topInset={top + 2}
-        enableContentPanningGesture={false}
         enableDynamicSizing={false}
         ref={sheetRef}
-        onChange={(index) => {
-          if (index === 0) setSelectedListingId(null);
-        }}
         backgroundStyle={{
           backgroundColor: PROFILE_COLORS.accent,
         }}
         handleStyle={{
           backgroundColor: PROFILE_COLORS.accent,
-          borderTopEndRadius: 12,
+          borderTopLeftRadius: 12,
+          borderTopRightRadius: 12,
         }}
         handleIndicatorStyle={{
           backgroundColor: "white",
         }}
       >
         <BottomSheetFlatList<Listing>
+          ref={listRef}
           showsVerticalScrollIndicator={false}
-          data={selectedListing ? [selectedListing] : []}
+          data={sheetListings}
           extraData={selectedListingId}
           keyExtractor={(item) => item._id}
+          onEndReached={handleEndReached}
+          onEndReachedThreshold={0.5}
+          ListHeaderComponent={
+            <Text className="px-4 pb-3 text-lg font-semibold text-white">
+              Nearest listings
+            </Text>
+          }
+          ListEmptyComponent={
+            <SheetMessage
+              isLoading={isLoading}
+              isError={isError}
+              hasActiveFilters={hasActiveFilters}
+              onRetry={() => void refetch()}
+              onClearFilters={clearFilters}
+            />
+          }
+          ListFooterComponent={
+            isFetchingNextPage ? (
+              <ActivityIndicator color="white" style={{ paddingVertical: 16 }} />
+            ) : null
+          }
           renderItem={({ item }) => (
             <VerticalListingCard
               data={item}
@@ -286,6 +353,84 @@ export default function MapScreen() {
       </BottomSheet>
     </VStack>
   );
+}
+
+type SheetMessageProps = {
+  isLoading: boolean;
+  isError: boolean;
+  hasActiveFilters: boolean;
+  onRetry: () => void;
+  onClearFilters: () => void;
+};
+
+function SheetMessage({
+  isLoading,
+  isError,
+  hasActiveFilters,
+  onRetry,
+  onClearFilters,
+}: SheetMessageProps) {
+  if (isLoading) {
+    return <ActivityIndicator color="white" style={{ paddingVertical: 24 }} />;
+  }
+
+  const message = isError
+    ? "Couldn't load listings. Check your connection and try again."
+    : hasActiveFilters
+      ? "No listings match your filters."
+      : "No listings yet.";
+  const action = isError
+    ? { label: "Try again", onPress: onRetry }
+    : hasActiveFilters
+      ? { label: "Clear filters", onPress: onClearFilters }
+      : null;
+
+  return (
+    <VStack className="items-center gap-4 px-6 py-6">
+      <Text className="text-center text-base font-semibold text-white">
+        {message}
+      </Text>
+      {action ? (
+        <Pressable
+          onPress={action.onPress}
+          className="rounded-full bg-white px-6 py-3"
+        >
+          <Text className="font-semibold text-primary-500">{action.label}</Text>
+        </Pressable>
+      ) : null}
+    </VStack>
+  );
+}
+
+/** The user's position if they allow it, otherwise the default map centre. */
+function useUserLocation(): LatLng {
+  const [origin, setOrigin] = useState<LatLng>(DEFAULT_ORIGIN);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") return;
+        const position =
+          (await Location.getLastKnownPositionAsync()) ??
+          (await Location.getCurrentPositionAsync({}));
+        if (!cancelled && position) {
+          setOrigin({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+        }
+      } catch {
+        // Keep the default origin; listings still load, sorted from there.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return origin;
 }
 
 type ListingMarkerProps = {

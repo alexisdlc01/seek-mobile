@@ -14,32 +14,41 @@ import { useToast } from '@/components/ui/toast';
 import { errorToast } from '@/src/utils/error-toast';
 
 export default function ApplicationAddedPage() {
-  const { id: idParam } = useLocalSearchParams<{ id?: string }>();
+  const { id: idParam, invite: inviteParam } = useLocalSearchParams<{
+    id?: string;
+    invite?: string;
+  }>();
   const id = idParam ?? "";
-  const { mutate } = useApplicationControllerJoinApplication();
+  const invite = Array.isArray(inviteParam)
+    ? (inviteParam[0] ?? "")
+    : (inviteParam ?? "");
+  // The invite secret rides in the shared link; the API rejects a join without it.
+  const { mutate } = useApplicationControllerJoinApplication({
+    request: { params: { invite } },
+  });
   const [isLoadingJoin, setLoadingJoin] = useState<boolean>(true);
   const toast = useToast();
   const router = useRouter();
 
   useFocusEffect(
     useCallback(() => {
-      if (!id) return;
+      if (!id || !invite) return;
       mutate({ id }, {
         onError(error) {
           errorToast({ toast, data: error.response?.data });
-          router.replace("/(app)/(tabs)/home");
+          router.replace("/(app)/(tabs)/map");
         },
         onSettled() {
           setLoadingJoin(false);
         }
       });
-    }, [id, mutate, router, toast])
+    }, [id, invite, mutate, router, toast])
   );
 
   const isLoading = isLoadingJoin;
 
-  if (!id) {
-    return <Redirect href="/(app)/(tabs)/home" />;
+  if (!id || !invite) {
+    return <Redirect href="/(app)/(tabs)/map" />;
   }
 
   return (

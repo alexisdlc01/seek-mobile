@@ -49,7 +49,7 @@ export default function SettingsScreen() {
       onSettled: () => {
         logout();
         queryClient.clear();
-        router.replace("/(app)/(tabs)/home");
+        router.replace("/(app)/(tabs)/map");
       },
     });
   };

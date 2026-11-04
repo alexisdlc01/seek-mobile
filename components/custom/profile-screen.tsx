@@ -38,7 +38,7 @@ export function ProfileScreen({
   title,
   children,
   showBack = true,
-  fallbackHref = "/(app)/(tabs)/profile",
+  fallbackHref = "/(app)/profile",
   scroll = true,
   contentContainerStyle,
   scrollViewProps,

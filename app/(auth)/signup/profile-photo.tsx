@@ -119,7 +119,7 @@ export default function ProfilePhoto() {
           </Avatar>
         </Pressable>
 
-        <Link href="/(app)/(tabs)/home" onPress={clearSignupState}>
+        <Link href="/(app)/(tabs)/map" onPress={clearSignupState}>
           <LinkText size="lg" className="text-secondary-700">
             Done for now
           </LinkText>

@@ -170,7 +170,7 @@ function PersonalInformationContent({
     <>
       <ProfileScreen
         title="Personal Information"
-        fallbackHref="/(app)/(tabs)/profile"
+        fallbackHref="/(app)/profile"
         alwaysReturnToFallback
       >
         <Text style={profileTypography.body}>

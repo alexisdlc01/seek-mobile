@@ -8,5 +8,5 @@ export default function Index() {
     return null;
   }
 
-  return <Redirect href="/(app)/(tabs)/home" />;
+  return <Redirect href="/(app)/(tabs)/map" />;
 }

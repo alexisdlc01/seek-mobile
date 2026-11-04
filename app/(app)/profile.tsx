@@ -71,7 +71,7 @@ function AuthenticatedProfileScreen() {
   const { data, isLoading, isError } = useAuthControllerCurrentUser();
 
   if (isError) {
-    return <Redirect href="/(app)/(tabs)/home" />;
+    return <Redirect href="/(app)/(tabs)/map" />;
   }
 
   return (
@@ -144,7 +144,7 @@ function ProfileContent({ user }: { user: UserDto }) {
         setShowLogout(false);
         localLogout();
         queryClient.clear();
-        router.replace("/(app)/(tabs)/home");
+        router.replace("/(app)/(tabs)/map");
       },
     });
   };
@@ -159,7 +159,7 @@ function ProfileContent({ user }: { user: UserDto }) {
     <>
       <ProfileScreen
         title="Profile"
-        showBack={false}
+        fallbackHref="/(app)/(tabs)/map"
         contentContainerStyle={styles.content}
       >
         <View style={styles.hero}>

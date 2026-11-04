@@ -12,4 +12,7 @@ sizeSqMeters: number;
 amenities: string[];
 lat: number;
 lng: number;
+radius?: number;
+page?: number;
+limit?: number;
 };

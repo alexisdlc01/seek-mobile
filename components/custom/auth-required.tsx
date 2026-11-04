@@ -8,7 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const SIGN_UP_ROUTE = "/(auth)/signup" as const;
 const LOGIN_ROUTE = "/(auth)/login" as const;
-const BROWSE_ROUTE = "/(app)/(tabs)/home" as const;
+const BROWSE_ROUTE = "/(app)/(tabs)/map" as const;
 
 export function useIsAuthenticated() {
   return useAuth(

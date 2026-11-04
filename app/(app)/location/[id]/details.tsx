@@ -231,7 +231,7 @@ export default function DetailsScreen() {
       toast,
       data: { message: "Unable to find listing.", statusCode: -1 },
     });
-    router.replace("/(app)/(tabs)/home");
+    router.replace("/(app)/(tabs)/map");
   }, [isError, router, toast]);
 
   const handleViewableItemsChanged = useCallback(
@@ -246,7 +246,7 @@ export default function DetailsScreen() {
     if (router.canGoBack()) {
       router.back();
     } else {
-      router.navigate("/(app)/(tabs)/home");
+      router.navigate("/(app)/(tabs)/map");
     }
   }
 
@@ -500,19 +500,15 @@ export default function DetailsScreen() {
 
                 {data.amenities?.length > 0 ? (
                   <Section title="Amenities">
-                    <ScrollView
-                      contentContainerStyle={{ gap: 12, paddingRight: 20 }}
-                      horizontal
-                      nestedScrollEnabled
-                      showsHorizontalScrollIndicator={false}
-                    >
+                    {/* Wrap rather than scroll sideways, so every amenity is visible. */}
+                    <Box className="flex-row flex-wrap justify-between gap-y-3">
                       {data.amenities.map((amenity, index) => (
                         <AmenityInfo
                           amenity={amenity}
                           key={`${amenity}-${index}`}
                         />
                       ))}
-                    </ScrollView>
+                    </Box>
                   </Section>
                 ) : null}
               </VStack>
@@ -649,6 +645,7 @@ const AMENITY_ICONS: Record<string, LucideIcon> = {
   tv: TvIcon,
   washing_machine: WashingMachineIcon,
   wifi: WifiIcon,
+  wi_fi: WifiIcon,
 };
 
 function AmenityInfo({ amenity }: { amenity: string }) {
@@ -657,7 +654,7 @@ function AmenityInfo({ amenity }: { amenity: string }) {
   return (
     <HStack
       className="items-center gap-3 rounded-2xl px-4 py-3"
-      style={{ backgroundColor: PROFILE_COLORS.surface, width: 184 }}
+      style={{ backgroundColor: PROFILE_COLORS.surface, width: "48.5%" }}
     >
       <AmenityIcon color={BRAND_COLOR} size={20} />
       <Text className="flex-1 text-sm font-medium text-black">

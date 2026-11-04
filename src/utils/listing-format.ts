@@ -17,6 +17,7 @@ const FURNISHING_LABELS: Record<string, string> = {
 
 const AMENITY_LABELS: Record<string, string> = {
   wifi: "Wi-Fi",
+  wi_fi: "Wi-Fi",
   washing_machine: "Washing machine",
   dishwasher: "Dishwasher",
   dryer: "Dryer",

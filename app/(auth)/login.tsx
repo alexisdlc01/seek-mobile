@@ -40,7 +40,7 @@ export default function Login() {
             refreshToken: refresh_token,
           });
           clearSignupState();
-          router.replace("/(app)/(tabs)/home");
+          router.replace("/(app)/(tabs)/map");
         },
         onError: (err) => {
           toast.show({
@@ -59,7 +59,7 @@ export default function Login() {
   }
 
   if (isLoggedIn) {
-    return <Redirect href="/(app)/(tabs)/home" />;
+    return <Redirect href="/(app)/(tabs)/map" />;
   }
 
   return (

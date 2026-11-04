@@ -124,7 +124,7 @@ export default function Signup() {
               accessToken: response.access_token,
               refreshToken: response.refresh_token,
             });
-            router.replace("/(app)/(tabs)/home");
+            router.replace("/(app)/(tabs)/map");
           }
         },
         onError: (err) => {

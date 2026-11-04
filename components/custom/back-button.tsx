@@ -13,7 +13,7 @@ type BackButtonProps = {
 
 export function BackButton({
   title,
-  fallbackHref = "/(app)/(tabs)/home",
+  fallbackHref = "/(app)/(tabs)/map",
   showBack = true,
   alwaysReturnToFallback = false,
 }: BackButtonProps) {

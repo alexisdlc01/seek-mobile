@@ -26,19 +26,22 @@ const PROPERTY_TYPE_ALIASES: Record<string, FilterParams["propertyType"]> = {
   other: "OTHER",
 };
 
+// Maps saved filters (including older spellings) to the names the website
+// stores on listings, which the backend matches exactly.
 const AMENITY_ALIASES: Record<string, string> = {
-  wifi: "WiFi",
-  washing_machine: "Washing_Machine",
+  wifi: "Wi-Fi",
+  wi_fi: "Wi-Fi",
+  washing_machine: "Washing Machine",
   dryer: "Dryer",
   dishwasher: "Dishwasher",
-  pets_allowed: "Pets_Allowed",
+  pets_allowed: "Pets Allowed",
   bike_storage: "Bike Storage",
   parking: "Parking",
   garden: "Garden",
-  smoke_alarm: "Smoke_Alarm",
+  smoke_alarm: "Smoke Alarm",
   fireplace: "Fireplace",
-  monoxide_alarm: "Monoxide_Alarm",
-  carbon_monoxide_alarm: "Monoxide_Alarm",
+  monoxide_alarm: "Monoxide Alarm",
+  carbon_monoxide_alarm: "Monoxide Alarm",
 };
 
 export function getActiveFilters(
