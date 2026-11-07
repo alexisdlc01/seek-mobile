@@ -12,7 +12,7 @@ import {
 } from "@/src/api/seek-api/contracts";
 import { aiControllerAdvice } from "@/src/api/seek-api/ai";
 import { formatDate, formatPence } from "@/src/utils/seek-format";
-import { depositCapCheck, errorMessage, openStoredFile, tenancyTitle, type TenancyView } from "@/src/utils/tenancy-view";
+import { depositCapCheck, depositDaysLeft, depositDeadline, errorMessage, openStoredFile, tenancyTitle, type TenancyView } from "@/src/utils/tenancy-view";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -22,6 +22,9 @@ const SCHEME_NAMES: Record<string, string> = {
   DPS: "DPS (Deposit Protection Service)",
   TDS: "TDS (Tenancy Deposit Scheme)",
   MYDEPOSITS: "mydeposits",
+  SAFEDEPOSITS_SCOTLAND: "SafeDeposits Scotland",
+  LPS_SCOTLAND: "Letting Protection Service Scotland",
+  MYDEPOSITS_SCOTLAND: "mydeposits Scotland",
 };
 
 export default function DepositScreen() {
@@ -75,12 +78,15 @@ function DepositContent({ tenancy }: { tenancy: TenancyView }) {
   const router = useRouter();
   const hasDeposit = tenancy.depositAmount > 0;
   const protectedOn = tenancy.depositProtectedAt;
-  const check = depositCapCheck(tenancy);
+  const scotland = tenancy.listing?.nation === "SCOTLAND";
+  const check = depositCapCheck(tenancy, tenancy.listing?.nation);
+  const limit = scotland ? "30 working days" : "30 days";
   const receivedOn = tenancy.depositReceivedAt;
   const dayMs = 86_400_000;
-  // Protection is due within 30 days of the deposit being received.
+  // Protection is due 30 days after receipt (England/Wales) or 30 working days after the tenancy starts (Scotland).
   const daysTaken = receivedOn && protectedOn ? Math.max(0, Math.round((Date.parse(protectedOn) - Date.parse(receivedOn)) / dayMs)) : null;
-  const daysLeft = receivedOn && !protectedOn ? 30 - Math.floor((Date.now() - Date.parse(receivedOn)) / dayMs) : null;
+  const daysLeft = protectedOn ? null : depositDaysLeft(tenancy, tenancy.listing?.nation);
+  const deadline = protectedOn ? null : depositDeadline(tenancy, tenancy.listing?.nation)?.toISOString() ?? null;
   const households = Math.max(1, tenancy.tenants.length);
   const certificate = (tenancy.documents ?? []).find((doc) => doc.type === "DEPOSIT_CERTIFICATE");
   const [certMessage, setCertMessage] = useState<string | null>(null);
@@ -104,13 +110,13 @@ function DepositContent({ tenancy }: { tenancy: TenancyView }) {
         ? `${formatDate(protectedOn)}${daysTaken != null ? ` · ${daysTaken} ${daysTaken === 1 ? "day" : "days"} after payment` : ""}`
         : daysLeft != null
           ? daysLeft >= 0
-            ? `Not yet · ${daysLeft} ${daysLeft === 1 ? "day" : "days"} left of 30`
-            : `Not yet · ${-daysLeft} ${daysLeft === -1 ? "day" : "days"} past the 30-day limit`
+            ? `Not yet · due by ${formatDate(deadline)} (${daysLeft} ${daysLeft === 1 ? "day" : "days"} left)`
+            : `Overdue since ${formatDate(deadline)} (${-daysLeft} ${daysLeft === -1 ? "day" : "days"} late)`
           : "Not protected yet",
     },
     { label: "Household total", value: `${formatPence(tenancy.depositAmount * households)} joint` },
     { label: "Monthly rent (your share)", value: formatPence(tenancy.monthlyRent) },
-    { label: "Legal maximum (5 weeks)", value: formatPence(check.cap) },
+    { label: `Legal maximum (${check.label})`, value: formatPence(check.cap) },
   ];
 
   return (
@@ -161,7 +167,7 @@ function DepositContent({ tenancy }: { tenancy: TenancyView }) {
       {hasDeposit && !protectedOn ? (
         <Card style={{ backgroundColor: colors.dangerBg, borderColor: "transparent" }}>
           <Text accessibilityRole="alert" style={[styles.notice, { color: colors.danger }]}>
-            Your landlord must protect your deposit in a government-approved scheme within 30 days and give you the
+            Your landlord must protect your deposit in a government-approved scheme within {limit}{scotland ? " of your tenancy starting" : ""} and give you the
             details. Ask them for the scheme and reference, or ask Seek AI what to do next.
           </Text>
         </Card>
@@ -170,7 +176,7 @@ function DepositContent({ tenancy }: { tenancy: TenancyView }) {
       {hasDeposit && check.overCap ? (
         <Card style={{ backgroundColor: colors.warningBg, borderColor: "transparent" }}>
           <Text accessibilityRole="alert" style={[styles.notice, { color: colors.warning }]}>
-            This deposit is about {check.weeks.toFixed(1)} weeks of rent. The legal maximum is 5 weeks (
+            This deposit is about {check.weeks.toFixed(1)} weeks of rent. The legal maximum is {check.label} (
             {formatPence(check.cap)}), so the part above it may be recoverable. Ask Seek AI how to raise it.
           </Text>
         </Card>
@@ -178,7 +184,7 @@ function DepositContent({ tenancy }: { tenancy: TenancyView }) {
 
       {hasDeposit && !check.overCap ? (
         <Text style={[styles.body, { color: colors.mutedText }]}>
-          Within the 5-week legal limit ({check.weeks.toFixed(1)} weeks of rent).
+          Within the {check.label} legal limit ({check.weeks.toFixed(1)} weeks of rent).
         </Text>
       ) : null}
 

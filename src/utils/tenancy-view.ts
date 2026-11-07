@@ -90,15 +90,48 @@ export function errorMessage(error: unknown, fallback = "Something went wrong. P
   return fallback;
 }
 
-/** Tenancy Fees Act 2019: a deposit may not exceed five weeks' rent. */
-export function depositCapCheck(tenancy: Pick<TenancyView, "monthlyRent" | "depositAmount">) {
+/** England/Wales: five weeks' rent (Tenant Fees Act 2019). Scotland: two months' rent (Rent (Scotland) Act 1984). */
+export function depositCapCheck(
+  tenancy: Pick<TenancyView, "monthlyRent" | "depositAmount">,
+  nation?: ListingView["nation"],
+) {
   const weeklyRent = (tenancy.monthlyRent * 12) / 52;
-  const cap = Math.floor(weeklyRent * 5);
+  const scotland = nation === "SCOTLAND";
+  const cap = scotland ? tenancy.monthlyRent * 2 : Math.floor(weeklyRent * 5);
   return {
     cap,
     weeks: weeklyRent > 0 ? tenancy.depositAmount / weeklyRent : 0,
     overCap: tenancy.depositAmount > cap,
+    label: scotland ? "2 months" : "5 weeks",
   };
+}
+
+/** Scotland: 30 working days from the tenancy start (weekends skipped, bank holidays not). Elsewhere: 30 days from receipt. */
+export function depositDeadline(
+  tenancy: Pick<TenancyView, "startDate" | "depositReceivedAt">,
+  nation?: ListingView["nation"],
+): Date | null {
+  if (nation !== "SCOTLAND") {
+    return tenancy.depositReceivedAt ? new Date(Date.parse(tenancy.depositReceivedAt) + 30 * 86_400_000) : null;
+  }
+  if (!tenancy.startDate) return null;
+  const due = new Date(tenancy.startDate);
+  for (let left = 30; left > 0; ) {
+    due.setUTCDate(due.getUTCDate() + 1);
+    if (due.getUTCDay() !== 0 && due.getUTCDay() !== 6) left--;
+  }
+  return due;
+}
+
+export function depositDaysLeft(
+  tenancy: Pick<TenancyView, "startDate" | "depositReceivedAt">,
+  nation?: ListingView["nation"],
+  now = Date.now(),
+): number | null {
+  const due = depositDeadline(tenancy, nation);
+  if (!due) return null;
+  const days = (due.getTime() - now) / 86_400_000;
+  return nation === "SCOTLAND" ? Math.floor(days) : Math.ceil(days); // keeps the historical rounding per nation
 }
 
 export const isWebUrl = (url?: string | null) => !!url && /^https?:\/\//i.test(url);
