@@ -30,7 +30,7 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <GluestackUIProvider mode={colorScheme ?? "dark"}>
+      <GluestackUIProvider mode={colorScheme ?? "light"}>
         <GestureHandlerRootView style={{ flex: 1 }}>
           <Slot />
         </GestureHandlerRootView>

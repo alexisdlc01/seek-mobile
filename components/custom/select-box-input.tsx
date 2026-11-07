@@ -31,11 +31,11 @@ export function SelectBoxInput({
         <Pressable
           key={option.value}
           onPressIn={() => onChange(option.value)}
-          className={`h-10 w-[31%] grow-0 items-center justify-center rounded-full border border-primary-500 ${option.value === value ? "bg-primary-500" : "bg-white"}`}
+          className={`h-10 w-[31%] grow-0 items-center justify-center rounded-full border border-primary-500 ${option.value === value ? "bg-primary-500" : "bg-background-card"}`}
         >
           <Text
             numberOfLines={2}
-            className={`px-2 text-center text-sm font-semibold leading-4 ${option.value === value ? "text-white" : "text-black"}`}
+            className={`px-2 text-center text-sm font-semibold leading-4 ${option.value === value ? "text-typography-0" : "text-typography-950"}`}
           >
             {option.label}
           </Text>

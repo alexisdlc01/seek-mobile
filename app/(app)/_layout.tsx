@@ -1,9 +1,14 @@
 import { AuthRequiredScreen } from "@/components/custom/auth-required";
+import { useSeekTheme } from "@/hooks/use-seek-theme";
 import { Stack, useSegments } from "expo-router";
 
 const PROTECTED_SEGMENTS = new Set([
+  "apply",
   "application-successful",
   "chat",
+  "connected-email",
+  "contract",
+  "thread",
   "edit-basic-information",
   "personal-info",
 ]);
@@ -13,6 +18,7 @@ const PUBLIC_SETTINGS_SEGMENTS = new Set([
 ]);
 
 export default function Layout() {
+  const colors = useSeekTheme();
   const segments = useSegments() as string[];
   const isSettingsRoute = segments.includes("settings");
   const isPublicSettingsRoute = segments.some((segment) =>
@@ -30,7 +36,7 @@ export default function Layout() {
         animationDuration: 260,
         gestureEnabled: true,
         fullScreenGestureEnabled: true,
-        contentStyle: { backgroundColor: "#FFFFFF" },
+        contentStyle: { backgroundColor: colors.background },
       }}
     >
       <Stack.Screen name="(tabs)" />
@@ -49,6 +55,15 @@ export default function Layout() {
       <Stack.Screen name="legal" />
       <Stack.Screen name="profile" />
       <Stack.Screen name="application-successful" />
+      <Stack.Screen name="apply" />
+      <Stack.Screen name="rent-plan" />
+      <Stack.Screen name="deposit" />
+      <Stack.Screen name="bills" />
+      <Stack.Screen name="documents" />
+      <Stack.Screen name="contract" />
+      <Stack.Screen name="repairs" />
+      <Stack.Screen name="connected-email" />
+      <Stack.Screen name="thread" />
     </Stack>
   );
 

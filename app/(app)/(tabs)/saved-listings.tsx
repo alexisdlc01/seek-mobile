@@ -1,5 +1,6 @@
 import { shareListing } from "@/components/links";
-import { PROFILE_COLORS } from "@/constants/design";
+import { BackButton } from "@/components/custom/back-button";
+import { useSeekTheme } from "@/hooks/use-seek-theme";
 import { LikeButton } from "@/components/custom/like-button";
 import { ListingCard } from "@/components/custom/listing-card";
 import { ShareButton } from "@/components/custom/share-button";
@@ -27,8 +28,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { AuthRequiredScreen } from "@/components/custom/auth-required";
 import { useListingLiked } from "@/hooks/use-listing-liked";
 
-const APP_BACKGROUND_COLOR = PROFILE_COLORS.background;
-
 type TriggerProps = {
   isExpanded: boolean;
 };
@@ -45,14 +44,16 @@ export default function SavedListings() {
 }
 
 function AuthenticatedSavedListings() {
+  const colors = useSeekTheme();
   const { data: liked } = useListingsControllerGetLiked();
   const { data: applied } = useApplicationControllerGetAllMyApplications();
 
   return (
     <SafeAreaView
       className="h-full px-6"
-      style={{ backgroundColor: APP_BACKGROUND_COLOR }}
+      style={{ backgroundColor: colors.background }}
     >
+      <BackButton title="Saved homes" fallbackHref="/(app)/(tabs)/map" />
       <Accordion className="bg-transparent" type="single" variant="unfilled">
         <AccordionItem value="liked">
           <AccordionHeader>
@@ -133,6 +134,7 @@ type SavedListingCardProps = {
 };
 
 function SavedListingCard({ data }: SavedListingCardProps) {
+  const colors = useSeekTheme();
   const { mutate: like, isPending: isLiking } = useLike();
   const { mutate: unlike, isPending: isUnliking } = useUnlike();
   const toast = useToast();
@@ -180,10 +182,10 @@ function SavedListingCard({ data }: SavedListingCardProps) {
       left={
         <HStack className="items-center gap-1">
           <LikeButton
-            activeColor={PROFILE_COLORS.accent}
+            activeColor={colors.accent}
             containerClassName="bg-transparent"
             disabled={isLiking || isUnliking}
-            iconColor={PROFILE_COLORS.accent}
+            iconColor={colors.accent}
             like={handleLike}
             liked={liked}
             size={21}
@@ -191,7 +193,7 @@ function SavedListingCard({ data }: SavedListingCardProps) {
           />
           <ShareButton
             containerClassName="bg-transparent"
-            iconColor={PROFILE_COLORS.accent}
+            iconColor={colors.accent}
             share={handleShare}
             size={21}
           />

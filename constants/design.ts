@@ -1,17 +1,4 @@
-export const PROFILE_COLORS = {
-  background: "#F2F2F2",
-  surface: "#FFFFFF",
-  text: "#151515",
-  mutedText: "#626262",
-  border: "#0B2A5B",
-  accent: "#0B2A5B",
-  accentPressed: "#071F45",
-  danger: "#C62828",
-  success: "#238636",
-  review: "#0B2A5B",
-  noAction: "#D32F2F",
-} as const;
-
+// Colours live in constants/seek-theme.ts (read with useSeekTheme()).
 export const PROFILE_LAYOUT = {
   horizontalPadding: 24,
   headerHeight: 54,

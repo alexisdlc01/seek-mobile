@@ -121,7 +121,7 @@ export default function Otp() {
           toast.show({
             placement: "top",
             render: (props) => (
-              <SuccessToast message={message} {...props} />
+              <SuccessToast message={message ?? "Code sent."} {...props} />
             ),
           });
         },

@@ -23,9 +23,7 @@ export default function ApplicationAddedPage() {
     ? (inviteParam[0] ?? "")
     : (inviteParam ?? "");
   // The invite secret rides in the shared link; the API rejects a join without it.
-  const { mutate } = useApplicationControllerJoinApplication({
-    request: { params: { invite } },
-  });
+  const { mutate } = useApplicationControllerJoinApplication();
   const [isLoadingJoin, setLoadingJoin] = useState<boolean>(true);
   const toast = useToast();
   const router = useRouter();
@@ -33,7 +31,7 @@ export default function ApplicationAddedPage() {
   useFocusEffect(
     useCallback(() => {
       if (!id || !invite) return;
-      mutate({ id }, {
+      mutate({ id, params: { invite } }, {
         onError(error) {
           errorToast({ toast, data: error.response?.data });
           router.replace("/(app)/(tabs)/map");

@@ -4,7 +4,7 @@ import {
   ProfilePrimaryButton,
   ProfileScreen,
   ProfileTextField,
-  profileTypography,
+  useProfileTypography,
 } from "@/components/custom/profile-screen";
 import { SuccessToast } from "@/components/custom/success-toast";
 import { Text } from "@/components/ui/text";
@@ -23,6 +23,7 @@ function firstParam(value: string | string[] | undefined): string {
 }
 
 export default function ConfirmResetPasswordScreen() {
+  const profileTypography = useProfileTypography();
   const params = useLocalSearchParams<{
     token?: string | string[];
     userId?: string | string[];
@@ -61,7 +62,7 @@ export default function ConfirmResetPasswordScreen() {
           queryClient.clear();
           toast.show({
             placement: "top",
-            render: (props) => <SuccessToast {...props} message={message} />,
+            render: (props) => <SuccessToast {...props} message={message ?? "Password updated."} />,
           });
           router.replace("/(auth)/login");
         },

@@ -12,6 +12,7 @@ import {
 } from "@/src/utils/validate-password";
 import { EyeOffIcon, EyeIcon } from "../ui/icon";
 import { useState } from "react";
+import type { ReturnKeyTypeOptions } from "react-native";
 
 type PasswordInputProps = {
   password: string;
@@ -19,6 +20,8 @@ type PasswordInputProps = {
   label?: string;
   placeholder?: string;
   validateStrength?: boolean;
+  onSubmitEditing?: () => void;
+  returnKeyType?: ReturnKeyTypeOptions;
 };
 
 export function PasswordInput({
@@ -27,6 +30,8 @@ export function PasswordInput({
   label = "Password",
   placeholder = "Enter your password",
   validateStrength = false,
+  onSubmitEditing,
+  returnKeyType,
 }: PasswordInputProps) {
   const [show, setShow] = useState<boolean>(false);
 
@@ -45,6 +50,8 @@ export function PasswordInput({
           placeholder={placeholder}
           onChangeText={setPassword}
           value={password}
+          onSubmitEditing={onSubmitEditing}
+          returnKeyType={returnKeyType}
         />
         <InputSlot className="pr-3" onPressIn={() => setShow((c) => !c)}>
           <InputIcon

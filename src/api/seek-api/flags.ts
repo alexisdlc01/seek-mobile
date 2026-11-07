@@ -52,7 +52,7 @@ export const flagsControllerCreate = (
   
 
 
-export const getFlagsControllerCreateMutationOptions = <TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>,
+export const getFlagsControllerCreateMutationOptions = <TError = ErrorType<ErrorDto>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof flagsControllerCreate>>, TError,{data: CreateFlagDto}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof flagsControllerCreate>>, TError,{data: CreateFlagDto}, TContext> => {
 
@@ -79,9 +79,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type FlagsControllerCreateMutationResult = NonNullable<Awaited<ReturnType<typeof flagsControllerCreate>>>
     export type FlagsControllerCreateMutationBody = CreateFlagDto
-    export type FlagsControllerCreateMutationError = ErrorType<ErrorDto | ErrorDto | ErrorDto>
+    export type FlagsControllerCreateMutationError = ErrorType<ErrorDto>
 
-    export const useFlagsControllerCreate = <TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>,
+    export const useFlagsControllerCreate = <TError = ErrorType<ErrorDto>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof flagsControllerCreate>>, TError,{data: CreateFlagDto}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof flagsControllerCreate>>,
@@ -116,7 +116,7 @@ export const getFlagsControllerGetAllQueryKey = () => {
     }
 
     
-export const getFlagsControllerGetAllQueryOptions = <TData = Awaited<ReturnType<typeof flagsControllerGetAll>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof flagsControllerGetAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getFlagsControllerGetAllQueryOptions = <TData = Awaited<ReturnType<typeof flagsControllerGetAll>>, TError = ErrorType<ErrorDto>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof flagsControllerGetAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -135,10 +135,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type FlagsControllerGetAllQueryResult = NonNullable<Awaited<ReturnType<typeof flagsControllerGetAll>>>
-export type FlagsControllerGetAllQueryError = ErrorType<ErrorDto | ErrorDto | ErrorDto>
+export type FlagsControllerGetAllQueryError = ErrorType<ErrorDto>
 
 
-export function useFlagsControllerGetAll<TData = Awaited<ReturnType<typeof flagsControllerGetAll>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>(
+export function useFlagsControllerGetAll<TData = Awaited<ReturnType<typeof flagsControllerGetAll>>, TError = ErrorType<ErrorDto>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof flagsControllerGetAll>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof flagsControllerGetAll>>,
@@ -148,7 +148,7 @@ export function useFlagsControllerGetAll<TData = Awaited<ReturnType<typeof flags
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useFlagsControllerGetAll<TData = Awaited<ReturnType<typeof flagsControllerGetAll>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>(
+export function useFlagsControllerGetAll<TData = Awaited<ReturnType<typeof flagsControllerGetAll>>, TError = ErrorType<ErrorDto>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof flagsControllerGetAll>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof flagsControllerGetAll>>,
@@ -158,12 +158,12 @@ export function useFlagsControllerGetAll<TData = Awaited<ReturnType<typeof flags
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useFlagsControllerGetAll<TData = Awaited<ReturnType<typeof flagsControllerGetAll>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>(
+export function useFlagsControllerGetAll<TData = Awaited<ReturnType<typeof flagsControllerGetAll>>, TError = ErrorType<ErrorDto>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof flagsControllerGetAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useFlagsControllerGetAll<TData = Awaited<ReturnType<typeof flagsControllerGetAll>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>(
+export function useFlagsControllerGetAll<TData = Awaited<ReturnType<typeof flagsControllerGetAll>>, TError = ErrorType<ErrorDto>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof flagsControllerGetAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -176,6 +176,7 @@ export function useFlagsControllerGetAll<TData = Awaited<ReturnType<typeof flags
 
   return query;
 }
+
 
 
 
@@ -195,7 +196,7 @@ export const flagsControllerResolve = (
   
 
 
-export const getFlagsControllerResolveMutationOptions = <TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>,
+export const getFlagsControllerResolveMutationOptions = <TError = ErrorType<ErrorDto>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof flagsControllerResolve>>, TError,{id: string;data: ResolveFlagDto}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof flagsControllerResolve>>, TError,{id: string;data: ResolveFlagDto}, TContext> => {
 
@@ -222,9 +223,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type FlagsControllerResolveMutationResult = NonNullable<Awaited<ReturnType<typeof flagsControllerResolve>>>
     export type FlagsControllerResolveMutationBody = ResolveFlagDto
-    export type FlagsControllerResolveMutationError = ErrorType<ErrorDto | ErrorDto | ErrorDto>
+    export type FlagsControllerResolveMutationError = ErrorType<ErrorDto>
 
-    export const useFlagsControllerResolve = <TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>,
+    export const useFlagsControllerResolve = <TError = ErrorType<ErrorDto>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof flagsControllerResolve>>, TError,{id: string;data: ResolveFlagDto}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof flagsControllerResolve>>,
@@ -259,7 +260,7 @@ export const getFlagsControllerFindOneQueryKey = (id?: string,) => {
     }
 
     
-export const getFlagsControllerFindOneQueryOptions = <TData = Awaited<ReturnType<typeof flagsControllerFindOne>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof flagsControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getFlagsControllerFindOneQueryOptions = <TData = Awaited<ReturnType<typeof flagsControllerFindOne>>, TError = ErrorType<ErrorDto>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof flagsControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -278,10 +279,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type FlagsControllerFindOneQueryResult = NonNullable<Awaited<ReturnType<typeof flagsControllerFindOne>>>
-export type FlagsControllerFindOneQueryError = ErrorType<ErrorDto | ErrorDto | ErrorDto>
+export type FlagsControllerFindOneQueryError = ErrorType<ErrorDto>
 
 
-export function useFlagsControllerFindOne<TData = Awaited<ReturnType<typeof flagsControllerFindOne>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>(
+export function useFlagsControllerFindOne<TData = Awaited<ReturnType<typeof flagsControllerFindOne>>, TError = ErrorType<ErrorDto>>(
  id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof flagsControllerFindOne>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof flagsControllerFindOne>>,
@@ -291,7 +292,7 @@ export function useFlagsControllerFindOne<TData = Awaited<ReturnType<typeof flag
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useFlagsControllerFindOne<TData = Awaited<ReturnType<typeof flagsControllerFindOne>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>(
+export function useFlagsControllerFindOne<TData = Awaited<ReturnType<typeof flagsControllerFindOne>>, TError = ErrorType<ErrorDto>>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof flagsControllerFindOne>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof flagsControllerFindOne>>,
@@ -301,12 +302,12 @@ export function useFlagsControllerFindOne<TData = Awaited<ReturnType<typeof flag
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useFlagsControllerFindOne<TData = Awaited<ReturnType<typeof flagsControllerFindOne>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>(
+export function useFlagsControllerFindOne<TData = Awaited<ReturnType<typeof flagsControllerFindOne>>, TError = ErrorType<ErrorDto>>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof flagsControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useFlagsControllerFindOne<TData = Awaited<ReturnType<typeof flagsControllerFindOne>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>(
+export function useFlagsControllerFindOne<TData = Awaited<ReturnType<typeof flagsControllerFindOne>>, TError = ErrorType<ErrorDto>>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof flagsControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -319,6 +320,7 @@ export function useFlagsControllerFindOne<TData = Awaited<ReturnType<typeof flag
 
   return query;
 }
+
 
 
 

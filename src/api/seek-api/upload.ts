@@ -55,7 +55,7 @@ export const getUploadControllerGetPresignedUrlQueryKey = (params?: UploadContro
     }
 
     
-export const getUploadControllerGetPresignedUrlQueryOptions = <TData = Awaited<ReturnType<typeof uploadControllerGetPresignedUrl>>, TError = ErrorType<ErrorDto | ErrorDto>>(params: UploadControllerGetPresignedUrlParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof uploadControllerGetPresignedUrl>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getUploadControllerGetPresignedUrlQueryOptions = <TData = Awaited<ReturnType<typeof uploadControllerGetPresignedUrl>>, TError = ErrorType<ErrorDto>>(params: UploadControllerGetPresignedUrlParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof uploadControllerGetPresignedUrl>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -74,10 +74,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type UploadControllerGetPresignedUrlQueryResult = NonNullable<Awaited<ReturnType<typeof uploadControllerGetPresignedUrl>>>
-export type UploadControllerGetPresignedUrlQueryError = ErrorType<ErrorDto | ErrorDto>
+export type UploadControllerGetPresignedUrlQueryError = ErrorType<ErrorDto>
 
 
-export function useUploadControllerGetPresignedUrl<TData = Awaited<ReturnType<typeof uploadControllerGetPresignedUrl>>, TError = ErrorType<ErrorDto | ErrorDto>>(
+export function useUploadControllerGetPresignedUrl<TData = Awaited<ReturnType<typeof uploadControllerGetPresignedUrl>>, TError = ErrorType<ErrorDto>>(
  params: UploadControllerGetPresignedUrlParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof uploadControllerGetPresignedUrl>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof uploadControllerGetPresignedUrl>>,
@@ -87,7 +87,7 @@ export function useUploadControllerGetPresignedUrl<TData = Awaited<ReturnType<ty
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useUploadControllerGetPresignedUrl<TData = Awaited<ReturnType<typeof uploadControllerGetPresignedUrl>>, TError = ErrorType<ErrorDto | ErrorDto>>(
+export function useUploadControllerGetPresignedUrl<TData = Awaited<ReturnType<typeof uploadControllerGetPresignedUrl>>, TError = ErrorType<ErrorDto>>(
  params: UploadControllerGetPresignedUrlParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof uploadControllerGetPresignedUrl>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof uploadControllerGetPresignedUrl>>,
@@ -97,12 +97,12 @@ export function useUploadControllerGetPresignedUrl<TData = Awaited<ReturnType<ty
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useUploadControllerGetPresignedUrl<TData = Awaited<ReturnType<typeof uploadControllerGetPresignedUrl>>, TError = ErrorType<ErrorDto | ErrorDto>>(
+export function useUploadControllerGetPresignedUrl<TData = Awaited<ReturnType<typeof uploadControllerGetPresignedUrl>>, TError = ErrorType<ErrorDto>>(
  params: UploadControllerGetPresignedUrlParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof uploadControllerGetPresignedUrl>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useUploadControllerGetPresignedUrl<TData = Awaited<ReturnType<typeof uploadControllerGetPresignedUrl>>, TError = ErrorType<ErrorDto | ErrorDto>>(
+export function useUploadControllerGetPresignedUrl<TData = Awaited<ReturnType<typeof uploadControllerGetPresignedUrl>>, TError = ErrorType<ErrorDto>>(
  params: UploadControllerGetPresignedUrlParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof uploadControllerGetPresignedUrl>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -115,6 +115,7 @@ export function useUploadControllerGetPresignedUrl<TData = Awaited<ReturnType<ty
 
   return query;
 }
+
 
 
 
@@ -141,7 +142,7 @@ export const getUploadControllerDownloadQueryKey = (params?: UploadControllerDow
     }
 
     
-export const getUploadControllerDownloadQueryOptions = <TData = Awaited<ReturnType<typeof uploadControllerDownload>>, TError = ErrorType<ErrorDto | ErrorDto>>(params: UploadControllerDownloadParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof uploadControllerDownload>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getUploadControllerDownloadQueryOptions = <TData = Awaited<ReturnType<typeof uploadControllerDownload>>, TError = ErrorType<ErrorDto>>(params: UploadControllerDownloadParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof uploadControllerDownload>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -160,10 +161,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type UploadControllerDownloadQueryResult = NonNullable<Awaited<ReturnType<typeof uploadControllerDownload>>>
-export type UploadControllerDownloadQueryError = ErrorType<ErrorDto | ErrorDto>
+export type UploadControllerDownloadQueryError = ErrorType<ErrorDto>
 
 
-export function useUploadControllerDownload<TData = Awaited<ReturnType<typeof uploadControllerDownload>>, TError = ErrorType<ErrorDto | ErrorDto>>(
+export function useUploadControllerDownload<TData = Awaited<ReturnType<typeof uploadControllerDownload>>, TError = ErrorType<ErrorDto>>(
  params: UploadControllerDownloadParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof uploadControllerDownload>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof uploadControllerDownload>>,
@@ -173,7 +174,7 @@ export function useUploadControllerDownload<TData = Awaited<ReturnType<typeof up
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useUploadControllerDownload<TData = Awaited<ReturnType<typeof uploadControllerDownload>>, TError = ErrorType<ErrorDto | ErrorDto>>(
+export function useUploadControllerDownload<TData = Awaited<ReturnType<typeof uploadControllerDownload>>, TError = ErrorType<ErrorDto>>(
  params: UploadControllerDownloadParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof uploadControllerDownload>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof uploadControllerDownload>>,
@@ -183,12 +184,12 @@ export function useUploadControllerDownload<TData = Awaited<ReturnType<typeof up
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useUploadControllerDownload<TData = Awaited<ReturnType<typeof uploadControllerDownload>>, TError = ErrorType<ErrorDto | ErrorDto>>(
+export function useUploadControllerDownload<TData = Awaited<ReturnType<typeof uploadControllerDownload>>, TError = ErrorType<ErrorDto>>(
  params: UploadControllerDownloadParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof uploadControllerDownload>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useUploadControllerDownload<TData = Awaited<ReturnType<typeof uploadControllerDownload>>, TError = ErrorType<ErrorDto | ErrorDto>>(
+export function useUploadControllerDownload<TData = Awaited<ReturnType<typeof uploadControllerDownload>>, TError = ErrorType<ErrorDto>>(
  params: UploadControllerDownloadParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof uploadControllerDownload>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -201,6 +202,7 @@ export function useUploadControllerDownload<TData = Awaited<ReturnType<typeof up
 
   return query;
 }
+
 
 
 

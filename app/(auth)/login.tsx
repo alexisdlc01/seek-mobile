@@ -35,6 +35,7 @@ export default function Login() {
       {
         onSuccess: (data) => {
           const { access_token, refresh_token } = data;
+          if (!access_token || !refresh_token) return;
           login({
             accessToken: access_token,
             refreshToken: refresh_token,
@@ -62,6 +63,9 @@ export default function Login() {
     return <Redirect href="/(app)/(tabs)/map" />;
   }
 
+  const isSubmitDisabled =
+    !isValidEmail(email) || password.length === 0 || isPending;
+
   return (
     <SafeAreaView className="flex-1">
       <VStack className="gap-8 p-4">
@@ -69,16 +73,21 @@ export default function Login() {
         <EmailInput setEmail={setEmail} email={email} />
 
         {/* Password */}
-        <PasswordInput setPassword={setPassword} password={password} />
+        <PasswordInput
+          setPassword={setPassword}
+          password={password}
+          returnKeyType="go"
+          onSubmitEditing={() => {
+            if (!isSubmitDisabled) handleSubmit();
+          }}
+        />
 
         <FormControl>
           <Button
             className="rounded-xl"
             size="lg"
             onPress={handleSubmit}
-            isDisabled={
-              !isValidEmail(email) || password.length === 0 || isPending
-            }
+            isDisabled={isSubmitDisabled}
           >
             <ButtonText>{isPending ? "Logging in…" : "Login"}</ButtonText>
           </Button>

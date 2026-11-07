@@ -21,6 +21,7 @@ import { useEffect, useState } from "react";
 import { useProgress } from "@/components/custom/progress-bar";
 import { useSignupState } from "@/src/store/signup-store";
 import { useAuth } from "@/src/store/auth-store";
+import type { CreateUserDto } from "@/src/api/seek-api/model";
 import { isValidEmail, normalizeEmail } from "@/src/utils/validate-email";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -61,7 +62,7 @@ export default function Signup() {
           email: normalizedEmail,
           password,
           name: name.trim(),
-        },
+        } as CreateUserDto, // imageUrl is optional on the API; the generated type marks it required.
       },
       {
         async onSuccess(response) {

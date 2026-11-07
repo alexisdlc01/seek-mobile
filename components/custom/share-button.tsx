@@ -1,6 +1,6 @@
 import { Share2Icon } from "lucide-react-native";
 import { Pressable } from "../ui/pressable";
-import { PROFILE_COLORS } from "@/constants/design";
+import { useSeekTheme } from "@/hooks/use-seek-theme";
 
 export type ShareButtonProps = {
   share: () => void | Promise<void>;
@@ -12,9 +12,10 @@ export type ShareButtonProps = {
 export function ShareButton({
   size = 35,
   share,
-  iconColor = PROFILE_COLORS.accent,
+  iconColor,
   containerClassName = "bg-primary-0",
 }: ShareButtonProps) {
+  const colors = useSeekTheme();
   return (
     <Pressable
       accessibilityLabel="Share listing"
@@ -26,7 +27,7 @@ export function ShareButton({
       hitSlop={10}
       className={`items-center justify-center rounded-full p-2 ${containerClassName}`}
     >
-      <Share2Icon color={iconColor} size={size} />
+      <Share2Icon color={iconColor ?? colors.accent} size={size} />
     </Pressable>
   );
 }

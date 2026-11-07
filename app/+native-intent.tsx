@@ -13,6 +13,16 @@ export function redirectSystemPath({
     return "/";
   }
 
+  // Return from the Gmail / Outlook consent screen.
+  if (path.startsWith("seekapp://connectors")) {
+    return "/connected-email";
+  }
+
+  // Return from Stripe Checkout (Android delivers it as a link): pay.tsx goes back to where the payment started.
+  if (/^(seekapp:\/\/)?\/*pay\?checkout=/.test(path)) {
+    return "/pay";
+  }
+
   if (path.startsWith("seekapp://link/")) {
     return path.replace("seekapp://link", "");
   } else if (path.startsWith("https://www.seekapp.uk/link/")) {

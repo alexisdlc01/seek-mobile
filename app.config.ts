@@ -40,7 +40,7 @@ function getExtension(variant: string): Partial<ExpoConfig> {
 }
 
 export default ({ config }: ConfigContext): ExpoConfig => {
-  const extension = getExtension(process.env.RELEASE!);
+  const extension = getExtension(process.env.RELEASE ?? "DEVELOPMENT");
 
   return {
     ...config,

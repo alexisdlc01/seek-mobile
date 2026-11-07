@@ -145,7 +145,7 @@ export default function ChatDetails() {
                 </Box>
                 {item._id === application?.owner || item._id === application?.landlord ? (
                   <Box className="rounded-full bg-primary-500 px-3 py-1">
-                    <Text size="sm" bold className="text-white">
+                    <Text size="sm" bold className="text-typography-0">
                       Admin
                     </Text>
                   </Box>

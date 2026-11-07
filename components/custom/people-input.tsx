@@ -23,12 +23,12 @@ export function PeopleInput({ value, onChange }: PeopleInputProps) {
         className={`h-12 min-w-12 flex-1 items-center justify-center rounded-full border ${
           isSelected
             ? "border-primary-500 bg-primary-500"
-            : "border-primary-200 bg-white"
+            : "border-primary-200 bg-background-card"
         }`}
       >
         <Text
           size="lg"
-          className={`text-center font-semibold ${isSelected ? "text-white" : "text-black"}`}
+          className={`text-center font-semibold ${isSelected ? "text-typography-0" : "text-typography-950"}`}
         >
           {label}
         </Text>

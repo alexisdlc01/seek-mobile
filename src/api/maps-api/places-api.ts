@@ -130,6 +130,7 @@ export function usePlaceDetails<TData = Awaited<ReturnType<typeof placeDetails>>
 
 
 
+
 /**
  * A Find Place request takes a text input and returns a place. The input can be any kind of Places text data, such as a name, address, or phone number. The request must be a string. A Find Place request using non-string data such as a lat/lng coordinate or plus code generates an error.
 <div class="note">Note: If you omit the fields parameter from a Find Place request, only the place_id for the result will be returned.</div>
@@ -221,6 +222,7 @@ export function useFindPlaceFromText<TData = Awaited<ReturnType<typeof findPlace
 
 
 
+
 /**
  * A Nearby Search lets you search for places within a specified area. You can refine your search request by supplying keywords or specifying the type of place you are searching for.
  */
@@ -307,6 +309,7 @@ export function useNearbySearch<TData = Awaited<ReturnType<typeof nearbySearch>>
 
   return query;
 }
+
 
 
 
@@ -404,6 +407,7 @@ export function useTextSearch<TData = Awaited<ReturnType<typeof textSearch>>, TE
 
 
 
+
 /**
  * The Place Photo service, part of the Places API, is a read- only API that allows you to add high quality photographic content to your application. The Place Photo service gives you access to the millions of photos stored in the Places database. When you get place information using a Place Details request, photo references will be returned for relevant photographic content. Find Place, Nearby Search, and Text Search requests also return a single photo reference per place, when relevant. Using the Photo service you can then access the referenced photos and resize the image to the optimal size for your application.
 
@@ -494,6 +498,7 @@ export function usePlacePhoto<TData = Awaited<ReturnType<typeof placePhoto>>, TE
 
   return query;
 }
+
 
 
 
@@ -589,6 +594,7 @@ export function useQueryAutocomplete<TData = Awaited<ReturnType<typeof queryAuto
 
 
 
+
 /**
  * The Place Autocomplete service is a web service that returns place predictions in response to an HTTP request. The request specifies a textual search string and optional geographic bounds. The service can be used to provide autocomplete functionality for text-based geographic searches, by returning places such as businesses, addresses and points of interest as a user types.
 <div class="note">Note: You can use Place Autocomplete even without a map. If you do show a map, it must be a Google map. When you display predictions from the Place Autocomplete service without a map, you must include the ['Powered by Google'](https://developers.google.com/maps/documentation/places/web-service/policies#logo_requirementshttps://developers.google.com/maps/documentation/places/web-service/policies#logo_requirements) logo.</div>
@@ -681,6 +687,7 @@ export function useAutocomplete<TData = Awaited<ReturnType<typeof autocomplete>>
 
   return query;
 }
+
 
 
 

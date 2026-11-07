@@ -23,7 +23,7 @@ export default function ForgotPassword() {
         onSuccess({ message }) {
           toast.show({
             placement: "top",
-            render: (props) => <SuccessToast {...props} message={message} />,
+            render: (props) => <SuccessToast {...props} message={message ?? "Check your email."} />,
           });
         },
         onError(error) {

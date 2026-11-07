@@ -1,9 +1,11 @@
 import {
   ProfileScreen,
-  profileTypography,
+  useProfileTypography,
 } from "@/components/custom/profile-screen";
 import { Text } from "@/components/ui/text";
-import { PROFILE_COLORS, PROFILE_LAYOUT } from "@/constants/design";
+import { PROFILE_LAYOUT } from "@/constants/design";
+import type { SeekColors } from "@/constants/seek-theme";
+import { useSeekTheme, useThemedStyles } from "@/hooks/use-seek-theme";
 import { useRouter } from "expo-router";
 import React from "react";
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
@@ -15,17 +17,17 @@ type FlagRecord = {
   description: string;
 };
 
-export function getFlagStatusPresentation(status: string) {
+export function getFlagStatusPresentation(status: string, colors: SeekColors) {
   if (status === "RESOLVED" || status === "ACCOUNT_SUSPENDED") {
-    return { label: "Resolved", color: PROFILE_COLORS.success };
+    return { label: "Resolved", color: colors.success };
   }
   if (status === "UNDER_REVIEW") {
-    return { label: "Under Review", color: PROFILE_COLORS.review };
+    return { label: "Under Review", color: colors.review };
   }
   if (status === "NO_ACTION" || status === "NO_ACTION_TAKEN") {
-    return { label: "No Action Taken", color: PROFILE_COLORS.noAction };
+    return { label: "No Action Taken", color: colors.noAction };
   }
-  return { label: "Unknown", color: PROFILE_COLORS.mutedText };
+  return { label: "Unknown", color: colors.mutedText };
 }
 
 export function FlagStatusPill({
@@ -35,7 +37,9 @@ export function FlagStatusPill({
   status: string;
   large?: boolean;
 }) {
-  const presentation = getFlagStatusPresentation(status);
+  const styles = useThemedStyles(createStyles);
+  const colors = useSeekTheme();
+  const presentation = getFlagStatusPresentation(status, colors);
   return (
     <View
       style={[
@@ -58,8 +62,11 @@ export function FlagStatusPill({
 }
 
 function FlagCard({ item }: { item: FlagRecord }) {
+  const styles = useThemedStyles(createStyles);
+  const colors = useSeekTheme();
+  const profileTypography = useProfileTypography();
   const router = useRouter();
-  const presentation = getFlagStatusPresentation(item.status);
+  const presentation = getFlagStatusPresentation(item.status, colors);
 
   return (
     <Pressable
@@ -80,6 +87,7 @@ function FlagCard({ item }: { item: FlagRecord }) {
 }
 
 export default function PreviousFlagsScreen() {
+  const styles = useThemedStyles(createStyles);
   const data: FlagRecord[] = [
     {
       _id: "1",
@@ -114,43 +122,44 @@ export default function PreviousFlagsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  list: {
-    gap: 14,
-    paddingBottom: 28,
-  },
-  card: {
-    gap: 16,
-    padding: 18,
-    borderWidth: 1.5,
-    borderRadius: PROFILE_LAYOUT.cardRadius,
-    backgroundColor: "transparent",
-  },
-  cardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  statusPill: {
-    alignSelf: "flex-start",
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderWidth: 1,
-    borderRadius: 999,
-    backgroundColor: "transparent",
-  },
-  largePill: {
-    paddingHorizontal: 18,
-    paddingVertical: 8,
-  },
-  statusText: {
-    fontSize: 13,
-    lineHeight: 17,
-    fontWeight: "700",
-  },
-  largeStatusText: {
-    fontSize: 16,
-    lineHeight: 21,
-  },
-});
+const createStyles = (colors: SeekColors) =>
+  StyleSheet.create({
+    list: {
+      gap: 14,
+      paddingBottom: 28,
+    },
+    card: {
+      gap: 16,
+      padding: 18,
+      borderWidth: 1.5,
+      borderRadius: PROFILE_LAYOUT.cardRadius,
+      backgroundColor: "transparent",
+    },
+    cardHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 12,
+    },
+    statusPill: {
+      alignSelf: "flex-start",
+      paddingHorizontal: 12,
+      paddingVertical: 5,
+      borderWidth: 1,
+      borderRadius: 999,
+      backgroundColor: "transparent",
+    },
+    largePill: {
+      paddingHorizontal: 18,
+      paddingVertical: 8,
+    },
+    statusText: {
+      fontSize: 13,
+      lineHeight: 17,
+      fontWeight: "700",
+    },
+    largeStatusText: {
+      fontSize: 16,
+      lineHeight: 21,
+    },
+  });

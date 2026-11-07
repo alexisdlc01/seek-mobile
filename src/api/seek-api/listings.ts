@@ -25,6 +25,7 @@ import type {
   ErrorDto,
   LikedListingsDto,
   Listing,
+  ListingSearchResultDto,
   ListingsControllerGetFilteredListingsParams,
   Step2ListingDto,
   Step3ListingDto,
@@ -112,7 +113,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   
 
 
-export const getListingsControllerCreateStep1MutationOptions = <TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>,
+export const getListingsControllerCreateStep1MutationOptions = <TError = ErrorType<ErrorDto>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof listingsControllerCreateStep1>>, TError,{id: string;data: CreateListingDto}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof listingsControllerCreateStep1>>, TError,{id: string;data: CreateListingDto}, TContext> => {
 
@@ -139,9 +140,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type ListingsControllerCreateStep1MutationResult = NonNullable<Awaited<ReturnType<typeof listingsControllerCreateStep1>>>
     export type ListingsControllerCreateStep1MutationBody = CreateListingDto
-    export type ListingsControllerCreateStep1MutationError = ErrorType<ErrorDto | ErrorDto | ErrorDto>
+    export type ListingsControllerCreateStep1MutationError = ErrorType<ErrorDto>
 
-    export const useListingsControllerCreateStep1 = <TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>,
+    export const useListingsControllerCreateStep1 = <TError = ErrorType<ErrorDto>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof listingsControllerCreateStep1>>, TError,{id: string;data: CreateListingDto}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof listingsControllerCreateStep1>>,
@@ -170,7 +171,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   
 
 
-export const getListingsControllerCreateStep2MutationOptions = <TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>,
+export const getListingsControllerCreateStep2MutationOptions = <TError = ErrorType<ErrorDto>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof listingsControllerCreateStep2>>, TError,{id: string;data: Step2ListingDto}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof listingsControllerCreateStep2>>, TError,{id: string;data: Step2ListingDto}, TContext> => {
 
@@ -197,9 +198,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type ListingsControllerCreateStep2MutationResult = NonNullable<Awaited<ReturnType<typeof listingsControllerCreateStep2>>>
     export type ListingsControllerCreateStep2MutationBody = Step2ListingDto
-    export type ListingsControllerCreateStep2MutationError = ErrorType<ErrorDto | ErrorDto | ErrorDto>
+    export type ListingsControllerCreateStep2MutationError = ErrorType<ErrorDto>
 
-    export const useListingsControllerCreateStep2 = <TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>,
+    export const useListingsControllerCreateStep2 = <TError = ErrorType<ErrorDto>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof listingsControllerCreateStep2>>, TError,{id: string;data: Step2ListingDto}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof listingsControllerCreateStep2>>,
@@ -228,7 +229,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   
 
 
-export const getListingsControllerCreateStep3MutationOptions = <TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>,
+export const getListingsControllerCreateStep3MutationOptions = <TError = ErrorType<ErrorDto>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof listingsControllerCreateStep3>>, TError,{id: string;data: Step3ListingDto}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof listingsControllerCreateStep3>>, TError,{id: string;data: Step3ListingDto}, TContext> => {
 
@@ -255,9 +256,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type ListingsControllerCreateStep3MutationResult = NonNullable<Awaited<ReturnType<typeof listingsControllerCreateStep3>>>
     export type ListingsControllerCreateStep3MutationBody = Step3ListingDto
-    export type ListingsControllerCreateStep3MutationError = ErrorType<ErrorDto | ErrorDto | ErrorDto>
+    export type ListingsControllerCreateStep3MutationError = ErrorType<ErrorDto>
 
-    export const useListingsControllerCreateStep3 = <TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>,
+    export const useListingsControllerCreateStep3 = <TError = ErrorType<ErrorDto>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof listingsControllerCreateStep3>>, TError,{id: string;data: Step3ListingDto}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof listingsControllerCreateStep3>>,
@@ -345,7 +346,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   
 
 
-export const getListingsControllerPublishMutationOptions = <TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>,
+export const getListingsControllerPublishMutationOptions = <TError = ErrorType<ErrorDto>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof listingsControllerPublish>>, TError,{id: string;data: CreateListingDto}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof listingsControllerPublish>>, TError,{id: string;data: CreateListingDto}, TContext> => {
 
@@ -372,9 +373,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type ListingsControllerPublishMutationResult = NonNullable<Awaited<ReturnType<typeof listingsControllerPublish>>>
     export type ListingsControllerPublishMutationBody = CreateListingDto
-    export type ListingsControllerPublishMutationError = ErrorType<ErrorDto | ErrorDto | ErrorDto>
+    export type ListingsControllerPublishMutationError = ErrorType<ErrorDto>
 
-    export const useListingsControllerPublish = <TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>,
+    export const useListingsControllerPublish = <TError = ErrorType<ErrorDto>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof listingsControllerPublish>>, TError,{id: string;data: CreateListingDto}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof listingsControllerPublish>>,
@@ -400,7 +401,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   
 
 
-export const getListingsControllerDeleteListingMutationOptions = <TError = ErrorType<ErrorDto | ErrorDto | ErrorDto | ErrorDto>,
+export const getListingsControllerDeleteListingMutationOptions = <TError = ErrorType<ErrorDto>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof listingsControllerDeleteListing>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof listingsControllerDeleteListing>>, TError,{id: string}, TContext> => {
 
@@ -427,9 +428,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type ListingsControllerDeleteListingMutationResult = NonNullable<Awaited<ReturnType<typeof listingsControllerDeleteListing>>>
     
-    export type ListingsControllerDeleteListingMutationError = ErrorType<ErrorDto | ErrorDto | ErrorDto | ErrorDto>
+    export type ListingsControllerDeleteListingMutationError = ErrorType<ErrorDto>
 
-    export const useListingsControllerDeleteListing = <TError = ErrorType<ErrorDto | ErrorDto | ErrorDto | ErrorDto>,
+    export const useListingsControllerDeleteListing = <TError = ErrorType<ErrorDto>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof listingsControllerDeleteListing>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof listingsControllerDeleteListing>>,
@@ -442,7 +443,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
       return useMutation(mutationOptions, queryClient);
     }
-    export const listingsControllerGetById = (
+    /**
+ * @summary Get a published and verified property
+ */
+export const listingsControllerGetById = (
     id: string,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
@@ -464,7 +468,7 @@ export const getListingsControllerGetByIdQueryKey = (id?: string,) => {
     }
 
     
-export const getListingsControllerGetByIdQueryOptions = <TData = Awaited<ReturnType<typeof listingsControllerGetById>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getListingsControllerGetByIdQueryOptions = <TData = Awaited<ReturnType<typeof listingsControllerGetById>>, TError = ErrorType<ErrorDto>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -483,10 +487,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListingsControllerGetByIdQueryResult = NonNullable<Awaited<ReturnType<typeof listingsControllerGetById>>>
-export type ListingsControllerGetByIdQueryError = ErrorType<ErrorDto | ErrorDto | ErrorDto>
+export type ListingsControllerGetByIdQueryError = ErrorType<ErrorDto>
 
 
-export function useListingsControllerGetById<TData = Awaited<ReturnType<typeof listingsControllerGetById>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>(
+export function useListingsControllerGetById<TData = Awaited<ReturnType<typeof listingsControllerGetById>>, TError = ErrorType<ErrorDto>>(
  id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetById>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listingsControllerGetById>>,
@@ -496,7 +500,7 @@ export function useListingsControllerGetById<TData = Awaited<ReturnType<typeof l
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListingsControllerGetById<TData = Awaited<ReturnType<typeof listingsControllerGetById>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>(
+export function useListingsControllerGetById<TData = Awaited<ReturnType<typeof listingsControllerGetById>>, TError = ErrorType<ErrorDto>>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetById>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listingsControllerGetById>>,
@@ -506,12 +510,15 @@ export function useListingsControllerGetById<TData = Awaited<ReturnType<typeof l
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListingsControllerGetById<TData = Awaited<ReturnType<typeof listingsControllerGetById>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>(
+export function useListingsControllerGetById<TData = Awaited<ReturnType<typeof listingsControllerGetById>>, TError = ErrorType<ErrorDto>>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get a published and verified property
+ */
 
-export function useListingsControllerGetById<TData = Awaited<ReturnType<typeof listingsControllerGetById>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>(
+export function useListingsControllerGetById<TData = Awaited<ReturnType<typeof listingsControllerGetById>>, TError = ErrorType<ErrorDto>>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -524,6 +531,7 @@ export function useListingsControllerGetById<TData = Awaited<ReturnType<typeof l
 
   return query;
 }
+
 
 
 
@@ -549,7 +557,7 @@ export const getListingsControllerMyListingsQueryKey = () => {
     }
 
     
-export const getListingsControllerMyListingsQueryOptions = <TData = Awaited<ReturnType<typeof listingsControllerMyListings>>, TError = ErrorType<ErrorDto | ErrorDto>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerMyListings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getListingsControllerMyListingsQueryOptions = <TData = Awaited<ReturnType<typeof listingsControllerMyListings>>, TError = ErrorType<ErrorDto>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerMyListings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -568,10 +576,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListingsControllerMyListingsQueryResult = NonNullable<Awaited<ReturnType<typeof listingsControllerMyListings>>>
-export type ListingsControllerMyListingsQueryError = ErrorType<ErrorDto | ErrorDto>
+export type ListingsControllerMyListingsQueryError = ErrorType<ErrorDto>
 
 
-export function useListingsControllerMyListings<TData = Awaited<ReturnType<typeof listingsControllerMyListings>>, TError = ErrorType<ErrorDto | ErrorDto>>(
+export function useListingsControllerMyListings<TData = Awaited<ReturnType<typeof listingsControllerMyListings>>, TError = ErrorType<ErrorDto>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerMyListings>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listingsControllerMyListings>>,
@@ -581,7 +589,7 @@ export function useListingsControllerMyListings<TData = Awaited<ReturnType<typeo
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListingsControllerMyListings<TData = Awaited<ReturnType<typeof listingsControllerMyListings>>, TError = ErrorType<ErrorDto | ErrorDto>>(
+export function useListingsControllerMyListings<TData = Awaited<ReturnType<typeof listingsControllerMyListings>>, TError = ErrorType<ErrorDto>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerMyListings>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listingsControllerMyListings>>,
@@ -591,12 +599,12 @@ export function useListingsControllerMyListings<TData = Awaited<ReturnType<typeo
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListingsControllerMyListings<TData = Awaited<ReturnType<typeof listingsControllerMyListings>>, TError = ErrorType<ErrorDto | ErrorDto>>(
+export function useListingsControllerMyListings<TData = Awaited<ReturnType<typeof listingsControllerMyListings>>, TError = ErrorType<ErrorDto>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerMyListings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListingsControllerMyListings<TData = Awaited<ReturnType<typeof listingsControllerMyListings>>, TError = ErrorType<ErrorDto | ErrorDto>>(
+export function useListingsControllerMyListings<TData = Awaited<ReturnType<typeof listingsControllerMyListings>>, TError = ErrorType<ErrorDto>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerMyListings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -609,6 +617,7 @@ export function useListingsControllerMyListings<TData = Awaited<ReturnType<typeo
 
   return query;
 }
+
 
 
 
@@ -634,7 +643,7 @@ export const getListingsControllerGetListingQueryKey = (id?: string,) => {
     }
 
     
-export const getListingsControllerGetListingQueryOptions = <TData = Awaited<ReturnType<typeof listingsControllerGetListing>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetListing>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getListingsControllerGetListingQueryOptions = <TData = Awaited<ReturnType<typeof listingsControllerGetListing>>, TError = ErrorType<ErrorDto>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetListing>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -653,10 +662,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListingsControllerGetListingQueryResult = NonNullable<Awaited<ReturnType<typeof listingsControllerGetListing>>>
-export type ListingsControllerGetListingQueryError = ErrorType<ErrorDto | ErrorDto | ErrorDto>
+export type ListingsControllerGetListingQueryError = ErrorType<ErrorDto>
 
 
-export function useListingsControllerGetListing<TData = Awaited<ReturnType<typeof listingsControllerGetListing>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>(
+export function useListingsControllerGetListing<TData = Awaited<ReturnType<typeof listingsControllerGetListing>>, TError = ErrorType<ErrorDto>>(
  id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetListing>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listingsControllerGetListing>>,
@@ -666,7 +675,7 @@ export function useListingsControllerGetListing<TData = Awaited<ReturnType<typeo
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListingsControllerGetListing<TData = Awaited<ReturnType<typeof listingsControllerGetListing>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>(
+export function useListingsControllerGetListing<TData = Awaited<ReturnType<typeof listingsControllerGetListing>>, TError = ErrorType<ErrorDto>>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetListing>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listingsControllerGetListing>>,
@@ -676,12 +685,12 @@ export function useListingsControllerGetListing<TData = Awaited<ReturnType<typeo
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListingsControllerGetListing<TData = Awaited<ReturnType<typeof listingsControllerGetListing>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>(
+export function useListingsControllerGetListing<TData = Awaited<ReturnType<typeof listingsControllerGetListing>>, TError = ErrorType<ErrorDto>>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetListing>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListingsControllerGetListing<TData = Awaited<ReturnType<typeof listingsControllerGetListing>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>(
+export function useListingsControllerGetListing<TData = Awaited<ReturnType<typeof listingsControllerGetListing>>, TError = ErrorType<ErrorDto>>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetListing>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -694,6 +703,7 @@ export function useListingsControllerGetListing<TData = Awaited<ReturnType<typeo
 
   return query;
 }
+
 
 
 
@@ -719,7 +729,7 @@ export const getListingsControllerGetAllUnverifiedListingsQueryKey = () => {
     }
 
     
-export const getListingsControllerGetAllUnverifiedListingsQueryOptions = <TData = Awaited<ReturnType<typeof listingsControllerGetAllUnverifiedListings>>, TError = ErrorType<ErrorDto | ErrorDto>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetAllUnverifiedListings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getListingsControllerGetAllUnverifiedListingsQueryOptions = <TData = Awaited<ReturnType<typeof listingsControllerGetAllUnverifiedListings>>, TError = ErrorType<ErrorDto>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetAllUnverifiedListings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -738,10 +748,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListingsControllerGetAllUnverifiedListingsQueryResult = NonNullable<Awaited<ReturnType<typeof listingsControllerGetAllUnverifiedListings>>>
-export type ListingsControllerGetAllUnverifiedListingsQueryError = ErrorType<ErrorDto | ErrorDto>
+export type ListingsControllerGetAllUnverifiedListingsQueryError = ErrorType<ErrorDto>
 
 
-export function useListingsControllerGetAllUnverifiedListings<TData = Awaited<ReturnType<typeof listingsControllerGetAllUnverifiedListings>>, TError = ErrorType<ErrorDto | ErrorDto>>(
+export function useListingsControllerGetAllUnverifiedListings<TData = Awaited<ReturnType<typeof listingsControllerGetAllUnverifiedListings>>, TError = ErrorType<ErrorDto>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetAllUnverifiedListings>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listingsControllerGetAllUnverifiedListings>>,
@@ -751,7 +761,7 @@ export function useListingsControllerGetAllUnverifiedListings<TData = Awaited<Re
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListingsControllerGetAllUnverifiedListings<TData = Awaited<ReturnType<typeof listingsControllerGetAllUnverifiedListings>>, TError = ErrorType<ErrorDto | ErrorDto>>(
+export function useListingsControllerGetAllUnverifiedListings<TData = Awaited<ReturnType<typeof listingsControllerGetAllUnverifiedListings>>, TError = ErrorType<ErrorDto>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetAllUnverifiedListings>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listingsControllerGetAllUnverifiedListings>>,
@@ -761,12 +771,12 @@ export function useListingsControllerGetAllUnverifiedListings<TData = Awaited<Re
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListingsControllerGetAllUnverifiedListings<TData = Awaited<ReturnType<typeof listingsControllerGetAllUnverifiedListings>>, TError = ErrorType<ErrorDto | ErrorDto>>(
+export function useListingsControllerGetAllUnverifiedListings<TData = Awaited<ReturnType<typeof listingsControllerGetAllUnverifiedListings>>, TError = ErrorType<ErrorDto>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetAllUnverifiedListings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListingsControllerGetAllUnverifiedListings<TData = Awaited<ReturnType<typeof listingsControllerGetAllUnverifiedListings>>, TError = ErrorType<ErrorDto | ErrorDto>>(
+export function useListingsControllerGetAllUnverifiedListings<TData = Awaited<ReturnType<typeof listingsControllerGetAllUnverifiedListings>>, TError = ErrorType<ErrorDto>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetAllUnverifiedListings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -782,6 +792,10 @@ export function useListingsControllerGetAllUnverifiedListings<TData = Awaited<Re
 
 
 
+
+/**
+ * @summary List published and verified properties
+ */
 export const listingsControllerGetAllVerifiedListings = (
     
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
@@ -804,7 +818,7 @@ export const getListingsControllerGetAllVerifiedListingsQueryKey = () => {
     }
 
     
-export const getListingsControllerGetAllVerifiedListingsQueryOptions = <TData = Awaited<ReturnType<typeof listingsControllerGetAllVerifiedListings>>, TError = ErrorType<ErrorDto | ErrorDto>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetAllVerifiedListings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getListingsControllerGetAllVerifiedListingsQueryOptions = <TData = Awaited<ReturnType<typeof listingsControllerGetAllVerifiedListings>>, TError = ErrorType<ErrorDto>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetAllVerifiedListings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -823,10 +837,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListingsControllerGetAllVerifiedListingsQueryResult = NonNullable<Awaited<ReturnType<typeof listingsControllerGetAllVerifiedListings>>>
-export type ListingsControllerGetAllVerifiedListingsQueryError = ErrorType<ErrorDto | ErrorDto>
+export type ListingsControllerGetAllVerifiedListingsQueryError = ErrorType<ErrorDto>
 
 
-export function useListingsControllerGetAllVerifiedListings<TData = Awaited<ReturnType<typeof listingsControllerGetAllVerifiedListings>>, TError = ErrorType<ErrorDto | ErrorDto>>(
+export function useListingsControllerGetAllVerifiedListings<TData = Awaited<ReturnType<typeof listingsControllerGetAllVerifiedListings>>, TError = ErrorType<ErrorDto>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetAllVerifiedListings>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listingsControllerGetAllVerifiedListings>>,
@@ -836,7 +850,7 @@ export function useListingsControllerGetAllVerifiedListings<TData = Awaited<Retu
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListingsControllerGetAllVerifiedListings<TData = Awaited<ReturnType<typeof listingsControllerGetAllVerifiedListings>>, TError = ErrorType<ErrorDto | ErrorDto>>(
+export function useListingsControllerGetAllVerifiedListings<TData = Awaited<ReturnType<typeof listingsControllerGetAllVerifiedListings>>, TError = ErrorType<ErrorDto>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetAllVerifiedListings>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listingsControllerGetAllVerifiedListings>>,
@@ -846,12 +860,15 @@ export function useListingsControllerGetAllVerifiedListings<TData = Awaited<Retu
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListingsControllerGetAllVerifiedListings<TData = Awaited<ReturnType<typeof listingsControllerGetAllVerifiedListings>>, TError = ErrorType<ErrorDto | ErrorDto>>(
+export function useListingsControllerGetAllVerifiedListings<TData = Awaited<ReturnType<typeof listingsControllerGetAllVerifiedListings>>, TError = ErrorType<ErrorDto>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetAllVerifiedListings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List published and verified properties
+ */
 
-export function useListingsControllerGetAllVerifiedListings<TData = Awaited<ReturnType<typeof listingsControllerGetAllVerifiedListings>>, TError = ErrorType<ErrorDto | ErrorDto>>(
+export function useListingsControllerGetAllVerifiedListings<TData = Awaited<ReturnType<typeof listingsControllerGetAllVerifiedListings>>, TError = ErrorType<ErrorDto>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetAllVerifiedListings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -867,13 +884,17 @@ export function useListingsControllerGetAllVerifiedListings<TData = Awaited<Retu
 
 
 
+
+/**
+ * @summary Filter published and verified properties
+ */
 export const listingsControllerGetFilteredListings = (
-    params: ListingsControllerGetFilteredListingsParams,
+    params?: ListingsControllerGetFilteredListingsParams,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
       
       
-      return customInstance<Listing[]>(
+      return customInstance<ListingSearchResultDto[]>(
       {url: `/listings/filter`, method: 'GET',
         params, signal
     },
@@ -890,7 +911,7 @@ export const getListingsControllerGetFilteredListingsQueryKey = (params?: Listin
     }
 
     
-export const getListingsControllerGetFilteredListingsQueryOptions = <TData = Awaited<ReturnType<typeof listingsControllerGetFilteredListings>>, TError = ErrorType<unknown>>(params: ListingsControllerGetFilteredListingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetFilteredListings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getListingsControllerGetFilteredListingsQueryOptions = <TData = Awaited<ReturnType<typeof listingsControllerGetFilteredListings>>, TError = ErrorType<ErrorDto>>(params?: ListingsControllerGetFilteredListingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetFilteredListings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -909,11 +930,11 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListingsControllerGetFilteredListingsQueryResult = NonNullable<Awaited<ReturnType<typeof listingsControllerGetFilteredListings>>>
-export type ListingsControllerGetFilteredListingsQueryError = ErrorType<unknown>
+export type ListingsControllerGetFilteredListingsQueryError = ErrorType<ErrorDto>
 
 
-export function useListingsControllerGetFilteredListings<TData = Awaited<ReturnType<typeof listingsControllerGetFilteredListings>>, TError = ErrorType<unknown>>(
- params: ListingsControllerGetFilteredListingsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetFilteredListings>>, TError, TData>> & Pick<
+export function useListingsControllerGetFilteredListings<TData = Awaited<ReturnType<typeof listingsControllerGetFilteredListings>>, TError = ErrorType<ErrorDto>>(
+ params: undefined |  ListingsControllerGetFilteredListingsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetFilteredListings>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listingsControllerGetFilteredListings>>,
           TError,
@@ -922,8 +943,8 @@ export function useListingsControllerGetFilteredListings<TData = Awaited<ReturnT
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListingsControllerGetFilteredListings<TData = Awaited<ReturnType<typeof listingsControllerGetFilteredListings>>, TError = ErrorType<unknown>>(
- params: ListingsControllerGetFilteredListingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetFilteredListings>>, TError, TData>> & Pick<
+export function useListingsControllerGetFilteredListings<TData = Awaited<ReturnType<typeof listingsControllerGetFilteredListings>>, TError = ErrorType<ErrorDto>>(
+ params?: ListingsControllerGetFilteredListingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetFilteredListings>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listingsControllerGetFilteredListings>>,
           TError,
@@ -932,13 +953,16 @@ export function useListingsControllerGetFilteredListings<TData = Awaited<ReturnT
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListingsControllerGetFilteredListings<TData = Awaited<ReturnType<typeof listingsControllerGetFilteredListings>>, TError = ErrorType<unknown>>(
- params: ListingsControllerGetFilteredListingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetFilteredListings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useListingsControllerGetFilteredListings<TData = Awaited<ReturnType<typeof listingsControllerGetFilteredListings>>, TError = ErrorType<ErrorDto>>(
+ params?: ListingsControllerGetFilteredListingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetFilteredListings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Filter published and verified properties
+ */
 
-export function useListingsControllerGetFilteredListings<TData = Awaited<ReturnType<typeof listingsControllerGetFilteredListings>>, TError = ErrorType<unknown>>(
- params: ListingsControllerGetFilteredListingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetFilteredListings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useListingsControllerGetFilteredListings<TData = Awaited<ReturnType<typeof listingsControllerGetFilteredListings>>, TError = ErrorType<ErrorDto>>(
+ params?: ListingsControllerGetFilteredListingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetFilteredListings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -950,6 +974,7 @@ export function useListingsControllerGetFilteredListings<TData = Awaited<ReturnT
 
   return query;
 }
+
 
 
 
@@ -975,7 +1000,7 @@ export const getListingsControllerGetLikedQueryKey = () => {
     }
 
     
-export const getListingsControllerGetLikedQueryOptions = <TData = Awaited<ReturnType<typeof listingsControllerGetLiked>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetLiked>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getListingsControllerGetLikedQueryOptions = <TData = Awaited<ReturnType<typeof listingsControllerGetLiked>>, TError = ErrorType<ErrorDto>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetLiked>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -994,10 +1019,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListingsControllerGetLikedQueryResult = NonNullable<Awaited<ReturnType<typeof listingsControllerGetLiked>>>
-export type ListingsControllerGetLikedQueryError = ErrorType<ErrorDto | ErrorDto | ErrorDto>
+export type ListingsControllerGetLikedQueryError = ErrorType<ErrorDto>
 
 
-export function useListingsControllerGetLiked<TData = Awaited<ReturnType<typeof listingsControllerGetLiked>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>(
+export function useListingsControllerGetLiked<TData = Awaited<ReturnType<typeof listingsControllerGetLiked>>, TError = ErrorType<ErrorDto>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetLiked>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listingsControllerGetLiked>>,
@@ -1007,7 +1032,7 @@ export function useListingsControllerGetLiked<TData = Awaited<ReturnType<typeof 
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListingsControllerGetLiked<TData = Awaited<ReturnType<typeof listingsControllerGetLiked>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>(
+export function useListingsControllerGetLiked<TData = Awaited<ReturnType<typeof listingsControllerGetLiked>>, TError = ErrorType<ErrorDto>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetLiked>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listingsControllerGetLiked>>,
@@ -1017,12 +1042,12 @@ export function useListingsControllerGetLiked<TData = Awaited<ReturnType<typeof 
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListingsControllerGetLiked<TData = Awaited<ReturnType<typeof listingsControllerGetLiked>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>(
+export function useListingsControllerGetLiked<TData = Awaited<ReturnType<typeof listingsControllerGetLiked>>, TError = ErrorType<ErrorDto>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetLiked>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListingsControllerGetLiked<TData = Awaited<ReturnType<typeof listingsControllerGetLiked>>, TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>>(
+export function useListingsControllerGetLiked<TData = Awaited<ReturnType<typeof listingsControllerGetLiked>>, TError = ErrorType<ErrorDto>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listingsControllerGetLiked>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -1035,6 +1060,7 @@ export function useListingsControllerGetLiked<TData = Awaited<ReturnType<typeof 
 
   return query;
 }
+
 
 
 
@@ -1051,7 +1077,7 @@ export const listingsControllerVerifyListing = (
   
 
 
-export const getListingsControllerVerifyListingMutationOptions = <TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>,
+export const getListingsControllerVerifyListingMutationOptions = <TError = ErrorType<ErrorDto>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof listingsControllerVerifyListing>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof listingsControllerVerifyListing>>, TError,{id: string}, TContext> => {
 
@@ -1078,9 +1104,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type ListingsControllerVerifyListingMutationResult = NonNullable<Awaited<ReturnType<typeof listingsControllerVerifyListing>>>
     
-    export type ListingsControllerVerifyListingMutationError = ErrorType<ErrorDto | ErrorDto | ErrorDto>
+    export type ListingsControllerVerifyListingMutationError = ErrorType<ErrorDto>
 
-    export const useListingsControllerVerifyListing = <TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>,
+    export const useListingsControllerVerifyListing = <TError = ErrorType<ErrorDto>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof listingsControllerVerifyListing>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof listingsControllerVerifyListing>>,
@@ -1106,7 +1132,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   
 
 
-export const getListingsControllerLikeListingMutationOptions = <TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>,
+export const getListingsControllerLikeListingMutationOptions = <TError = ErrorType<ErrorDto>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof listingsControllerLikeListing>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof listingsControllerLikeListing>>, TError,{id: string}, TContext> => {
 
@@ -1133,9 +1159,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type ListingsControllerLikeListingMutationResult = NonNullable<Awaited<ReturnType<typeof listingsControllerLikeListing>>>
     
-    export type ListingsControllerLikeListingMutationError = ErrorType<ErrorDto | ErrorDto | ErrorDto>
+    export type ListingsControllerLikeListingMutationError = ErrorType<ErrorDto>
 
-    export const useListingsControllerLikeListing = <TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>,
+    export const useListingsControllerLikeListing = <TError = ErrorType<ErrorDto>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof listingsControllerLikeListing>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof listingsControllerLikeListing>>,
@@ -1161,7 +1187,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   
 
 
-export const getListingsControllerUnlikeListingMutationOptions = <TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>,
+export const getListingsControllerUnlikeListingMutationOptions = <TError = ErrorType<ErrorDto>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof listingsControllerUnlikeListing>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof listingsControllerUnlikeListing>>, TError,{id: string}, TContext> => {
 
@@ -1188,9 +1214,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type ListingsControllerUnlikeListingMutationResult = NonNullable<Awaited<ReturnType<typeof listingsControllerUnlikeListing>>>
     
-    export type ListingsControllerUnlikeListingMutationError = ErrorType<ErrorDto | ErrorDto | ErrorDto>
+    export type ListingsControllerUnlikeListingMutationError = ErrorType<ErrorDto>
 
-    export const useListingsControllerUnlikeListing = <TError = ErrorType<ErrorDto | ErrorDto | ErrorDto>,
+    export const useListingsControllerUnlikeListing = <TError = ErrorType<ErrorDto>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof listingsControllerUnlikeListing>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof listingsControllerUnlikeListing>>,
@@ -1203,3 +1229,4 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
       return useMutation(mutationOptions, queryClient);
     }
+    

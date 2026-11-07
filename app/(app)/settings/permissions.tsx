@@ -188,7 +188,7 @@ export default function PermissionsScreen() {
         ) : (
           <VStack className="gap-2">
             {loadError ? (
-              <VStack className="mb-3 gap-3 rounded-2xl bg-white p-4">
+              <VStack className="mb-3 gap-3 rounded-2xl bg-background-card p-4">
                 <Text className="text-neutral-700">
                   Some permission statuses could not be read. You can retry or
                   manage them in your device settings.
@@ -203,7 +203,7 @@ export default function PermissionsScreen() {
                     <ButtonText>Retry</ButtonText>
                   </Button>
                   <Button className="flex-1" onPress={openAppSettings}>
-                    <ButtonText className="text-white">Open Settings</ButtonText>
+                    <ButtonText className="text-typography-0">Open Settings</ButtonText>
                   </Button>
                 </HStack>
               </VStack>
@@ -271,7 +271,7 @@ export default function PermissionsScreen() {
               <ButtonText>Not Now</ButtonText>
             </Button>
             <Button size="md" onPress={confirmPermissionChange}>
-              <ButtonText className="text-white">
+              <ButtonText className="text-typography-0">
                 {isPendingGranted ? "Open Settings" : "Allow"}
               </ButtonText>
             </Button>

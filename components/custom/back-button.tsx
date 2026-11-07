@@ -2,7 +2,7 @@ import { ArrowLeftIcon } from "lucide-react-native";
 import { Pressable, View } from "react-native";
 import { Href, useRouter } from "expo-router";
 import { Text } from "../ui/text";
-import { PROFILE_COLORS } from "@/constants/design";
+import { useSeekTheme } from "@/hooks/use-seek-theme";
 
 type BackButtonProps = {
   title?: string;
@@ -18,6 +18,7 @@ export function BackButton({
   alwaysReturnToFallback = false,
 }: BackButtonProps) {
   const router = useRouter();
+  const colors = useSeekTheme();
 
   const goBack = () => {
     if (alwaysReturnToFallback) {
@@ -43,7 +44,7 @@ export function BackButton({
           className="absolute left-0 h-12 w-12 items-start justify-center"
         >
           <ArrowLeftIcon
-            color={PROFILE_COLORS.accent}
+            color={colors.accent}
             size={28}
             strokeWidth={2.25}
           />
@@ -54,7 +55,7 @@ export function BackButton({
           numberOfLines={1}
           style={{
             paddingHorizontal: 48,
-            color: PROFILE_COLORS.accent,
+            color: colors.accent,
             fontSize: title.length > 20 ? 20 : 24,
             lineHeight: title.length > 20 ? 26 : 30,
             fontWeight: "700",

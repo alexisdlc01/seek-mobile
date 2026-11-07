@@ -2,7 +2,7 @@ import { queryClient } from "@/app/_layout";
 import {
   ProfilePrimaryButton,
   ProfileScreen,
-  profileTypography,
+  useProfileTypography,
 } from "@/components/custom/profile-screen";
 import { Loader } from "@/components/custom/loader";
 import { SuccessToast } from "@/components/custom/success-toast";
@@ -15,7 +15,9 @@ import {
 } from "@/components/ui/actionsheet";
 import { Text } from "@/components/ui/text";
 import { useToast } from "@/components/ui/toast";
-import { PROFILE_COLORS, PROFILE_LAYOUT } from "@/constants/design";
+import { PROFILE_LAYOUT } from "@/constants/design";
+import type { SeekColors } from "@/constants/seek-theme";
+import { useSeekTheme, useThemedStyles } from "@/hooks/use-seek-theme";
 import { useProfilePicture } from "@/hooks/use-profile-photo";
 import { useAuthControllerCurrentUser } from "@/src/api/seek-api/auth";
 import {
@@ -46,15 +48,16 @@ import React, { ReactNode, useCallback, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
 export default function PersonalInformationScreen() {
-  const { data: user, isLoading: loadingUser, isError } =
-    useAuthControllerCurrentUser();
+  const {
+    data: user,
+    isLoading: loadingUser,
+    isError,
+  } = useAuthControllerCurrentUser();
   const { data: documents, isLoading: loadingDocuments } =
     useUsersControllerDocumentTypes();
 
   return (
-    <Loader
-      isLoading={loadingUser || loadingDocuments || !user || isError}
-    >
+    <Loader isLoading={loadingUser || loadingDocuments || !user || isError}>
       {user ? (
         <PersonalInformationContent
           user={user}
@@ -72,6 +75,10 @@ function PersonalInformationContent({
   user: UserDto;
   documentTypes: DocumentTypesDtoDataItem[];
 }) {
+  const styles = useThemedStyles(createStyles);
+  const colors = useSeekTheme();
+  const profileTypography = useProfileTypography();
+  const documentIconProps = { color: colors.accent, size: 25, strokeWidth: 2 };
   const toast = useToast();
   const accessToken = useAuth((state) => state.accessToken);
   const { pickImage } = useProfilePicture();
@@ -163,7 +170,8 @@ function PersonalInformationContent({
           data: { message: "Failed to upload file.", statusCode: -1 },
         });
       }
-    }, [accessToken, finishDocument, pickImage, toast, user._id],
+    },
+    [accessToken, finishDocument, pickImage, toast, user._id],
   );
 
   return (
@@ -174,8 +182,8 @@ function PersonalInformationContent({
         alwaysReturnToFallback
       >
         <Text style={profileTypography.body}>
-          Keep your documents ready so applications can move faster. Uploads
-          are stored privately.
+          Keep your documents ready so applications can move faster. Uploads are
+          stored privately.
         </Text>
 
         <DocumentCard
@@ -230,19 +238,21 @@ function PersonalInformationContent({
           <ActionsheetDragIndicatorWrapper>
             <ActionsheetDragIndicator />
           </ActionsheetDragIndicatorWrapper>
-          <Text style={profileTypography.sectionTitle}>Upload identification</Text>
+          <Text style={profileTypography.sectionTitle}>
+            Upload identification
+          </Text>
           <Text style={[profileTypography.metadata, styles.sourceDescription]}>
             Choose how you would like to add your document.
           </Text>
           <View style={styles.sourceCards}>
             <SourceCard
               title="Take Photo"
-              icon={<CameraIcon color={PROFILE_COLORS.accent} size={36} />}
+              icon={<CameraIcon color={colors.accent} size={36} />}
               onPress={() => uploadIdentification(true)}
             />
             <SourceCard
               title="Choose from Library"
-              icon={<ImageIcon color={PROFILE_COLORS.accent} size={36} />}
+              icon={<ImageIcon color={colors.accent} size={36} />}
               onPress={() => uploadIdentification(false)}
             />
           </View>
@@ -251,12 +261,6 @@ function PersonalInformationContent({
     </>
   );
 }
-
-const documentIconProps = {
-  color: PROFILE_COLORS.accent,
-  size: 25,
-  strokeWidth: 2,
-};
 
 function DocumentCard({
   title,
@@ -273,6 +277,9 @@ function DocumentCard({
   loading: boolean;
   onPress: () => void;
 }) {
+  const styles = useThemedStyles(createStyles);
+  const colors = useSeekTheme();
+  const profileTypography = useProfileTypography();
   return (
     <View style={styles.documentCard}>
       <View style={styles.documentHeader}>
@@ -282,7 +289,7 @@ function DocumentCard({
           <Text style={profileTypography.metadata}>{description}</Text>
         </View>
         {uploaded ? (
-          <CheckCircle2Icon color={PROFILE_COLORS.success} size={24} />
+          <CheckCircle2Icon color={colors.success} size={24} />
         ) : null}
       </View>
       <ProfilePrimaryButton
@@ -304,6 +311,7 @@ function SourceCard({
   icon: ReactNode;
   onPress: () => void;
 }) {
+  const styles = useThemedStyles(createStyles);
   return (
     <Pressable
       accessibilityRole="button"
@@ -317,77 +325,78 @@ function SourceCard({
   );
 }
 
-const styles = StyleSheet.create({
-  documentCard: {
-    padding: 18,
-    gap: 18,
-    borderWidth: 1.25,
-    borderColor: PROFILE_COLORS.border,
-    borderRadius: PROFILE_LAYOUT.cardRadius,
-    backgroundColor: PROFILE_COLORS.surface,
-  },
-  documentHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  documentIcon: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#EAF3FF",
-  },
-  documentText: {
-    flex: 1,
-    gap: 2,
-  },
-  documentTitle: {
-    color: PROFILE_COLORS.accent,
-    fontSize: 18,
-    lineHeight: 23,
-    fontWeight: "700",
-  },
-  sourceSheet: {
-    paddingHorizontal: 22,
-    paddingBottom: 28,
-    backgroundColor: PROFILE_COLORS.surface,
-  },
-  sourceDescription: {
-    textAlign: "center",
-  },
-  sourceCards: {
-    width: "100%",
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 8,
-  },
-  sourceCard: {
-    flex: 1,
-    minHeight: 154,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 14,
-    padding: 14,
-    borderWidth: 1.25,
-    borderColor: PROFILE_COLORS.border,
-    borderRadius: PROFILE_LAYOUT.cardRadius,
-    backgroundColor: PROFILE_COLORS.surface,
-  },
-  sourceIcon: {
-    width: 66,
-    height: 66,
-    borderRadius: 33,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#EAF3FF",
-  },
-  sourceTitle: {
-    color: PROFILE_COLORS.accent,
-    fontSize: 16,
-    lineHeight: 21,
-    fontWeight: "700",
-    textAlign: "center",
-  },
-});
+const createStyles = (colors: SeekColors) =>
+  StyleSheet.create({
+    documentCard: {
+      padding: 18,
+      gap: 18,
+      borderWidth: 1.25,
+      borderColor: colors.border,
+      borderRadius: PROFILE_LAYOUT.cardRadius,
+      backgroundColor: colors.surface,
+    },
+    documentHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+    },
+    documentIcon: {
+      width: 46,
+      height: 46,
+      borderRadius: 23,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.tint,
+    },
+    documentText: {
+      flex: 1,
+      gap: 2,
+    },
+    documentTitle: {
+      color: colors.accent,
+      fontSize: 18,
+      lineHeight: 23,
+      fontWeight: "700",
+    },
+    sourceSheet: {
+      paddingHorizontal: 22,
+      paddingBottom: 28,
+      backgroundColor: colors.surface,
+    },
+    sourceDescription: {
+      textAlign: "center",
+    },
+    sourceCards: {
+      width: "100%",
+      flexDirection: "row",
+      gap: 12,
+      marginTop: 8,
+    },
+    sourceCard: {
+      flex: 1,
+      minHeight: 154,
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 14,
+      padding: 14,
+      borderWidth: 1.25,
+      borderColor: colors.border,
+      borderRadius: PROFILE_LAYOUT.cardRadius,
+      backgroundColor: colors.surface,
+    },
+    sourceIcon: {
+      width: 66,
+      height: 66,
+      borderRadius: 33,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.tint,
+    },
+    sourceTitle: {
+      color: colors.accent,
+      fontSize: 16,
+      lineHeight: 21,
+      fontWeight: "700",
+      textAlign: "center",
+    },
+  });

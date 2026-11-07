@@ -165,6 +165,8 @@ module.exports = {
           muted: 'rgb(var(--color-background-muted)/<alpha-value>)',
           success: 'rgb(var(--color-background-success)/<alpha-value>)',
           info: 'rgb(var(--color-background-info)/<alpha-value>)',
+          screen: 'rgb(var(--color-background-screen)/<alpha-value>)',
+          card: 'rgb(var(--color-background-card)/<alpha-value>)',
           light: '#FBFBFB',
           dark: '#181719',
         },

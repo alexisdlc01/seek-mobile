@@ -3,7 +3,7 @@ import {
   ProfilePrimaryButton,
   ProfileScreen,
   ProfileTextField,
-  profileTypography,
+  useProfileTypography,
 } from "@/components/custom/profile-screen";
 import { Loader } from "@/components/custom/loader";
 import {
@@ -22,7 +22,8 @@ import {
 } from "@/components/ui/actionsheet";
 import { Text } from "@/components/ui/text";
 import { useToast } from "@/components/ui/toast";
-import { PROFILE_COLORS } from "@/constants/design";
+import type { SeekColors } from "@/constants/seek-theme";
+import { useSeekTheme, useThemedStyles } from "@/hooks/use-seek-theme";
 import { useProfilePicture } from "@/hooks/use-profile-photo";
 import {
   getAuthControllerCurrentUserQueryKey,
@@ -56,10 +57,7 @@ function isValidCalendarDate(value: string) {
 }
 
 function refreshCurrentUser(updatedUser: UserDto) {
-  queryClient.setQueryData(
-    getAuthControllerCurrentUserQueryKey(),
-    updatedUser,
-  );
+  queryClient.setQueryData(getAuthControllerCurrentUserQueryKey(), updatedUser);
   queryClient.invalidateQueries({
     queryKey: getAuthControllerCurrentUserQueryKey(),
   });
@@ -75,11 +73,10 @@ export default function EditBasicInformationScreen() {
   );
 }
 
-function EditBasicInformationForm({
-  user,
-}: {
-  user: UserDto;
-}) {
+function EditBasicInformationForm({ user }: { user: UserDto }) {
+  const styles = useThemedStyles(createStyles);
+  const colors = useSeekTheme();
+  const profileTypography = useProfileTypography();
   const toast = useToast();
   const accessToken = useAuth((state) => state.accessToken);
   const [name, setName] = useState(user.name ?? "");
@@ -156,7 +153,8 @@ function EditBasicInformationForm({
       } finally {
         setShowImagePicker(false);
       }
-    }, [accessToken, pickImage, toast, updateProfilePicture, user._id],
+    },
+    [accessToken, pickImage, toast, updateProfilePicture, user._id],
   );
 
   const save = () => {
@@ -210,7 +208,11 @@ function EditBasicInformationForm({
               ) : null}
             </Avatar>
             <View style={styles.cameraBadge}>
-              <CameraIcon color="#FFFFFF" size={18} strokeWidth={2.25} />
+              <CameraIcon
+                color={colors.onPrimary}
+                size={18}
+                strokeWidth={2.25}
+              />
             </View>
           </Pressable>
           <Text style={profileTypography.metadata}>
@@ -304,34 +306,35 @@ function EditBasicInformationForm({
   );
 }
 
-const styles = StyleSheet.create({
-  photoSection: {
-    alignItems: "center",
-    gap: 10,
-    paddingVertical: 6,
-  },
-  avatarButton: {
-    position: "relative",
-  },
-  avatar: {
-    borderWidth: 2,
-    borderColor: PROFILE_COLORS.border,
-    backgroundColor: "#D9E9FF",
-  },
-  cameraBadge: {
-    position: "absolute",
-    right: 0,
-    bottom: 0,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: PROFILE_COLORS.background,
-    backgroundColor: PROFILE_COLORS.accent,
-  },
-  universityField: {
-    minHeight: 100,
-  },
-});
+const createStyles = (colors: SeekColors) =>
+  StyleSheet.create({
+    photoSection: {
+      alignItems: "center",
+      gap: 10,
+      paddingVertical: 6,
+    },
+    avatarButton: {
+      position: "relative",
+    },
+    avatar: {
+      borderWidth: 2,
+      borderColor: colors.border,
+      backgroundColor: colors.heroChip,
+    },
+    cameraBadge: {
+      position: "absolute",
+      right: 0,
+      bottom: 0,
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 2,
+      borderColor: colors.background,
+      backgroundColor: colors.primary,
+    },
+    universityField: {
+      minHeight: 100,
+    },
+  });

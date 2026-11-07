@@ -1,63 +1,63 @@
-import { Box } from '@/components/ui/box';
-import { Button, ButtonText } from '@/components/ui/button';
-import { Center } from '@/components/ui/center';
-import { Heading } from '@/components/ui/heading';
-import { CheckCircleIcon, Icon } from '@/components/ui/icon';
-import { VStack } from '@/components/ui/vstack';
-import { Text } from '@/components/ui/text';
-import { useRouter } from 'expo-router';
+import { Card, SeekButton, SeekScreen } from "@/components/seek/ui";
+import { useSeekTheme } from "@/hooks/use-seek-theme";
+import { useRouter } from "expo-router";
+import { CheckCircle2Icon } from "lucide-react-native";
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
 
-function ApplicationSuccess() {
-  const navigation = useRouter();
+export default function ApplicationSuccessScreen() {
+  const colors = useSeekTheme();
+  const router = useRouter();
 
   return (
-    <Box className="flex-1 bg-primary-0 p-6">
-      <Center className="flex-1">
-        <VStack space="xl" className="items-center text-center">
-          {/* Success Icon */}
-          <Box className="bg-success-100 p-6 rounded-full">
-            <Icon as={CheckCircleIcon} size="xl" className="text-success-600" />
-          </Box>
-
-          {/* Message */}
-          <VStack space="xs" className="items-center">
-            <Heading size="2xl" className="text-primary-500 text-center">
-              Application Sent!
-            </Heading>
-          </VStack>
-
-          {/* Info Card */}
-          <Box className="bg-primary-0 p-4 rounded-3xl w-full">
-            <Text size="sm" className="text-neutral-800 text-center">
-              The landlord in St Andrews will review your profile and documents shortly. You&apos;ll receive a push notification once they respond.
-            </Text>
-          </Box>
-        </VStack>
-      </Center>
-
-      {/* Action Buttons */}
-      <VStack space="md" className="mb-8">
-        <Button
-          size="lg"
-          variant="solid"
-          action="primary"
-          className="rounded-full"
-          onPress={() => navigation.navigate("/saved-listings")}
-        >
-          <ButtonText>View My Applications</ButtonText>
-        </Button>
-        <Button
-          size="lg"
-          variant="outline"
-          action="secondary"
-          className="rounded-full bg-primary-0"
-          onPress={() => navigation.navigate("/(app)/(tabs)/map")}
-        >
-          <ButtonText>Back to Search</ButtonText>
-        </Button>
-      </VStack>
-    </Box >
+    <SeekScreen
+      scroll={false}
+      contentStyle={styles.content}
+      footer={
+        <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.line }]}>
+          <SeekButton label="Open Inbox" onPress={() => router.replace("/(app)/(tabs)/inbox")} />
+          <SeekButton
+            label="Keep looking"
+            variant="secondary"
+            onPress={() => router.replace("/(app)/(tabs)/map")}
+          />
+        </View>
+      }
+    >
+      <View style={[styles.badge, { backgroundColor: colors.successBg }]}>
+        <CheckCircle2Icon color={colors.success} size={44} strokeWidth={2} />
+      </View>
+      <Text accessibilityRole="header" style={[styles.title, { color: colors.text }]}>
+        Application sent
+      </Text>
+      <Text style={[styles.body, { color: colors.mutedText }]}>
+        The landlord now has your household and your Seek Passport. You&apos;ll
+        get a reply in your Inbox.
+      </Text>
+      <Card tone="tint" style={styles.card}>
+        <Text style={[styles.cardTitle, { color: colors.onTint }]}>Shared for 14 days</Text>
+        <Text style={[styles.cardBody, { color: colors.onTint }]}>
+          Your documents are visible to the landlord for 14 days. Stop sharing any
+          time in Profile, under Who can see this.
+        </Text>
+        <SeekButton
+          label="Manage sharing"
+          variant="secondary"
+          compact
+          onPress={() => router.replace("/(app)/(tabs)/passport")}
+        />
+      </Card>
+    </SeekScreen>
   );
-};
+}
 
-export default ApplicationSuccess;
+const styles = StyleSheet.create({
+  content: { flex: 1, alignItems: "center", justifyContent: "center", gap: 14, padding: 24 },
+  badge: { width: 88, height: 88, borderRadius: 44, alignItems: "center", justifyContent: "center" },
+  title: { fontSize: 24, fontWeight: "700", textAlign: "center" },
+  body: { fontSize: 15, lineHeight: 22, textAlign: "center" },
+  card: { alignSelf: "stretch", alignItems: "flex-start" },
+  cardTitle: { fontSize: 14.5, fontWeight: "700" },
+  cardBody: { fontSize: 13, lineHeight: 19 },
+  footer: { padding: 16, gap: 8, borderTopWidth: 1 },
+});

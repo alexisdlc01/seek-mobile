@@ -1,4 +1,5 @@
-import { PROFILE_COLORS } from "@/constants/design";
+import type { SeekColors } from "@/constants/seek-theme";
+import { useSeekTheme, useThemedStyles } from "@/hooks/use-seek-theme";
 import { useAuth } from "@/src/store/auth-store";
 import { useRouter } from "expo-router";
 import { LockKeyholeIcon } from "lucide-react-native";
@@ -48,6 +49,8 @@ export function AuthRequiredScreen({
   title = "Create an account to continue",
   description = "Sign up to use this feature, or log in if you already have an account.",
 }: AuthRequiredScreenProps) {
+  const styles = useThemedStyles(createStyles);
+  const colors = useSeekTheme();
   const router = useRouter();
   const hasHydrated = useAuth((state) => state._hasHydrated);
   const isAuthenticated = useIsAuthenticated();
@@ -59,11 +62,7 @@ export function AuthRequiredScreen({
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.content}>
         <View style={styles.iconContainer}>
-          <LockKeyholeIcon
-            color={PROFILE_COLORS.accent}
-            size={38}
-            strokeWidth={2}
-          />
+          <LockKeyholeIcon color={colors.accent} size={38} strokeWidth={2} />
         </View>
         <View style={styles.copy}>
           <Text accessibilityRole="header" style={styles.title}>
@@ -99,84 +98,85 @@ export function AuthRequiredScreen({
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: PROFILE_COLORS.background,
-  },
-  content: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 28,
-    paddingHorizontal: 28,
-    paddingBottom: 24,
-  },
-  iconContainer: {
-    width: 78,
-    height: 78,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 39,
-    backgroundColor: "#EAF3FF",
-  },
-  copy: {
-    maxWidth: 360,
-    gap: 10,
-  },
-  title: {
-    color: PROFILE_COLORS.accent,
-    fontSize: 26,
-    lineHeight: 32,
-    fontWeight: "700",
-    textAlign: "center",
-  },
-  description: {
-    color: "#52647E",
-    fontSize: 16,
-    lineHeight: 23,
-    textAlign: "center",
-  },
-  actions: {
-    width: "100%",
-    maxWidth: 360,
-    gap: 12,
-  },
-  primaryButton: {
-    minHeight: 54,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 999,
-    backgroundColor: PROFILE_COLORS.accent,
-  },
-  primaryButtonText: {
-    color: "#FFFFFF",
-    fontSize: 17,
-    fontWeight: "700",
-  },
-  secondaryButton: {
-    minHeight: 54,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1.5,
-    borderColor: PROFILE_COLORS.accent,
-    borderRadius: 999,
-    backgroundColor: PROFILE_COLORS.surface,
-  },
-  secondaryButtonText: {
-    color: PROFILE_COLORS.accent,
-    fontSize: 17,
-    fontWeight: "700",
-  },
-  browseButton: {
-    minHeight: 44,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  browseButtonText: {
-    color: PROFILE_COLORS.accent,
-    fontSize: 15,
-    fontWeight: "600",
-    textDecorationLine: "underline",
-  },
-});
+const createStyles = (colors: SeekColors) =>
+  StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 28,
+      paddingHorizontal: 28,
+      paddingBottom: 24,
+    },
+    iconContainer: {
+      width: 78,
+      height: 78,
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: 39,
+      backgroundColor: colors.tint,
+    },
+    copy: {
+      maxWidth: 360,
+      gap: 10,
+    },
+    title: {
+      color: colors.accent,
+      fontSize: 26,
+      lineHeight: 32,
+      fontWeight: "700",
+      textAlign: "center",
+    },
+    description: {
+      color: colors.mutedText,
+      fontSize: 16,
+      lineHeight: 23,
+      textAlign: "center",
+    },
+    actions: {
+      width: "100%",
+      maxWidth: 360,
+      gap: 12,
+    },
+    primaryButton: {
+      minHeight: 54,
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: 999,
+      backgroundColor: colors.primary,
+    },
+    primaryButtonText: {
+      color: colors.onPrimary,
+      fontSize: 17,
+      fontWeight: "700",
+    },
+    secondaryButton: {
+      minHeight: 54,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 1.5,
+      borderColor: colors.accent,
+      borderRadius: 999,
+      backgroundColor: colors.surface,
+    },
+    secondaryButtonText: {
+      color: colors.accent,
+      fontSize: 17,
+      fontWeight: "700",
+    },
+    browseButton: {
+      minHeight: 44,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    browseButtonText: {
+      color: colors.accent,
+      fontSize: 15,
+      fontWeight: "600",
+      textDecorationLine: "underline",
+    },
+  });

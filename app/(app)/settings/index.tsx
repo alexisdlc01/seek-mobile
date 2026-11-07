@@ -1,7 +1,7 @@
 import {
   ProfileActionRow,
   ProfileScreen,
-  profileTypography,
+  useProfileTypography,
 } from "@/components/custom/profile-screen";
 import { queryClient } from "@/app/_layout";
 import { Button, ButtonText } from "@/components/ui/button";
@@ -14,7 +14,8 @@ import {
   ModalHeader,
 } from "@/components/ui/modal";
 import { Text } from "@/components/ui/text";
-import { PROFILE_COLORS } from "@/constants/design";
+import type { SeekColors } from "@/constants/seek-theme";
+import { useSeekTheme, useThemedStyles } from "@/hooks/use-seek-theme";
 import { useAuthControllerLogout } from "@/src/api/seek-api/auth";
 import { useAuth } from "@/src/store/auth-store";
 import { useRouter } from "expo-router";
@@ -29,13 +30,16 @@ import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 export default function SettingsScreen() {
+  const styles = useThemedStyles(createStyles);
+  const colors = useSeekTheme();
+  const profileTypography = useProfileTypography();
   const router = useRouter();
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const logout = useAuth((state) => state.logout);
   const { mutate: logoutServer, isPending: isLoggingOut } =
     useAuthControllerLogout();
   const iconProps = {
-    color: PROFILE_COLORS.accent,
+    color: colors.accent,
     size: 22,
     strokeWidth: 2,
   };
@@ -83,11 +87,7 @@ export default function SettingsScreen() {
           <ProfileActionRow
             title="Delete Account"
             icon={
-              <Trash2Icon
-                color={PROFILE_COLORS.danger}
-                size={22}
-                strokeWidth={2}
-              />
+              <Trash2Icon color={colors.danger} size={22} strokeWidth={2} />
             }
             destructive
             showChevron={false}
@@ -135,23 +135,24 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  rows: {
-    gap: 12,
-  },
-  modalContent: {
-    width: "88%",
-    borderRadius: 20,
-    backgroundColor: PROFILE_COLORS.surface,
-  },
-  modalFooter: {
-    justifyContent: "flex-end",
-    gap: 10,
-  },
-  modalButton: {
-    borderRadius: 999,
-  },
-  deleteText: {
-    color: PROFILE_COLORS.surface,
-  },
-});
+const createStyles = (colors: SeekColors) =>
+  StyleSheet.create({
+    rows: {
+      gap: 12,
+    },
+    modalContent: {
+      width: "88%",
+      borderRadius: 20,
+      backgroundColor: colors.surface,
+    },
+    modalFooter: {
+      justifyContent: "flex-end",
+      gap: 10,
+    },
+    modalButton: {
+      borderRadius: 999,
+    },
+    deleteText: {
+      color: "#FFFFFF",
+    },
+  });

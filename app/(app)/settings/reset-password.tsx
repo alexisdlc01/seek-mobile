@@ -2,7 +2,7 @@ import {
   ProfilePrimaryButton,
   ProfileScreen,
   ProfileTextField,
-  profileTypography,
+  useProfileTypography,
 } from "@/components/custom/profile-screen";
 import { Text } from "@/components/ui/text";
 import { ErrorToast } from "@/components/custom/error-toast";
@@ -13,6 +13,7 @@ import { isValidEmail, normalizeEmail } from "@/src/utils/validate-email";
 import React, { useState } from "react";
 
 export default function ResetPasswordScreen() {
+  const profileTypography = useProfileTypography();
   const [email, setEmail] = useState("");
   const { mutate, isPending } = useAuthControllerForgotPassword();
   const toast = useToast();
@@ -24,7 +25,7 @@ export default function ResetPasswordScreen() {
         onSuccess({ message }) {
           toast.show({
             placement: "top",
-            render: (props) => <SuccessToast {...props} message={message} />,
+            render: (props) => <SuccessToast {...props} message={message ?? "Check your email."} />,
           });
         },
         onError(error) {

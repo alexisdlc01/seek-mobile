@@ -1,6 +1,8 @@
+import { useSeekTheme } from "@/hooks/use-seek-theme";
 import { Stack } from "expo-router";
 
 export default function StackLayout() {
+  const colors = useSeekTheme();
   return (
     <Stack
       screenOptions={{
@@ -9,7 +11,7 @@ export default function StackLayout() {
         animationDuration: 260,
         gestureEnabled: true,
         fullScreenGestureEnabled: true,
-        contentStyle: { backgroundColor: "#FFFFFF" },
+        contentStyle: { backgroundColor: colors.background },
       }}
     />
   );

@@ -9,6 +9,9 @@ export type ApplicationDtoStage = typeof ApplicationDtoStage[keyof typeof Applic
 export const ApplicationDtoStage = {
   SENT: 'SENT',
   NOT_SENT: 'NOT_SENT',
+  VIEWED: 'VIEWED',
+  OFFERED: 'OFFERED',
   ACCEPTED: 'ACCEPTED',
+  SIGNED: 'SIGNED',
   REJECTED: 'REJECTED',
 } as const;

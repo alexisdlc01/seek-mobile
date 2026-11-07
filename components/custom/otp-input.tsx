@@ -10,7 +10,7 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated';
 import { cn } from '@gluestack-ui/utils/nativewind-utils';
-import { PROFILE_COLORS } from '@/constants/design';
+import { useSeekTheme } from '@/hooks/use-seek-theme';
 
 
 type AppleOTPInputProps = {
@@ -41,14 +41,14 @@ function Slot({ char, isActive, hasFakeCaret }: SlotProps) {
   return (
     <View
       className={cn(
-        'w-[50px] h-[50px] items-center justify-center border border-gray-200 rounded-lg bg-white',
+        'w-[50px] h-[50px] items-center justify-center border border-outline-200 rounded-lg bg-background-card',
         {
           'border-primary-500 border-2': isActive,
         }
       )}
     >
       {char !== null && (
-        <Text className="text-2xl font-medium text-gray-900">{char}</Text>
+        <Text className="text-2xl font-medium text-typography-900">{char}</Text>
       )}
       {hasFakeCaret && <FakeCaret />}
     </View>
@@ -56,6 +56,7 @@ function Slot({ char, isActive, hasFakeCaret }: SlotProps) {
 }
 
 function FakeCaret() {
+  const colors = useSeekTheme();
   const opacity = useSharedValue(1);
 
   useEffect(() => {
@@ -76,7 +77,7 @@ function FakeCaret() {
   const baseStyle = {
     width: 2,
     height: 28,
-    backgroundColor: PROFILE_COLORS.accent,
+    backgroundColor: colors.accent,
     borderRadius: 1,
   };
 

@@ -1,5 +1,5 @@
 import { queryClient } from "@/app/_layout";
-import { PROFILE_COLORS } from "@/constants/design";
+import { useSeekTheme } from "@/hooks/use-seek-theme";
 import { shareListing } from "@/components/links";
 import { LikeButton } from "@/components/custom/like-button";
 import { Loader } from "@/components/custom/loader";
@@ -18,11 +18,7 @@ import {
   useAuthRequiredAction,
   useIsAuthenticated,
 } from "@/components/custom/auth-required";
-import {
-  getApplicationControllerGetAllMyApplicationsQueryKey,
-  useApplicationControllerCreateApplication,
-  useApplicationControllerGetAllMyApplications,
-} from "@/src/api/seek-api/application";
+import { useApplicationControllerGetAllMyApplications } from "@/src/api/seek-api/application";
 import {
   getListingsControllerGetAllVerifiedListingsQueryKey,
   useListingsControllerGetById,
@@ -76,10 +72,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useListingLiked } from "@/hooks/use-listing-liked";
 
-const APP_BACKGROUND_COLOR = PROFILE_COLORS.background;
-const BRAND_COLOR = PROFILE_COLORS.accent;
-
-const DOCUMENT_LABELS: Record<DocumentTypesDtoDataItem, string> = {
+const DOCUMENT_LABELS: Partial<Record<DocumentTypesDtoDataItem, string>> = {
   IDENTIFICATION: "Identification",
   PROOF_OF_INCOME: "Proof of income",
   GUARANTOR_AGREEMENT: "Guarantor agreement",
@@ -136,6 +129,7 @@ function getRequiredDocumentTypes(
 }
 
 export default function DetailsScreen() {
+  const colors = useSeekTheme();
   const [galleryWidth, setGalleryWidth] = useState(0);
   const [imageIndex, setImageIndex] = useState(0);
   const [savedOverride, setSavedOverride] = useState<boolean | null>(null);
@@ -169,10 +163,6 @@ export default function DetailsScreen() {
 
   const { mutate: like, isPending: isLiking } = useLike();
   const { mutate: unlike, isPending: isUnliking } = useUnlike();
-  const {
-    mutate: apply,
-    isPending: isApplying,
-  } = useApplicationControllerCreateApplication();
   const { data: applications } = useApplicationControllerGetAllMyApplications({
     query: { enabled: isAuthenticated },
   });
@@ -184,8 +174,13 @@ export default function DetailsScreen() {
   } = useUsersControllerDocumentTypes({
     query: { enabled: isAuthenticated },
   });
+  // A draft (not sent yet) can still be finished on the Apply screen.
   const hasApplied = Boolean(
-    id && applications?.some((application) => application.listing?._id === id),
+    id &&
+      applications?.some(
+        (application) =>
+          application.listing?._id === id && application.stage !== "NOT_SENT",
+      ),
   );
 
   const photos = useMemo(
@@ -297,7 +292,7 @@ export default function DetailsScreen() {
 
   function handleApply() {
     if (!requireApplyAuth()) return;
-    if (!data || isApplying || hasApplied || isCheckingDocuments) return;
+    if (!data || hasApplied || isCheckingDocuments) return;
 
     if (documentsError) {
       Alert.alert(
@@ -332,20 +327,7 @@ export default function DetailsScreen() {
       return;
     }
 
-    apply(
-      { data: { listingId: data._id } },
-      {
-        onError(error) {
-          errorToast({ toast, data: error.response?.data });
-        },
-        onSuccess() {
-          void queryClient.invalidateQueries({
-            queryKey: getApplicationControllerGetAllMyApplicationsQueryKey(),
-          });
-          router.navigate("/application-successful");
-        },
-      },
-    );
+    router.push({ pathname: "/(app)/apply", params: { listingId: data._id } });
   }
 
   const regularBedrooms = Math.max(
@@ -354,7 +336,7 @@ export default function DetailsScreen() {
   );
 
   return (
-    <Box className="flex-1" style={{ backgroundColor: APP_BACKGROUND_COLOR }}>
+    <Box className="flex-1" style={{ backgroundColor: colors.background }}>
       <Loader isLoading={isLoading && !data}>
         {data ? (
           <>
@@ -365,7 +347,7 @@ export default function DetailsScreen() {
             >
               <Box
                 className="overflow-hidden"
-                style={{ height: galleryHeight, backgroundColor: PROFILE_COLORS.surface }}
+                style={{ height: galleryHeight, backgroundColor: colors.surface }}
                 onLayout={(event: LayoutChangeEvent) =>
                   setGalleryWidth(event.nativeEvent.layout.width)
                 }
@@ -399,9 +381,9 @@ export default function DetailsScreen() {
                 ) : (
                   <Box
                     className="h-full w-full items-center justify-center"
-                    style={{ backgroundColor: PROFILE_COLORS.surface }}
+                    style={{ backgroundColor: colors.surface }}
                   >
-                    <Building2Icon color="#525252" size={64} />
+                    <Building2Icon color={colors.mutedText} size={64} />
                     <Text className="mt-3 font-medium text-neutral-700">
                       No photos available
                     </Text>
@@ -428,7 +410,7 @@ export default function DetailsScreen() {
 
               <VStack
                 className="-mt-7 gap-7 rounded-t-[32px] px-5 pb-8 pt-7"
-                style={{ backgroundColor: APP_BACKGROUND_COLOR }}
+                style={{ backgroundColor: colors.background }}
               >
                 <VStack className="gap-3">
                   <Text className="text-3xl font-bold leading-9 text-primary-500">
@@ -555,25 +537,23 @@ export default function DetailsScreen() {
             <HStack
               className="absolute bottom-0 left-0 right-0 border-t border-black/10 px-4 pt-3"
               style={{
-                backgroundColor: APP_BACKGROUND_COLOR,
+                backgroundColor: colors.background,
                 paddingBottom: Math.max(insets.bottom, 12),
               }}
             >
               <Button
                 className="h-14 flex-1 rounded-full bg-primary-500"
-                disabled={isApplying || hasApplied || isCheckingDocuments}
+                disabled={hasApplied || isCheckingDocuments}
                 onPress={handleApply}
               >
-                <ButtonText className="font-bold text-white">
+                <ButtonText className="font-bold text-typography-0">
                   {!isAuthenticated
                     ? "Sign Up to Apply"
                     : hasApplied
                     ? "Applied"
                     : isCheckingDocuments
                       ? "Checking documents…"
-                      : isApplying
-                        ? "Applying…"
-                        : "Apply Now"}
+                      : "Apply Now"}
                 </ButtonText>
               </Button>
             </HStack>
@@ -590,13 +570,14 @@ type QuickStatProps = {
 };
 
 function QuickStat({ icon: StatIcon, label }: QuickStatProps) {
+  const colors = useSeekTheme();
   return (
     <VStack
       className="flex-1 items-center gap-2 rounded-2xl px-1 py-3"
-      style={{ backgroundColor: PROFILE_COLORS.surface }}
+      style={{ backgroundColor: colors.surface }}
     >
-      <StatIcon color={BRAND_COLOR} size={21} />
-      <Text className="text-center text-xs font-semibold text-black">{label}</Text>
+      <StatIcon color={colors.accent} size={21} />
+      <Text className="text-center text-xs font-semibold text-typography-950">{label}</Text>
     </VStack>
   );
 }
@@ -619,18 +600,19 @@ type DetailItemProps = {
 };
 
 function DetailItem({ icon: DetailIcon, label, value }: DetailItemProps) {
+  const colors = useSeekTheme();
   return (
     <VStack
       className="gap-2 rounded-2xl p-4"
-      style={{ backgroundColor: PROFILE_COLORS.surface, width: "48.5%" }}
+      style={{ backgroundColor: colors.surface, width: "48.5%" }}
     >
       <HStack className="items-center gap-2">
-        <DetailIcon color={BRAND_COLOR} size={18} />
+        <DetailIcon color={colors.accent} size={18} />
         <Text className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
           {label}
         </Text>
       </HStack>
-      <Text className="text-sm font-semibold leading-5 text-black">{value}</Text>
+      <Text className="text-sm font-semibold leading-5 text-typography-950">{value}</Text>
     </VStack>
   );
 }
@@ -649,15 +631,16 @@ const AMENITY_ICONS: Record<string, LucideIcon> = {
 };
 
 function AmenityInfo({ amenity }: { amenity: string }) {
+  const colors = useSeekTheme();
   const AmenityIcon = AMENITY_ICONS[normalizeListingToken(amenity)] ?? HouseIcon;
 
   return (
     <HStack
       className="items-center gap-3 rounded-2xl px-4 py-3"
-      style={{ backgroundColor: PROFILE_COLORS.surface, width: "48.5%" }}
+      style={{ backgroundColor: colors.surface, width: "48.5%" }}
     >
-      <AmenityIcon color={BRAND_COLOR} size={20} />
-      <Text className="flex-1 text-sm font-medium text-black">
+      <AmenityIcon color={colors.accent} size={20} />
+      <Text className="flex-1 text-sm font-medium text-typography-950">
         {formatAmenity(amenity)}
       </Text>
     </HStack>

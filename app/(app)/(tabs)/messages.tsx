@@ -14,7 +14,7 @@ import { useApplicationControllerGetAllMyApplications } from "@/src/api/seek-api
 import { Loader } from "@/components/custom/loader";
 import { ApplicationDto } from "@/src/api/seek-api/model";
 import { useMemo } from "react";
-import { PROFILE_COLORS } from "@/constants/design";
+import { useSeekTheme } from "@/hooks/use-seek-theme";
 import { AuthRequiredScreen } from "@/components/custom/auth-required";
 
 export default function MessagesScreen() {
@@ -60,6 +60,7 @@ type MessageItemProps = {
 };
 
 function MessageItem({ data }: MessageItemProps) {
+  const colors = useSeekTheme();
   function LeaveButton() {
     return (
       <Box className="bg-red-600 p-2 items-center">
@@ -88,8 +89,8 @@ function MessageItem({ data }: MessageItemProps) {
           <Box className="bg-background-400 w-10 h-10 rounded-full items-center justify-center text-center">
             <Icon
               as={Users2Icon}
-              color={PROFILE_COLORS.accent}
-              fill={PROFILE_COLORS.accent}
+              color={colors.accent}
+              fill={colors.accent}
               size="xl"
             />
           </Box>

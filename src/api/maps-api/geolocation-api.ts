@@ -49,7 +49,7 @@ export const geolocate = (
   
 
 
-export const getGeolocateMutationOptions = <TError = ErrorType<ErrorResponse | ErrorResponse>,
+export const getGeolocateMutationOptions = <TError = ErrorType<ErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof geolocate>>, TError,{data: GeolocationRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof geolocate>>, TError,{data: GeolocationRequest}, TContext> => {
 
@@ -76,9 +76,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type GeolocateMutationResult = NonNullable<Awaited<ReturnType<typeof geolocate>>>
     export type GeolocateMutationBody = GeolocationRequest
-    export type GeolocateMutationError = ErrorType<ErrorResponse | ErrorResponse>
+    export type GeolocateMutationError = ErrorType<ErrorResponse>
 
-    export const useGeolocate = <TError = ErrorType<ErrorResponse | ErrorResponse>,
+    export const useGeolocate = <TError = ErrorType<ErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof geolocate>>, TError,{data: GeolocationRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof geolocate>>,

@@ -122,6 +122,7 @@ export function useStreetView<TData = Awaited<ReturnType<typeof streetView>>, TE
 
 
 
+
 /**
  * The Street View Static API metadata requests provide data about Street View panoramas. Using the metadata, you can find out if a Street View image is available at a given location, as well as getting programmatic access to the latitude and longitude, the panorama ID, the date the photo was taken, and the copyright information for the image. Accessing this metadata allows you to customize error behavior in your application.
 
@@ -209,6 +210,7 @@ export function useStreetViewMetadata<TData = Awaited<ReturnType<typeof streetVi
 
   return query;
 }
+
 
 
 

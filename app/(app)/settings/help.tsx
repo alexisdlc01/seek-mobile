@@ -2,7 +2,7 @@ import {
   ProfileActionRow,
   ProfileScreen,
 } from "@/components/custom/profile-screen";
-import { PROFILE_COLORS } from "@/constants/design";
+import { useSeekTheme } from "@/hooks/use-seek-theme";
 import { useRouter } from "expo-router";
 import {
   FlagIcon,
@@ -13,9 +13,10 @@ import React from "react";
 import { View } from "react-native";
 
 export default function HelpScreen() {
+  const colors = useSeekTheme();
   const router = useRouter();
   const iconProps = {
-    color: PROFILE_COLORS.accent,
+    color: colors.accent,
     size: 22,
     strokeWidth: 2,
   };

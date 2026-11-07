@@ -365,7 +365,7 @@ function ChatMenu({ conversationId, userId }: ChatMenuProps) {
             onPress={close}
             style={{ position: "absolute", top: -1000, left: -2000, width: 4000, height: 4000 }}
           />
-          <VStack className="absolute right-0 top-8 z-50 w-48 rounded-xl bg-white py-1 shadow-hard-5">
+          <VStack className="absolute right-0 top-8 z-50 w-48 rounded-xl bg-background-card py-1 shadow-hard-5">
             <MenuItem label="Group details" onPress={openDetails} />
             {canInvite ? <MenuItem label="Invite" onPress={() => void invite()} /> : null}
             {canLeave ? <MenuItem label="Leave group" onPress={leave} destructive /> : null}

@@ -8,10 +8,7 @@ import { ErrorToast } from "@/components/custom/error-toast";
 import { SuccessToast } from "@/components/custom/success-toast";
 import { useToast } from "@/components/ui/toast";
 import { authControllerChangePassword } from "@/src/api/seek-api/auth";
-import type {
-  ChangePasswordDto,
-  MessageResponseDto,
-} from "@/src/api/seek-api/model";
+import type { ChangePasswordDto } from "@/src/api/seek-api/model";
 import { useAuth } from "@/src/store/auth-store";
 import type { ErrorType } from "@/src/utils/custom-axios";
 import {
@@ -30,7 +27,7 @@ export default function ModifyPasswordScreen() {
   const logout = useAuth((state) => state.logout);
   const router = useRouter();
   const { mutate, isPending } = useMutation<
-    MessageResponseDto,
+    { message?: string },
     ErrorType,
     ChangePasswordDto
   >({
@@ -40,7 +37,7 @@ export default function ModifyPasswordScreen() {
       queryClient.clear();
       toast.show({
         placement: "top",
-        render: (props) => <SuccessToast {...props} message={message} />,
+        render: (props) => <SuccessToast {...props} message={message ?? "Password changed."} />,
       });
       router.replace("/(auth)/login");
     },

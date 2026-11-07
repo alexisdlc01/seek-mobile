@@ -86,7 +86,7 @@ export default function Filters() {
     : `Up to £${monthlyRentDraft.toLocaleString("en-GB")}`;
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F2F2F2]">
+    <SafeAreaView className="flex-1 bg-background-screen">
       <Box className="px-6 pb-3 pt-4">
         <Box className="h-10 items-center justify-center">
           <Pressable
@@ -175,7 +175,7 @@ export default function Filters() {
                   <CheckboxIndicator>
                     <CheckboxIcon as={CheckIcon} />
                   </CheckboxIndicator>
-                  <CheckboxLabel className="flex-1 text-sm text-black">
+                  <CheckboxLabel className="flex-1 text-sm text-typography-950">
                     {amenity.label}
                   </CheckboxLabel>
                 </Checkbox>

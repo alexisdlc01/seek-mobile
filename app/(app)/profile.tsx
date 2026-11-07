@@ -2,7 +2,7 @@ import { queryClient } from "@/app/_layout";
 import {
   ProfileActionRow,
   ProfileScreen,
-  profileTypography,
+  useProfileTypography,
 } from "@/components/custom/profile-screen";
 import { errorToast } from "@/src/utils/error-toast";
 import { Loader } from "@/components/custom/loader";
@@ -31,7 +31,8 @@ import {
 } from "@/components/ui/modal";
 import { Text } from "@/components/ui/text";
 import { useToast } from "@/components/ui/toast";
-import { PROFILE_COLORS } from "@/constants/design";
+import type { SeekColors } from "@/constants/seek-theme";
+import { useSeekTheme, useThemedStyles } from "@/hooks/use-seek-theme";
 import { useProfilePicture } from "@/hooks/use-profile-photo";
 import {
   getAuthControllerCurrentUserQueryKey,
@@ -47,6 +48,7 @@ import {
   CameraIcon,
   CircleHelpIcon,
   FileTextIcon,
+  IdCardIcon,
   LogOutIcon,
   PencilLineIcon,
   ScaleIcon,
@@ -82,6 +84,9 @@ function AuthenticatedProfileScreen() {
 }
 
 function ProfileContent({ user }: { user: UserDto }) {
+  const styles = useThemedStyles(createStyles);
+  const colors = useSeekTheme();
+  const profileTypography = useProfileTypography();
   const router = useRouter();
   const toast = useToast();
   const localLogout = useAuth((state) => state.logout);
@@ -135,7 +140,8 @@ function ProfileContent({ user }: { user: UserDto }) {
       } finally {
         setShowImagePicker(false);
       }
-    }, [accessToken, pickImage, toast, updateProfilePicture, user._id],
+    },
+    [accessToken, pickImage, toast, updateProfilePicture, user._id],
   );
 
   const confirmLogout = () => {
@@ -150,7 +156,7 @@ function ProfileContent({ user }: { user: UserDto }) {
   };
 
   const iconProps = {
-    color: PROFILE_COLORS.accent,
+    color: colors.accent,
     size: 22,
     strokeWidth: 2,
   };
@@ -179,7 +185,11 @@ function ProfileContent({ user }: { user: UserDto }) {
               ) : null}
             </Avatar>
             <View style={styles.cameraBadge}>
-              <CameraIcon color="#FFFFFF" size={18} strokeWidth={2.25} />
+              <CameraIcon
+                color={colors.onPrimary}
+                size={18}
+                strokeWidth={2.25}
+              />
             </View>
           </Pressable>
           <Text style={profileTypography.heroName}>{user.name}</Text>
@@ -189,6 +199,12 @@ function ProfileContent({ user }: { user: UserDto }) {
         </View>
 
         <View style={styles.rows}>
+          <ProfileActionRow
+            title="Seek Passport"
+            subtitle="Documents, references and who can see them"
+            icon={<IdCardIcon {...iconProps} />}
+            onPress={() => router.push("/(app)/(tabs)/passport")}
+          />
           <ProfileActionRow
             title="Personal Information"
             subtitle="Identity and supporting documents"
@@ -219,11 +235,7 @@ function ProfileContent({ user }: { user: UserDto }) {
           <ProfileActionRow
             title="Logout"
             icon={
-              <LogOutIcon
-                color={PROFILE_COLORS.danger}
-                size={22}
-                strokeWidth={2}
-              />
+              <LogOutIcon color={colors.danger} size={22} strokeWidth={2} />
             }
             destructive
             showChevron={false}
@@ -293,56 +305,57 @@ function ProfileContent({ user }: { user: UserDto }) {
   );
 }
 
-const styles = StyleSheet.create({
-  content: {
-    paddingTop: 0,
-    gap: 12,
-  },
-  hero: {
-    minHeight: 236,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  avatarButton: {
-    position: "relative",
-    marginBottom: 4,
-  },
-  avatar: {
-    borderWidth: 2,
-    borderColor: PROFILE_COLORS.border,
-    backgroundColor: "#D9E9FF",
-  },
-  cameraBadge: {
-    position: "absolute",
-    right: 0,
-    bottom: 0,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: PROFILE_COLORS.background,
-    backgroundColor: PROFILE_COLORS.accent,
-  },
-  rows: {
-    gap: 12,
-  },
-  modalContent: {
-    width: "86%",
-    borderRadius: 20,
-    backgroundColor: PROFILE_COLORS.surface,
-  },
-  modalFooter: {
-    justifyContent: "flex-end",
-    gap: 10,
-  },
-  modalButton: {
-    borderRadius: 999,
-    minWidth: 105,
-  },
-  logoutButtonText: {
-    color: PROFILE_COLORS.surface,
-  },
-});
+const createStyles = (colors: SeekColors) =>
+  StyleSheet.create({
+    content: {
+      paddingTop: 0,
+      gap: 12,
+    },
+    hero: {
+      minHeight: 236,
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+    },
+    avatarButton: {
+      position: "relative",
+      marginBottom: 4,
+    },
+    avatar: {
+      borderWidth: 2,
+      borderColor: colors.border,
+      backgroundColor: colors.heroChip,
+    },
+    cameraBadge: {
+      position: "absolute",
+      right: 0,
+      bottom: 0,
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 2,
+      borderColor: colors.background,
+      backgroundColor: colors.primary,
+    },
+    rows: {
+      gap: 12,
+    },
+    modalContent: {
+      width: "86%",
+      borderRadius: 20,
+      backgroundColor: colors.surface,
+    },
+    modalFooter: {
+      justifyContent: "flex-end",
+      gap: 10,
+    },
+    modalButton: {
+      borderRadius: 999,
+      minWidth: 105,
+    },
+    logoutButtonText: {
+      color: "#FFFFFF",
+    },
+  });

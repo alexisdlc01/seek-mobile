@@ -122,6 +122,7 @@ export function useSnapToRoads<TData = Awaited<ReturnType<typeof snapToRoads>>, 
 
 
 
+
 /**
  * This service returns individual road segments for a given set of GPS coordinates. This services takes up to 100 GPS points and returns the closest road segments for each point. The points passed do not need to be part of a continuous path.
  */
@@ -208,6 +209,7 @@ export function useNearestRoads<TData = Awaited<ReturnType<typeof nearestRoads>>
 
   return query;
 }
+
 
 
 

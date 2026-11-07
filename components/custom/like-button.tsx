@@ -1,6 +1,6 @@
 import { HeartIcon } from "lucide-react-native";
 import { Pressable } from "../ui/pressable";
-import { PROFILE_COLORS } from "@/constants/design";
+import { useSeekTheme } from "@/hooks/use-seek-theme";
 
 export type LikeButtonProps = {
   like: () => void | Promise<void>;
@@ -18,11 +18,12 @@ export function LikeButton({
   unlike,
   liked,
   size = 35,
-  iconColor = PROFILE_COLORS.accent,
-  activeColor = PROFILE_COLORS.accent,
+  iconColor,
+  activeColor,
   containerClassName = "bg-primary-0",
   disabled = false,
 }: LikeButtonProps) {
+  const colors = useSeekTheme();
   return (
     <Pressable
       accessibilityLabel={liked ? "Remove from saved listings" : "Save listing"}
@@ -36,8 +37,8 @@ export function LikeButton({
       className={`items-center justify-center rounded-full p-2 ${containerClassName}`}
     >
       <HeartIcon
-        color={iconColor}
-        fill={liked ? activeColor : "transparent"}
+        color={iconColor ?? colors.accent}
+        fill={liked ? (activeColor ?? colors.accent) : "transparent"}
         strokeWidth={2.5}
         size={size}
       />

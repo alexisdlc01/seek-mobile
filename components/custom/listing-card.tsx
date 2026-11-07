@@ -4,7 +4,9 @@ import { HStack } from "@/components/ui/hstack";
 import { Image } from "@/components/ui/image";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import { FlatList, LayoutChangeEvent, Pressable } from "react-native";
+import { FlatList, LayoutChangeEvent, Pressable, StyleSheet, Text as RNText, View } from "react-native";
+import { Badge, SeekButton } from "@/components/seek/ui";
+import type { Match } from "@/src/utils/listing-match";
 import { Box } from "../ui/box";
 import { ShareIcon } from "lucide-react-native";
 import { useState } from "react";
@@ -16,7 +18,7 @@ import { useToast } from "../ui/toast";
 import { ErrorToast } from "./error-toast";
 import { LikeButton } from "./like-button";
 import { shareListing } from "../links";
-import { PROFILE_COLORS } from "@/constants/design";
+import { useSeekTheme } from "@/hooks/use-seek-theme";
 import { useAuthRequiredAction } from "./auth-required";
 
 function handleShare(listing: Listing) {
@@ -52,7 +54,7 @@ export function ListingCard({ data, left }: ListingCardProps) {
               <Text className="text-lg font-bold text-primary-500 overflow-ellipsis line-clamp-1">
                 {data.propertyTitle}
               </Text>
-              <Text className="text-sm text-neutral-700 line-clamp-1">{data.streetAddress}</Text>
+              <Text className="text-sm text-typography-700 line-clamp-1">{data.streetAddress}</Text>
               <Text className="text-base font-semibold text-primary-500">£{data.monthlyRent} pcm</Text>
             </VStack>
           </HStack>
@@ -66,12 +68,18 @@ export function ListingCard({ data, left }: ListingCardProps) {
 export type VerticalListingCardProps = {
   data: Listing;
   onPress?: () => void;
+  /** Match % and the reason line, shown with an Apply button. */
+  match?: Match;
+  onApply?: () => void;
 };
 
 export function VerticalListingCard({
   data,
   onPress,
+  match,
+  onApply,
 }: VerticalListingCardProps) {
+  const colors = useSeekTheme();
   const requireAuth = useAuthRequiredAction("save listings");
   const { mutate: like } = useLike();
   const { mutate: unlike } = useUnlike();
@@ -161,13 +169,18 @@ export function VerticalListingCard({
             <ScrollDots total={data.photos.length} value={imageIndex} />
           </Box>
         </Pressable>
-        <HStack className="rounded-b-3xl bg-primary-0 px-4 py-3">
+        <HStack className={match || onApply ? "bg-primary-0 px-4 py-3" : "rounded-b-3xl bg-primary-0 px-4 py-3"}>
           <VStack className="flex-1">
             <Text className="text-lg font-bold text-primary-500">
               {data.propertyTitle}
             </Text>
-            <Text className="text-sm text-neutral-700">{data.streetAddress}</Text>
-            <Text className="text-sm font-semibold text-primary-500">£{data.monthlyRent} pcm</Text>
+            <Text className="text-sm text-typography-700">{data.streetAddress}</Text>
+            <Text className="text-sm font-semibold text-primary-500">
+              {match && data.numOfPeople > 1
+                ? `£${Math.round(data.monthlyRent / data.numOfPeople)} pcm each`
+                : `£${data.monthlyRent} pcm`}
+              {match ? (data.billsIncluded ? " · bills incl." : " · bills extra") : ""}
+            </Text>
           </VStack>
           <HStack className="gap-2">
             <LikeButton unlike={handleUnlike}
@@ -177,13 +190,49 @@ export function VerticalListingCard({
             <Box className="items-center justify-center rounded-full bg-primary-0 p-2">
               <ShareIcon
                 onPress={() => void handleShare(data)}
-                color={PROFILE_COLORS.accent}
+                color={colors.accent}
                 size={24}
               />
             </Box>
           </HStack>
         </HStack>
+        {match || onApply ? (
+          <View style={[styles.matchRow, { backgroundColor: colors.surface, borderColor: colors.line }]}>
+            <View style={styles.matchText}>
+              {match ? <Badge label={`${match.percent}% match`} tone="info" /> : null}
+              {match ? (
+                <RNText numberOfLines={2} style={[styles.why, { color: colors.mutedText }]}>
+                  {match.why}
+                </RNText>
+              ) : null}
+            </View>
+            {onApply ? (
+              <SeekButton
+                label="Apply"
+                compact
+                onPress={onApply}
+                accessibilityLabel={`Apply to ${data.propertyTitle}`}
+              />
+            ) : null}
+          </View>
+        ) : null}
       </VStack>
     </Card>
   );
 }
+
+const styles = StyleSheet.create({
+  matchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderTopWidth: 0,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  matchText: { flex: 1, gap: 4, alignItems: "flex-start" },
+  why: { fontSize: 12.5, lineHeight: 17 },
+});
