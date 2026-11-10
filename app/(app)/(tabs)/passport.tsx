@@ -11,14 +11,17 @@ import {
   SeekScreen,
   SectionTitle,
 } from "@/components/seek/ui";
+import { ProfilePrimaryButton, ProfileTextField } from "@/components/custom/profile-screen";
 import { resolveAdviceLink } from "@/components/seek/advice-card";
+import { VerifiedStudentBadge } from "@/components/custom/student-verification";
 import { useSeekTheme } from "@/hooks/use-seek-theme";
 import { aiControllerAdvice } from "@/src/api/seek-api/ai";
 import { useAuthControllerCurrentUser } from "@/src/api/seek-api/auth";
 import { useConnectorsControllerOverview } from "@/src/api/seek-api/connectors";
-import type {
-  AddDocumentDtoDocumentType,
-  PassportItemDto,
+import {
+  RequestReferenceDtoType,
+  type AddDocumentDtoDocumentType,
+  type PassportItemDto,
 } from "@/src/api/seek-api/model";
 import {
   getUsersControllerDocumentTypesQueryKey,
@@ -27,6 +30,7 @@ import {
   useUsersControllerAddDocument,
   useUsersControllerGetPassport,
   useUsersControllerListShares,
+  useUsersControllerRequestReference,
   useUsersControllerRevokeShare,
 } from "@/src/api/seek-api/users";
 import { useAuth } from "@/src/store/auth-store";
@@ -49,16 +53,9 @@ import {
   WalletIcon,
 } from "lucide-react-native";
 import React, { useState, type ReactElement } from "react";
-import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 type BadgeTone = "success" | "warning" | "danger" | "neutral";
-
-const REFERENCE_REQUEST: Partial<Record<string, { who: string; subject: string }>> = {
-  LANDLORD_REFERENCE: { who: "previous landlord", subject: "Reference for my next tenancy" },
-  AGENT_REFERENCE: { who: "letting agent", subject: "Reference for my next tenancy" },
-  CHARACTER_REFERENCE: { who: "referee", subject: "Character reference" },
-  RECOMMENDATION: { who: "tutor or employer", subject: "Recommendation letter" },
-};
 
 function sectionIcon(key: string, color: string): ReactElement {
   switch (key) {
@@ -138,11 +135,15 @@ function statusBadge(item: PassportItemDto): { label: string; tone: BadgeTone } 
 }
 
 function itemDetail(item: PassportItemDto): string | undefined {
+  if (item.source === "university email") return `${item.detail ?? "University email"} confirmed`;
   if (item.status === "VERIFIED" && item.expiresAt) {
     return `Valid until ${formatDate(item.expiresAt)}`;
   }
   if (item.status === "EXPIRED" && item.expiresAt) {
     return `Expired ${formatDate(item.expiresAt)}`;
+  }
+  if (item.status === "PENDING" && item.source === "request") {
+    return item.type === "GUARANTOR_AGREEMENT" ? "Invite sent · Pending" : "Requested · Pending";
   }
   if (item.status === "PENDING") return "Waiting for verification";
   if (item.status === "REJECTED") return "Upload a clearer copy";
@@ -172,8 +173,13 @@ function Profile() {
   const connectors = useConnectorsControllerOverview();
   const addDocument = useUsersControllerAddDocument();
   const revokeShare = useUsersControllerRevokeShare();
+  const requestReference = useUsersControllerRequestReference();
+  const [asking, setAsking] = useState<RequestReferenceDtoType | null>(null);
+  const [refName, setRefName] = useState("");
+  const [refEmail, setRefEmail] = useState("");
   const [uploading, setUploading] = useState<AddDocumentDtoDocumentType | null>(null);
   const [picking, setPicking] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ text: string; error?: boolean } | null>(null);
 
   const upload = async (item: PassportItemDto) => {
@@ -211,21 +217,24 @@ function Profile() {
     }
   };
 
-  // No server-side sender yet: open the student's own mail app with the request
-  // written, then they add the reply here as a document.
-  const requestReference = (item: PassportItemDto, reference: { who: string; subject: string }) => {
+  // Seek emails the referee; the reply is filed through the connected inbox.
+  const sendRequest = (type: RequestReferenceDtoType) => {
     setNotice(null);
-    const body = [
-      `Hello,`,
-      ``,
-      `I'm applying for student housing through Seek and my landlord needs a reference from my ${reference.who}.`,
-      `Could you reply with a short letter or email confirming ${item.type === "CHARACTER_REFERENCE" || item.type === "RECOMMENDATION" ? "what you know of me" : "how my tenancy went (rent paid on time, care of the property)"}?`,
-      ``,
-      `Thank you,`,
-      user?.name ?? "",
-    ].join("\n");
-    Linking.openURL(`mailto:?subject=${encodeURIComponent(reference.subject)}&body=${encodeURIComponent(body)}`).catch(() =>
-      setNotice({ text: "We couldn't open your mail app. Ask them by email, then add their reply here.", error: true }),
+    setFormError(null);
+    requestReference.mutate(
+      { data: { type, name: refName.trim(), email: refEmail.trim() } },
+      {
+        onSuccess() {
+          void queryClient.invalidateQueries({ queryKey: getUsersControllerGetPassportQueryKey() });
+          setAsking(null);
+          setRefName("");
+          setRefEmail("");
+          setNotice({ text: "Sent. Their reply will be filed to your passport." });
+        },
+        onError(error) {
+          setFormError(errorMessage(error, "We couldn't send that. Please try again."));
+        },
+      },
     );
   };
 
@@ -269,7 +278,9 @@ function Profile() {
           <Avatar initials={initialsOf(user?.name)} size={52} tone="alt" />
           <View style={styles.flex}>
             <Text style={[styles.heroName, { color: colors.onHero }]}>{user?.name ?? "Your profile"}</Text>
-            {user?.universityDetails ? (
+            {user?.studentVerified ? (
+              <VerifiedStudentBadge university={user.university} />
+            ) : user?.universityDetails ? (
               <Text style={[styles.heroSub, { color: colors.heroMuted }]}>{user.universityDetails}</Text>
             ) : null}
           </View>
@@ -317,7 +328,10 @@ function Profile() {
                   ? { label: "Uploading…", tone: "neutral" as BadgeTone }
                   : statusBadge(item);
                 const needsUpload = item.status !== "VERIFIED" && item.status !== "PENDING";
-                const reference = REFERENCE_REQUEST[item.type];
+                const requestable = (Object.values(RequestReferenceDtoType) as string[]).includes(item.type)
+                  ? (item.type as RequestReferenceDtoType)
+                  : null;
+                const canAsk = requestable && item.status === "MISSING";
                 return (
                   <View key={item.type}>
                     {index > 0 ? <Divider /> : null}
@@ -326,19 +340,52 @@ function Profile() {
                       title={item.label}
                       subtitle={itemDetail(item)}
                       right={
-                        reference && needsUpload ? (
+                        canAsk ? (
                           <SeekButton
-                            label="Request"
+                            label={requestable === "GUARANTOR_AGREEMENT" ? "Invite" : "Request"}
                             variant="tint"
                             compact
-                            onPress={() => requestReference(item, reference)}
+                            onPress={() => {
+                              setFormError(null);
+                              setAsking(asking === requestable ? null : requestable);
+                            }}
                           />
                         ) : (
                           <Badge label={badge.label} tone={badge.tone} />
                         )
                       }
-                      onPress={needsUpload ? () => void upload(item) : undefined}
+                      onPress={
+                        item.type === "STUDENT_STATUS" && !user?.studentVerified && needsUpload
+                          ? () => router.push("/(app)/profile")
+                          : needsUpload
+                            ? () => void upload(item)
+                            : undefined
+                      }
                     />
+                    {canAsk && asking === requestable ? (
+                      <View style={styles.askForm}>
+                        <ProfileTextField label="Their name" value={refName} onChangeText={setRefName} autoCapitalize="words" />
+                        <ProfileTextField
+                          label="Their email"
+                          value={refEmail}
+                          onChangeText={setRefEmail}
+                          keyboardType="email-address"
+                          autoCapitalize="none"
+                          autoCorrect={false}
+                        />
+                        {formError ? (
+                          <Text accessibilityRole="alert" style={[styles.notice, { color: colors.danger }]}>
+                            {formError}
+                          </Text>
+                        ) : null}
+                        <ProfilePrimaryButton
+                          title="Send"
+                          onPress={() => sendRequest(requestable)}
+                          disabled={!refName.trim() || !refEmail.trim()}
+                          loading={requestReference.isPending}
+                        />
+                      </View>
+                    ) : null}
                     {item.type === "GUARANTOR_AGREEMENT" &&
                     (item.status === "PENDING" || item.status === "MISSING") ? (
                       <GuarantorTip />
@@ -445,6 +492,7 @@ function Profile() {
 }
 
 const styles = StyleSheet.create({
+  askForm: { paddingHorizontal: 16, paddingBottom: 12, gap: 8 },
   flex: { flex: 1 },
   heroTop: { flexDirection: "row", alignItems: "center", gap: 12 },
   heroName: { fontSize: 19, fontWeight: "700" },

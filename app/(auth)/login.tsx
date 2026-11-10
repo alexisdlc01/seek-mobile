@@ -13,10 +13,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 import { isValidEmail, normalizeEmail } from "@/src/utils/validate-email";
 import { useSignupState } from "@/src/store/signup-store";
+import { errorMessage } from "@/src/utils/tenancy-view";
+import { Text } from "@/components/ui/text";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [blocked, setBlocked] = useState<string | null>(null);
   const normalizedEmail = normalizeEmail(email);
 
   const { mutate, isPending } = useAuthControllerLogin();
@@ -30,6 +33,7 @@ export default function Login() {
   const router = useRouter();
 
   const handleSubmit = () => {
+    setBlocked(null);
     mutate(
       { data: { email: normalizedEmail, password } },
       {
@@ -44,6 +48,11 @@ export default function Login() {
           router.replace("/(app)/(tabs)/map");
         },
         onError: (err) => {
+          // 403 = landlord account on the mobile app: keep the server message on screen.
+          if (err.response?.status === 403) {
+            setBlocked(errorMessage(err));
+            return;
+          }
           toast.show({
             placement: "top",
             render: (props) => (
@@ -81,6 +90,12 @@ export default function Login() {
             if (!isSubmitDisabled) handleSubmit();
           }}
         />
+
+        {blocked ? (
+          <Text accessibilityRole="alert" className="text-error-600">
+            {blocked}
+          </Text>
+        ) : null}
 
         <FormControl>
           <Button

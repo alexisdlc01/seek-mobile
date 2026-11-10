@@ -2,6 +2,8 @@ import {
   ProfileScreen,
   useProfileTypography,
 } from "@/components/custom/profile-screen";
+import { Loader } from "@/components/custom/loader";
+import { useFlagsControllerFindOne } from "@/src/api/seek-api/flags";
 import { Text } from "@/components/ui/text";
 import { PROFILE_LAYOUT } from "@/constants/design";
 import type { SeekColors } from "@/constants/seek-theme";
@@ -9,7 +11,7 @@ import { useThemedStyles } from "@/hooks/use-seek-theme";
 import { useLocalSearchParams } from "expo-router";
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { FlagStatusPill } from "../previous-flags";
+import { FlagStatusPill, flagDate } from "../previous-flags";
 
 function DetailRow({ label, value }: { label: string; value: string }) {
   const styles = useThemedStyles(createStyles);
@@ -24,48 +26,57 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 export default function FlagDetailsScreen() {
   const styles = useThemedStyles(createStyles);
   const profileTypography = useProfileTypography();
-  const { flag } = useLocalSearchParams<{ flag: string }>();
+  const { flag: id } = useLocalSearchParams<{ flag: string }>();
+  const { data: flag, isLoading, isError, error } = useFlagsControllerFindOne(id);
 
   return (
     <ProfileScreen title="Flag Details">
-      <View style={styles.centered}>
-        <FlagStatusPill status="RESOLVED" large />
-      </View>
+      <Loader isLoading={isLoading}>
+        {isError || !flag ? (
+          <Text style={profileTypography.body}>
+            {error?.response?.status === 404
+              ? "This flag could not be found."
+              : "We could not load this flag. Please try again later."}
+          </Text>
+        ) : (
+          <>
+            <View style={styles.centered}>
+              <FlagStatusPill status={flag.status} large />
+            </View>
 
-      <View style={styles.card}>
-        <DetailRow label="Flag ID" value={flag ?? "—"} />
-        <View style={styles.divider} />
-        <DetailRow label="Date submitted" value="This is a description" />
-        <View style={styles.divider} />
-        <DetailRow label="Category" value="This is a description" />
-        <View style={styles.divider} />
-        <DetailRow label="Reported user" value="This is a description" />
-        <View style={styles.divider} />
-        <DetailRow label="Resolution date" value="This is a description" />
-      </View>
+            <View style={styles.card}>
+              <DetailRow label="Flag ID" value={flag._id} />
+              <View style={styles.divider} />
+              <DetailRow label="Date submitted" value={flagDate(flag.createdAt)} />
+              <View style={styles.divider} />
+              <DetailRow label="Category" value={flag.category.replace(/_/g, " ").toLowerCase()} />
+              {flag.resolutionDate ? (
+                <>
+                  <View style={styles.divider} />
+                  <DetailRow
+                    label="Resolution date"
+                    value={new Date(flag.resolutionDate).toLocaleDateString(
+                      "en-GB",
+                    )}
+                  />
+                </>
+              ) : null}
+            </View>
 
-      <View style={styles.card}>
-        <Text style={profileTypography.sectionTitle}>Your Report</Text>
-        <Text style={profileTypography.body}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
-          ullamcorper, nisl in tincidunt aliquet, lorem justo aliquam lectus,
-          quis aliquam nisi nisl in nisi.
-        </Text>
-      </View>
+            <View style={styles.card}>
+              <Text style={profileTypography.sectionTitle}>Your Report</Text>
+              <Text style={profileTypography.body}>{flag.text}</Text>
+            </View>
 
-      <View style={styles.card}>
-        <Text style={profileTypography.sectionTitle}>
-          Seek Support Response
-        </Text>
-        <Text style={profileTypography.body}>
-          Thank you for reporting this incident. After reviewing the case and
-          speaking with both parties, we have taken the appropriate action.
-        </Text>
-        <Text style={profileTypography.body}>
-          We take flags seriously and appreciate your detailed report. Contact
-          us if you need further assistance.
-        </Text>
-      </View>
+            {flag.supportResponse ? (
+              <View style={styles.card}>
+                <Text style={profileTypography.sectionTitle}>Seek Support</Text>
+                <Text style={profileTypography.body}>{flag.supportResponse}</Text>
+              </View>
+            ) : null}
+          </>
+        )}
+      </Loader>
     </ProfileScreen>
   );
 }

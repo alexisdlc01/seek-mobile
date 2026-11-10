@@ -27,7 +27,8 @@ import type {
   ErrorDto,
   PrescribedInfoDto,
   Tenancy,
-  UpdateDepositDto
+  UpdateDepositDto,
+  UpdateEnergyAllowanceDto
 } from './model';
 
 import { customInstance } from '../../utils/custom-axios';
@@ -502,6 +503,70 @@ export const useTenanciesControllerDeposit = <TError = ErrorType<ErrorDto>,
       > => {
 
       const mutationOptions = getTenanciesControllerDepositMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Set or remove the household's monthly energy fair-use allowance.
+ */
+export const tenanciesControllerEnergyAllowance = (
+    id: string,
+    updateEnergyAllowanceDto: UpdateEnergyAllowanceDto,
+ options?: SecondParameter<typeof customInstance>,) => {
+      
+      
+      return customInstance<Tenancy>(
+      {url: `/tenancies/${id}/energy-allowance`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: updateEnergyAllowanceDto
+    },
+      options);
+    }
+  
+
+
+export const getTenanciesControllerEnergyAllowanceMutationOptions = <TError = ErrorType<ErrorDto>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof tenanciesControllerEnergyAllowance>>, TError,{id: string;data: UpdateEnergyAllowanceDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof tenanciesControllerEnergyAllowance>>, TError,{id: string;data: UpdateEnergyAllowanceDto}, TContext> => {
+
+const mutationKey = ['tenanciesControllerEnergyAllowance'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof tenanciesControllerEnergyAllowance>>, {id: string;data: UpdateEnergyAllowanceDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  tenanciesControllerEnergyAllowance(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TenanciesControllerEnergyAllowanceMutationResult = NonNullable<Awaited<ReturnType<typeof tenanciesControllerEnergyAllowance>>>
+    export type TenanciesControllerEnergyAllowanceMutationBody = UpdateEnergyAllowanceDto
+    export type TenanciesControllerEnergyAllowanceMutationError = ErrorType<ErrorDto>
+
+    /**
+ * @summary Set or remove the household's monthly energy fair-use allowance.
+ */
+export const useTenanciesControllerEnergyAllowance = <TError = ErrorType<ErrorDto>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof tenanciesControllerEnergyAllowance>>, TError,{id: string;data: UpdateEnergyAllowanceDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof tenanciesControllerEnergyAllowance>>,
+        TError,
+        {id: string;data: UpdateEnergyAllowanceDto},
+        TContext
+      > => {
+
+      const mutationOptions = getTenanciesControllerEnergyAllowanceMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

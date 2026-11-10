@@ -2,20 +2,19 @@ import {
   ProfileScreen,
   useProfileTypography,
 } from "@/components/custom/profile-screen";
+import { Loader } from "@/components/custom/loader";
 import { Text } from "@/components/ui/text";
 import { PROFILE_LAYOUT } from "@/constants/design";
 import type { SeekColors } from "@/constants/seek-theme";
 import { useSeekTheme, useThemedStyles } from "@/hooks/use-seek-theme";
+import type { Flag } from "@/src/api/seek-api/model";
+import { useFlagsControllerMine } from "@/src/api/seek-api/flags";
 import { useRouter } from "expo-router";
 import React from "react";
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
 
-type FlagRecord = {
-  _id: string;
-  status: string;
-  date: string;
-  description: string;
-};
+export const flagDate = (createdAt: string) =>
+  new Date(createdAt).toLocaleDateString("en-GB");
 
 export function getFlagStatusPresentation(status: string, colors: SeekColors) {
   if (status === "RESOLVED" || status === "ACCOUNT_SUSPENDED") {
@@ -61,17 +60,18 @@ export function FlagStatusPill({
   );
 }
 
-function FlagCard({ item }: { item: FlagRecord }) {
+function FlagCard({ item }: { item: Flag }) {
   const styles = useThemedStyles(createStyles);
   const colors = useSeekTheme();
   const profileTypography = useProfileTypography();
   const router = useRouter();
+  const date = flagDate(item.createdAt);
   const presentation = getFlagStatusPresentation(item.status, colors);
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Open ${presentation.label} flag from ${item.date}`}
+      accessibilityLabel={`Open ${presentation.label} flag from ${date}`}
       onPress={() =>
         router.navigate(`/(app)/settings/${item._id}/flag-details`)
       }
@@ -79,45 +79,40 @@ function FlagCard({ item }: { item: FlagRecord }) {
     >
       <View style={styles.cardHeader}>
         <FlagStatusPill status={item.status} />
-        <Text style={profileTypography.metadata}>{item.date}</Text>
+        <Text style={profileTypography.metadata}>{date}</Text>
       </View>
-      <Text style={profileTypography.body}>{item.description}</Text>
+      <Text style={profileTypography.body}>{item.text}</Text>
     </Pressable>
   );
 }
 
 export default function PreviousFlagsScreen() {
   const styles = useThemedStyles(createStyles);
-  const data: FlagRecord[] = [
-    {
-      _id: "1",
-      status: "RESOLVED",
-      date: "2023-01-01",
-      description: "This is a description",
-    },
-    {
-      _id: "2",
-      status: "UNDER_REVIEW",
-      date: "2023-01-02",
-      description: "This is a description",
-    },
-    {
-      _id: "3",
-      status: "NO_ACTION_TAKEN",
-      date: "2023-03-01",
-      description: "This is a description",
-    },
-  ];
+  const profileTypography = useProfileTypography();
+  const { data, isLoading, isError } = useFlagsControllerMine();
 
   return (
     <ProfileScreen title="Previous Flags" scroll={false}>
-      <FlatList
-        data={data}
-        keyExtractor={(item) => item._id}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.list}
-        renderItem={({ item }) => <FlagCard item={item} />}
-      />
+      <Loader isLoading={isLoading}>
+        {isError ? (
+          <Text style={profileTypography.body}>
+            We could not load your flags. Please try again later.
+          </Text>
+        ) : (
+          <FlatList
+            data={data}
+            keyExtractor={(item) => item._id}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.list}
+            ListEmptyComponent={
+              <Text style={profileTypography.body}>
+                You have not flagged anything.
+              </Text>
+            }
+            renderItem={({ item }) => <FlagCard item={item} />}
+          />
+        )}
+      </Loader>
     </ProfileScreen>
   );
 }

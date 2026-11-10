@@ -267,7 +267,7 @@ function RentPlanContent({ tenancyId, title }: { tenancyId: string; title: strin
         <SectionTitle>How you pay</SectionTitle>
         <View style={styles.modes}>
           {[
-            { value: true, title: "Autopay", note: "Charged on the due date. Receipt in the app." },
+            { value: true, title: "Autopay", note: plan.plan.autopay && !plan.autopayCardSaved ? "Pay your next rent once with a card to turn on Autopay." : "Charged on the due date. Receipt in the app." },
             { value: false, title: "Remind me", note: "You pay each time, one tap." },
           ].map((mode) => (
             <Pressable
@@ -349,6 +349,11 @@ function RentPlanContent({ tenancyId, title }: { tenancyId: string; title: strin
                 <View style={styles.scheduleRow}>
                   <View style={styles.flex}>
                     <Text style={[styles.planTitle, { color: colors.text }]}>{formatDay(item.dueDate)}</Text>
+                    {item.holdingDepositCredit ? (
+                      <Text style={[styles.planUnit, { color: colors.mutedText }]}>
+                        Holding deposit {formatPence(item.holdingDepositCredit)} applied to first rent
+                      </Text>
+                    ) : null}
                     {item.status === "LATE" || item.status === "FAILED" ? (
                       <Text style={[styles.planUnit, { color: colors.danger }]}>
                         {item.status === "LATE" ? "Overdue" : "Last attempt failed"}
@@ -394,6 +399,11 @@ function RentPlanContent({ tenancyId, title }: { tenancyId: string; title: strin
                     <Text style={[styles.planUnit, { color: colors.mutedText }]}>
                       {item.paidAt ? `Paid ${formatDay(item.paidAt)}` : "Paid"}
                     </Text>
+                    {item.holdingDepositCredit ? (
+                      <Text style={[styles.planUnit, { color: colors.mutedText }]}>
+                        Holding deposit {formatPence(item.holdingDepositCredit)} applied to first rent
+                      </Text>
+                    ) : null}
                   </View>
                   <Text style={[styles.planPrice, { color: colors.text }]}>{formatPence(item.amount)}</Text>
                   <Badge label="Paid" tone="success" />

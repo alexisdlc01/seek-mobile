@@ -16,6 +16,13 @@ export interface UserDto {
   dateOfBirth?: string;
   universityDetails?: string;
   role: UserDtoRole;
+  /** Proved a university email address (student badge). */
+  studentVerified: boolean;
+  /**
+   * University behind the badge, e.g. "University of St Andrews".
+   * @nullable
+   */
+  university: string | null;
   profilePicUrl: string;
   isVerified: boolean;
   lastSeen: string;

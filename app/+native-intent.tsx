@@ -29,5 +29,9 @@ export function redirectSystemPath({
     return path.replace("https://www.seekapp.uk/link", "");
   }
 
+  // Any other seekapp:///profile or seekapp://receipts opens that route.
+  const route = path.replace(/^seekapp:\/\/\/*/, "");
+  if (route !== path && route) return `/${route}`;
+
   return "/";
 }

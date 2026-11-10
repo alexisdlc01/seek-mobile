@@ -12,4 +12,10 @@ export interface Flag {
   createdBy: string;
   text: string;
   resolutionDate?: string;
+  /**
+   * Seek support's reply to the reporter.
+   * @nullable
+   */
+  supportResponse?: string | null;
+  createdAt: string;
 }

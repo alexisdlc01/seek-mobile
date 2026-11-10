@@ -1,4 +1,9 @@
-import { AuthRequiredScreen } from "@/components/custom/auth-required";
+import {
+  AuthRequiredScreen,
+  useIsAuthenticated,
+} from "@/components/custom/auth-required";
+import { LandlordBlockedScreen } from "@/components/custom/landlord-blocked";
+import { useAuthControllerCurrentUser } from "@/src/api/seek-api/auth";
 import { useSeekTheme } from "@/hooks/use-seek-theme";
 import { Stack, useSegments } from "expo-router";
 
@@ -19,6 +24,10 @@ const PUBLIC_SETTINGS_SEGMENTS = new Set([
 
 export default function Layout() {
   const colors = useSeekTheme();
+  const isAuthenticated = useIsAuthenticated();
+  const { data: me } = useAuthControllerCurrentUser({
+    query: { enabled: isAuthenticated },
+  });
   const segments = useSegments() as string[];
   const isSettingsRoute = segments.includes("settings");
   const isPublicSettingsRoute = segments.some((segment) =>
@@ -57,6 +66,8 @@ export default function Layout() {
       <Stack.Screen name="application-successful" />
       <Stack.Screen name="apply" />
       <Stack.Screen name="rent-plan" />
+      <Stack.Screen name="receipts" />
+      <Stack.Screen name="receipt" />
       <Stack.Screen name="deposit" />
       <Stack.Screen name="bills" />
       <Stack.Screen name="documents" />
@@ -66,6 +77,10 @@ export default function Layout() {
       <Stack.Screen name="thread" />
     </Stack>
   );
+
+  if (isAuthenticated && me?.role === "LANDLORD_AGENCY") {
+    return <LandlordBlockedScreen />;
+  }
 
   if (!requiresAuthentication) return stack;
 

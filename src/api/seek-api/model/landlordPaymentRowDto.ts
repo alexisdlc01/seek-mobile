@@ -39,10 +39,12 @@ export interface LandlordPaymentRowDto {
   remindersSent: number;
   /** A paid holding deposit the landlord must refund within 7 days (Tenant Fees Act). */
   refundDue: boolean;
-  /** Seek's 0.5% fee on this payment, pence. */
+  /** Seek's 1% fee on this payment, pence. */
   fee: number;
   /** What the landlord receives for this payment, pence. */
   payout: number;
+  /** The tenant's paid holding deposit counted toward this rent, pence (0 if none). `amount` is already reduced by it. */
+  holdingDepositCredit: number;
   /**
    * Estimated payout date for this payment: two working days after it is paid or due. Null once it is late or failed, or while it is held.
    * @nullable

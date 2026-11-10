@@ -22,6 +22,8 @@ export interface StudentPaymentDto {
   landlord: string;
   /** What the tenant pays, in pence. */
   amount: number;
+  /** Paid holding deposit counted toward this rent (Tenant Fees Act), pence. `amount` is already reduced by it. */
+  holdingDepositCredit?: number;
   /** Months of rent this payment covers. */
   coversMonths: number;
   status: StudentPaymentDtoStatus;

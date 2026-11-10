@@ -21,6 +21,8 @@ export interface RentPlanViewDto {
    */
   restrictionReason: string | null;
   mode: RentPlanViewDtoMode;
+  /** True once a card is saved for autopay (Stripe charges it off-session). */
+  autopayCardSaved: boolean;
   /** Next payments due (up to 3). */
   upcoming: StudentPaymentDto[];
 }

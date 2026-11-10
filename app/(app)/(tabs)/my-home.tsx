@@ -219,7 +219,7 @@ function HomeContent({ tenancy }: { tenancy: TenancyView }) {
       icon: ReceiptIcon,
       title: "Rent history",
       detail: payments.isLoading ? "Loading…" : `${pluralise(paidCount, "payment")} made`,
-      onPress: () => router.push("/(app)/rent-plan"),
+      onPress: () => router.push("/(app)/receipts"),
     },
     {
       key: "notifications",
@@ -268,7 +268,9 @@ function HomeContent({ tenancy }: { tenancy: TenancyView }) {
             <Text style={[styles.heroAmount, { color: colors.onHero }]}>{formatPence(next.amount)}</Text>
             <Text style={[styles.heroNote, { color: colors.heroMuted }]}>
               {planView
-                ? `${planView.plan.autopay ? "Autopay on" : "Autopay off"} · ${frequencyLabel(planView.plan.frequency)}`
+                ? planView.plan.autopay && !planView.autopayCardSaved
+                  ? "Pay your next rent once with a card to turn on Autopay"
+                  : `${planView.plan.autopay ? "Autopay on" : "Autopay off"} · ${frequencyLabel(planView.plan.frequency)}`
                 : "Rent plan"}
             </Text>
           </>
@@ -287,7 +289,7 @@ function HomeContent({ tenancy }: { tenancy: TenancyView }) {
             label="Receipts"
             variant="outlineOnHero"
             compact
-            onPress={() => router.push("/(app)/rent-plan")}
+            onPress={() => router.push("/(app)/receipts")}
             style={styles.receipts}
           />
         </View>

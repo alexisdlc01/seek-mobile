@@ -238,7 +238,93 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
       return useMutation(mutationOptions, queryClient);
     }
-    export const flagsControllerFindOne = (
+    export const flagsControllerMine = (
+    
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<Flag[]>(
+      {url: `/flags/mine`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getFlagsControllerMineQueryKey = () => {
+    return [
+    `/flags/mine`
+    ] as const;
+    }
+
+    
+export const getFlagsControllerMineQueryOptions = <TData = Awaited<ReturnType<typeof flagsControllerMine>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof flagsControllerMine>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getFlagsControllerMineQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof flagsControllerMine>>> = ({ signal }) => flagsControllerMine(requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof flagsControllerMine>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type FlagsControllerMineQueryResult = NonNullable<Awaited<ReturnType<typeof flagsControllerMine>>>
+export type FlagsControllerMineQueryError = ErrorType<unknown>
+
+
+export function useFlagsControllerMine<TData = Awaited<ReturnType<typeof flagsControllerMine>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof flagsControllerMine>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof flagsControllerMine>>,
+          TError,
+          Awaited<ReturnType<typeof flagsControllerMine>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useFlagsControllerMine<TData = Awaited<ReturnType<typeof flagsControllerMine>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof flagsControllerMine>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof flagsControllerMine>>,
+          TError,
+          Awaited<ReturnType<typeof flagsControllerMine>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useFlagsControllerMine<TData = Awaited<ReturnType<typeof flagsControllerMine>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof flagsControllerMine>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useFlagsControllerMine<TData = Awaited<ReturnType<typeof flagsControllerMine>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof flagsControllerMine>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getFlagsControllerMineQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+export const flagsControllerFindOne = (
     id: string,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {

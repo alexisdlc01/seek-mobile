@@ -17,6 +17,7 @@ import { Text } from "@/components/ui/text";
 import type { SeekColors } from "@/constants/seek-theme";
 import { useSeekTheme, useThemedStyles } from "@/hooks/use-seek-theme";
 import { useAuthControllerLogout } from "@/src/api/seek-api/auth";
+import { useUsersControllerDeleteMe } from "@/src/api/seek-api/users";
 import { useAuth } from "@/src/store/auth-store";
 import { useRouter } from "expo-router";
 import {
@@ -27,7 +28,7 @@ import {
   Trash2Icon,
 } from "lucide-react-native";
 import React, { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 
 export default function SettingsScreen() {
   const styles = useThemedStyles(createStyles);
@@ -38,6 +39,8 @@ export default function SettingsScreen() {
   const logout = useAuth((state) => state.logout);
   const { mutate: logoutServer, isPending: isLoggingOut } =
     useAuthControllerLogout();
+  const { mutate: deleteAccount, isPending: isDeleting } =
+    useUsersControllerDeleteMe();
   const iconProps = {
     color: colors.accent,
     size: 22,
@@ -54,6 +57,29 @@ export default function SettingsScreen() {
         logout();
         queryClient.clear();
         router.replace("/(app)/(tabs)/map");
+      },
+    });
+  };
+
+  const handleDeleteAccount = () => {
+    if (isDeleting) {
+      return;
+    }
+
+    deleteAccount(undefined, {
+      onSuccess: () => {
+        setShowDeleteAccount(false);
+        logout();
+        queryClient.clear();
+        router.replace("/(app)/(tabs)/map");
+      },
+      onError: (error) => {
+        setShowDeleteAccount(false);
+        Alert.alert(
+          "Account not deleted",
+          (error as { response?: { data?: { message?: string } } })?.response
+            ?.data?.message || "Something went wrong. Please try again.",
+        );
       },
     });
   };
@@ -123,10 +149,13 @@ export default function SettingsScreen() {
             </Button>
             <Button
               action="negative"
-              onPress={() => setShowDeleteAccount(false)}
+              onPress={handleDeleteAccount}
+              isDisabled={isDeleting}
               style={styles.modalButton}
             >
-              <ButtonText style={styles.deleteText}>Delete Account</ButtonText>
+              <ButtonText style={styles.deleteText}>
+                {isDeleting ? "Deleting…" : "Delete Account"}
+              </ButtonText>
             </Button>
           </ModalFooter>
         </ModalContent>

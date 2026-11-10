@@ -57,6 +57,10 @@ import {
 import React, { useCallback, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { AuthRequiredScreen } from "@/components/custom/auth-required";
+import {
+  StudentVerificationCard,
+  VerifiedStudentBadge,
+} from "@/components/custom/student-verification";
 
 export default function ProfileScreenRoute() {
   return (
@@ -196,7 +200,12 @@ function ProfileContent({ user }: { user: UserDto }) {
           {user.username ? (
             <Text style={profileTypography.metadata}>@{user.username}</Text>
           ) : null}
+          {user.studentVerified ? (
+            <VerifiedStudentBadge university={user.university} />
+          ) : null}
         </View>
+
+        {user.role === "STUDENT" ? <StudentVerificationCard user={user} /> : null}
 
         <View style={styles.rows}>
           <ProfileActionRow

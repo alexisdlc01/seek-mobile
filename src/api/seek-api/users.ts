@@ -29,8 +29,12 @@ import type {
   ErrorDto,
   InviteTeamMemberDto,
   PassportDto,
+  RequestReferenceDto,
   SetProfilePicDto,
   SetUsernameDto,
+  StudentEmailCodeDto,
+  StudentEmailDto,
+  StudentVerificationResultDto,
   TeamInviteDto,
   TeamMemberDto,
   UpdateDocumentStatusDto,
@@ -48,6 +52,134 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 /**
+ * @summary Send a 6-digit code to your university email (valid 15 minutes) to get the verified student badge.
+ */
+export const usersControllerSendStudentEmailCode = (
+    studentEmailDto: StudentEmailDto,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<void>(
+      {url: `/users/me/student-email`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: studentEmailDto, signal
+    },
+      options);
+    }
+  
+
+
+export const getUsersControllerSendStudentEmailCodeMutationOptions = <TError = ErrorType<ErrorDto>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerSendStudentEmailCode>>, TError,{data: StudentEmailDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof usersControllerSendStudentEmailCode>>, TError,{data: StudentEmailDto}, TContext> => {
+
+const mutationKey = ['usersControllerSendStudentEmailCode'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof usersControllerSendStudentEmailCode>>, {data: StudentEmailDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  usersControllerSendStudentEmailCode(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UsersControllerSendStudentEmailCodeMutationResult = NonNullable<Awaited<ReturnType<typeof usersControllerSendStudentEmailCode>>>
+    export type UsersControllerSendStudentEmailCodeMutationBody = StudentEmailDto
+    export type UsersControllerSendStudentEmailCodeMutationError = ErrorType<ErrorDto>
+
+    /**
+ * @summary Send a 6-digit code to your university email (valid 15 minutes) to get the verified student badge.
+ */
+export const useUsersControllerSendStudentEmailCode = <TError = ErrorType<ErrorDto>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerSendStudentEmailCode>>, TError,{data: StudentEmailDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof usersControllerSendStudentEmailCode>>,
+        TError,
+        {data: StudentEmailDto},
+        TContext
+      > => {
+
+      const mutationOptions = getUsersControllerSendStudentEmailCodeMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Check the code. 5 wrong tries and you need a new code.
+ */
+export const usersControllerVerifyStudentEmail = (
+    studentEmailCodeDto: StudentEmailCodeDto,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<StudentVerificationResultDto>(
+      {url: `/users/me/student-email/verify`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: studentEmailCodeDto, signal
+    },
+      options);
+    }
+  
+
+
+export const getUsersControllerVerifyStudentEmailMutationOptions = <TError = ErrorType<ErrorDto>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerVerifyStudentEmail>>, TError,{data: StudentEmailCodeDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof usersControllerVerifyStudentEmail>>, TError,{data: StudentEmailCodeDto}, TContext> => {
+
+const mutationKey = ['usersControllerVerifyStudentEmail'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof usersControllerVerifyStudentEmail>>, {data: StudentEmailCodeDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  usersControllerVerifyStudentEmail(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UsersControllerVerifyStudentEmailMutationResult = NonNullable<Awaited<ReturnType<typeof usersControllerVerifyStudentEmail>>>
+    export type UsersControllerVerifyStudentEmailMutationBody = StudentEmailCodeDto
+    export type UsersControllerVerifyStudentEmailMutationError = ErrorType<ErrorDto>
+
+    /**
+ * @summary Check the code. 5 wrong tries and you need a new code.
+ */
+export const useUsersControllerVerifyStudentEmail = <TError = ErrorType<ErrorDto>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerVerifyStudentEmail>>, TError,{data: StudentEmailCodeDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof usersControllerVerifyStudentEmail>>,
+        TError,
+        {data: StudentEmailCodeDto},
+        TContext
+      > => {
+
+      const mutationOptions = getUsersControllerVerifyStudentEmailMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
  * @summary Delete your account (soft delete: you are signed out everywhere and cannot sign in again).
  */
 export const usersControllerDeleteMe = (
@@ -939,6 +1071,70 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
 
       const mutationOptions = getUsersControllerSetUsernameMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Invite a UK guarantor or ask a previous landlord, letting agent or academic for a reference. Seek emails them (replies go to you; a connected inbox files a reference into your passport) and the passport row reads PENDING with source "request" until a document arrives. Asking again for the same type replaces the request.
+ */
+export const usersControllerRequestReference = (
+    requestReferenceDto: RequestReferenceDto,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PassportDto>(
+      {url: `/users/me/passport/references`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: requestReferenceDto, signal
+    },
+      options);
+    }
+  
+
+
+export const getUsersControllerRequestReferenceMutationOptions = <TError = ErrorType<ErrorDto>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerRequestReference>>, TError,{data: RequestReferenceDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof usersControllerRequestReference>>, TError,{data: RequestReferenceDto}, TContext> => {
+
+const mutationKey = ['usersControllerRequestReference'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof usersControllerRequestReference>>, {data: RequestReferenceDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  usersControllerRequestReference(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UsersControllerRequestReferenceMutationResult = NonNullable<Awaited<ReturnType<typeof usersControllerRequestReference>>>
+    export type UsersControllerRequestReferenceMutationBody = RequestReferenceDto
+    export type UsersControllerRequestReferenceMutationError = ErrorType<ErrorDto>
+
+    /**
+ * @summary Invite a UK guarantor or ask a previous landlord, letting agent or academic for a reference. Seek emails them (replies go to you; a connected inbox files a reference into your passport) and the passport row reads PENDING with source "request" until a document arrives. Asking again for the same type replaces the request.
+ */
+export const useUsersControllerRequestReference = <TError = ErrorType<ErrorDto>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerRequestReference>>, TError,{data: RequestReferenceDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof usersControllerRequestReference>>,
+        TError,
+        {data: RequestReferenceDto},
+        TContext
+      > => {
+
+      const mutationOptions = getUsersControllerRequestReferenceMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

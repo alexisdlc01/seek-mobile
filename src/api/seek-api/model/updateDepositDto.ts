@@ -12,4 +12,9 @@ export interface UpdateDepositDto {
   depositReceivedAt?: string;
   /** Correct the deposit per tenant, in pence. */
   depositAmount?: number;
+  /**
+   * Energy fair-use allowance for the household, in pence per month. null removes it.
+   * @nullable
+   */
+  energyAllowance?: number | null;
 }
