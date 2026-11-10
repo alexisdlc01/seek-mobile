@@ -11,6 +11,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
   ViewStyle,
 } from "react-native";
@@ -214,19 +215,21 @@ export function SeekButton({
   }[variant];
 
   return (
-    <Pressable
+    // TouchableOpacity, not Pressable: NativeWind drops a function `style` on iOS (no bg/border/centering).
+    <TouchableOpacity
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ disabled }}
+      activeOpacity={0.85}
       disabled={disabled}
       onPress={onPress}
-      style={({ pressed }) => [
+      style={[
         styles.button,
         compact && styles.buttonCompact,
         {
           backgroundColor: palette.bg,
           borderColor: palette.border,
-          opacity: disabled ? 0.5 : pressed ? 0.85 : 1,
+          opacity: disabled ? 0.5 : 1,
         },
         style,
       ]}
@@ -240,7 +243,7 @@ export function SeekButton({
       >
         {label}
       </Text>
-    </Pressable>
+    </TouchableOpacity>
   );
 }
 

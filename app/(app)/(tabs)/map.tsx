@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Alert,
   Keyboard,
+  Platform,
   StyleSheet,
   TextInput,
   View,
@@ -310,7 +311,7 @@ export default function MapScreen() {
   return (
     <VStack className="flex-1">
       <MapView
-        provider={PROVIDER_GOOGLE}
+        provider={Platform.OS === "android" ? PROVIDER_GOOGLE : undefined}
         ref={mapRef}
         style={StyleSheet.absoluteFillObject}
         onMapReady={() => setMapReady(true)}
