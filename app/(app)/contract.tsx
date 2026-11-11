@@ -12,7 +12,7 @@ import {
 } from "@/src/api/seek-api/contracts";
 import type { Contract } from "@/src/api/seek-api/model";
 import { formatDate } from "@/src/utils/seek-format";
-import { errorMessage, openStoredFile, tenancyTitle, type TenancyView } from "@/src/utils/tenancy-view";
+import { errorMessage, isWebUrl, openStoredFile, tenancyTitle, type TenancyView } from "@/src/utils/tenancy-view";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
@@ -219,7 +219,7 @@ function ContractCard({ contract, tenancy }: { contract: Contract; tenancy: Tena
             variant="secondary"
             onPress={() => void onRead()}
           />
-          {contract.prescribedInformationUrl ? (
+          {isWebUrl(contract.prescribedInformationUrl) ? (
             <SeekButton
               label="Deposit information"
               compact
