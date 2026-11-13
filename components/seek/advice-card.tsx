@@ -41,6 +41,16 @@ export function resolveAdviceLink(link: string): AdviceTarget | null {
  * reopening a screen does not spend another model call. Each action opens its
  * app screen or the web page it points to.
  */
+export function useAdvice(args: { topic: AdviceRequestDtoTopic; tenancyId?: string; threadId?: string; applicationId?: string }) {
+  const { topic, tenancyId, threadId, applicationId } = args;
+  return useQuery({
+    queryKey: ["ai-advice", topic, tenancyId, threadId, applicationId],
+    queryFn: () => aiControllerAdvice({ topic, tenancyId, threadId, applicationId }),
+    staleTime: 10 * 60 * 1000,
+    retry: false,
+  });
+}
+
 export function AdviceCard({
   topic,
   tenancyId,
@@ -58,12 +68,9 @@ export function AdviceCard({
 }) {
   const colors = useSeekTheme();
   const router = useRouter();
-  const query = useQuery({
-    queryKey: ["ai-advice", topic, tenancyId, threadId, applicationId],
-    queryFn: () => aiControllerAdvice({ topic, tenancyId, threadId, applicationId }),
-    staleTime: 10 * 60 * 1000,
-    retry: false,
-  });
+  const query = useAdvice({ topic, tenancyId, threadId, applicationId });
+  // Only label it "Seek AI" when a model really answered; rule-based tips are "Seek tips".
+  const label = query.data?.source === "ai" ? heading : heading.replace(/^Seek AI/, "Seek tips");
   const links = (query.data?.actions ?? []).flatMap((action) => {
     const target = resolveAdviceLink(action.link);
     return target ? [{ ...action, target }] : [];
@@ -73,17 +80,17 @@ export function AdviceCard({
     <Card tone="hero">
       <View style={styles.title}>
         <SparklesIcon color={colors.onHero} size={18} />
-        <Text style={[styles.titleText, { color: colors.onHero }]}>{heading}</Text>
+        <Text style={[styles.titleText, { color: colors.onHero }]}>{label}</Text>
       </View>
       {query.isLoading ? (
         <View style={styles.loading}>
           <ActivityIndicator color={colors.onHero} />
-          <Text style={[styles.body, { color: colors.heroMuted }]}>Seek AI is reading your tenancy…</Text>
+          <Text style={[styles.body, { color: colors.heroMuted }]}>Reading your tenancy…</Text>
         </View>
       ) : query.isError ? (
         <>
           <Text style={[styles.body, { color: colors.heroMuted }]}>
-            Seek AI isn&apos;t available right now. Try again in a minute.
+            Tips aren&apos;t available right now. Try again in a minute.
           </Text>
           <SeekButton label="Try again" variant="light" compact onPress={() => query.refetch()} style={styles.self} />
         </>

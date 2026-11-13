@@ -1,5 +1,5 @@
 import { AuthRequiredScreen } from "@/components/custom/auth-required";
-import { AdviceCard } from "@/components/seek/advice-card";
+import { AdviceCard, useAdvice } from "@/components/seek/advice-card";
 import { EmptyState, ErrorState, LoadingState } from "@/components/seek/states";
 import { Badge, Card, Composer, Divider, SectionTitle, SeekButton, SeekScreen } from "@/components/seek/ui";
 import { useActiveTenancy } from "@/hooks/use-active-tenancy";
@@ -74,6 +74,7 @@ function Deposit() {
 }
 
 function DepositContent({ tenancy }: { tenancy: TenancyView }) {
+  const advice = useAdvice({ topic: "deposit", tenancyId: tenancy._id });
   const colors = useSeekTheme();
   const router = useRouter();
   const hasDeposit = tenancy.depositAmount > 0;
@@ -168,7 +169,7 @@ function DepositContent({ tenancy }: { tenancy: TenancyView }) {
         <Card style={{ backgroundColor: colors.dangerBg, borderColor: "transparent" }}>
           <Text accessibilityRole="alert" style={[styles.notice, { color: colors.danger }]}>
             Your landlord must protect your deposit in a government-approved scheme within {limit}{scotland ? " of your tenancy starting" : ""} and give you the
-            details. Ask them for the scheme and reference, or ask Seek AI what to do next.
+            details. Ask them for the scheme and reference, or see the tips below.
           </Text>
         </Card>
       ) : null}
@@ -177,7 +178,7 @@ function DepositContent({ tenancy }: { tenancy: TenancyView }) {
         <Card style={{ backgroundColor: colors.warningBg, borderColor: "transparent" }}>
           <Text accessibilityRole="alert" style={[styles.notice, { color: colors.warning }]}>
             This deposit is about {check.weeks.toFixed(1)} weeks of rent. The legal maximum is {check.label} (
-            {formatPence(check.cap)}), so the part above it may be recoverable. Ask Seek AI how to raise it.
+            {formatPence(check.cap)}), so the part above it may be recoverable. See the tips below on how to raise it.
           </Text>
         </Card>
       ) : null}
@@ -192,7 +193,7 @@ function DepositContent({ tenancy }: { tenancy: TenancyView }) {
 
       {hasDeposit ? <Deductions tenancy={tenancy} /> : null}
 
-      <AskAboutDeposit tenancy={tenancy} />
+      {advice.data?.source === "ai" ? <AskAboutDeposit tenancy={tenancy} /> : null}
 
       <View style={styles.section}>
         <SectionTitle>At move-out</SectionTitle>

@@ -349,8 +349,8 @@ export default function MapScreen() {
           <View style={styles.searchBar}>
             <SparklesIcon color={colors.accent} size={20} />
             <TextInput
-              accessibilityLabel="Ask Seek AI to find a home"
-              placeholder="Ask Seek AI: 4 beds near UoB under £700"
+              accessibilityLabel="Ask Seek to find a home"
+              placeholder="Ask Seek: 4 beds near UoB under £700"
               placeholderTextColor={colors.mutedText}
               value={query}
               onChangeText={setQuery}
@@ -376,11 +376,11 @@ export default function MapScreen() {
           <View style={styles.aiBanner}>
             <SparklesIcon color={colors.accent} size={16} />
             <Text style={styles.aiBannerText} numberOfLines={1}>
-              Seek AI picks · {aiResults.length} {aiResults.length === 1 ? "home" : "homes"}
+              Seek picks · {aiResults.length} {aiResults.length === 1 ? "home" : "homes"}
             </Text>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Clear Seek AI picks"
+              accessibilityLabel="Clear Seek picks"
               onPress={() => {
                 clearAiResults();
                 setSelectedListingId(null);
@@ -448,7 +448,7 @@ export default function MapScreen() {
             ListHeaderComponent={
               <View style={styles.sheetHeader}>
                 <Text style={styles.sheetTitle}>
-                  {sheetAiResults.length} {sheetAiResults.length === 1 ? "home" : "homes"} · Seek AI picks
+                  {sheetAiResults.length} {sheetAiResults.length === 1 ? "home" : "homes"} · Seek picks
                 </Text>
                 <PassportBanner />
               </View>
@@ -476,7 +476,7 @@ export default function MapScreen() {
           ListHeaderComponent={
             <View style={styles.sheetHeader}>
               <Text style={styles.sheetTitle}>
-                {listings.length} {listings.length === 1 ? "home" : "homes"} · Sorted by AI match
+                {listings.length} {listings.length === 1 ? "home" : "homes"} · Sorted by best match
               </Text>
               <PassportBanner />
             </View>

@@ -152,9 +152,10 @@ function ProfileContent({ user }: { user: UserDto }) {
     remoteLogout(undefined, {
       onSettled: () => {
         setShowLogout(false);
+        // Navigate first: clearing auth swaps the layout tree and unmounts the navigator.
+        router.replace("/(auth)/login");
         localLogout();
         queryClient.clear();
-        router.replace("/(app)/(tabs)/map");
       },
     });
   };

@@ -89,13 +89,13 @@ export default function MapScreen() {
       <View style={styles.searchRow}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Ask Seek AI to find a home"
+          accessibilityLabel="Ask Seek to find a home"
           onPress={() => router.push("/(app)/(tabs)/seek-ai")}
           style={styles.searchBar}
         >
           <SparklesIcon color={colors.accent} size={20} />
           <Text style={styles.searchText} numberOfLines={1}>
-            Ask Seek AI: 4 beds near UoB under £700
+            Ask Seek: 4 beds near UoB under £700
           </Text>
         </Pressable>
         <Pressable
@@ -138,7 +138,7 @@ export default function MapScreen() {
 
       <View style={styles.sheet}>
         <Text style={styles.sheetTitle}>
-          {ranked.length} {ranked.length === 1 ? "home" : "homes"} · Sorted by AI match
+          {ranked.length} {ranked.length === 1 ? "home" : "homes"} · Sorted by best match
         </Text>
         <View style={styles.banner}>
           <PassportBanner />

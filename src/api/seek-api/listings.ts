@@ -1064,12 +1064,15 @@ export function useListingsControllerGetLiked<TData = Awaited<ReturnType<typeof 
 
 
 
+/**
+ * @summary Run the automatic check again on a listing (Seek staff). Never approves a listing by hand.
+ */
 export const listingsControllerVerifyListing = (
     id: string,
  options?: SecondParameter<typeof customInstance>,) => {
       
       
-      return customInstance<unknown>(
+      return customInstance<Listing>(
       {url: `/listings/verify/${id}`, method: 'PATCH'
     },
       options);
@@ -1106,7 +1109,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     
     export type ListingsControllerVerifyListingMutationError = ErrorType<ErrorDto>
 
-    export const useListingsControllerVerifyListing = <TError = ErrorType<ErrorDto>,
+    /**
+ * @summary Run the automatic check again on a listing (Seek staff). Never approves a listing by hand.
+ */
+export const useListingsControllerVerifyListing = <TError = ErrorType<ErrorDto>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof listingsControllerVerifyListing>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof listingsControllerVerifyListing>>,

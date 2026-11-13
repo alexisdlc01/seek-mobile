@@ -53,8 +53,8 @@ type ChatItem = {
 export default function SeekAiScreen() {
   return (
     <AuthRequiredScreen
-      title="Sign in to ask Seek AI"
-      description="Describe the home you want and Seek AI finds matches. Browse the map without an account, or sign in to chat."
+      title="Sign in to use Seek search"
+      description="Describe the home you want and Seek search finds matches. Browse the map without an account, or sign in to chat."
     >
       <SeekAiChat />
     </AuthRequiredScreen>
@@ -78,7 +78,8 @@ function SeekAiChat() {
   const router = useRouter();
   const { q } = useLocalSearchParams<{ q?: string }>();
   const showOnMap = useAiMapStore((state) => state.show);
-  const { mutate, isPending } = useAiControllerSearchChat();
+  const { mutate, isPending, data: last } = useAiControllerSearchChat();
+  const name = last?.source === "ai" ? "Seek AI" : "Seek search";
   const [items, setItems] = useState<ChatItem[]>([]);
   const [draft, setDraft] = useState("");
   const scrollRef = useRef<ScrollView>(null);
@@ -155,7 +156,7 @@ function SeekAiChat() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <SeekScreen
-        title="Seek AI"
+        title={name}
         subtitle="Describe the home you want"
         scroll={false}
         contentStyle={styles.noPadding}
@@ -168,7 +169,7 @@ function SeekAiChat() {
         }
         footer={
           <Composer
-            label="Message Seek AI"
+            label={`Message ${name}`}
             placeholder="Refine: closer, cheaper, en-suite…"
             value={draft}
             onChangeText={setDraft}
@@ -230,7 +231,7 @@ function SeekAiChat() {
             </View>
           ))}
           {isPending ? (
-            <View style={styles.typing} accessibilityRole="progressbar" accessibilityLabel="Seek AI is searching">
+            <View style={styles.typing} accessibilityRole="progressbar" accessibilityLabel={`${name} is searching`}>
               <ActivityIndicator color={colors.accent} />
               <Text style={[styles.typingText, { color: colors.mutedText }]}>Searching…</Text>
             </View>

@@ -38,7 +38,6 @@ import type {
   StudentVerificationResultDto,
   TeamInviteDto,
   TeamMemberDto,
-  UpdateDocumentStatusDto,
   UpdateUserProfileDto,
   UserDto
 } from './model';
@@ -1385,7 +1384,7 @@ export const useUsersControllerRevokeShare = <TError = ErrorType<ErrorDto>,
       return useMutation(mutationOptions, queryClient);
     }
     /**
- * @summary Seek Passport uploads waiting for a check, oldest first (Seek staff). Record the result with PATCH users/{id}/documents/{type}/status.
+ * @summary Seek Passport uploads not yet marked as provided, oldest first (Seek staff, monitoring only).
  */
 export const usersControllerListPendingDocuments = (
     
@@ -1456,7 +1455,7 @@ export function useUsersControllerListPendingDocuments<TData = Awaited<ReturnTyp
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Seek Passport uploads waiting for a check, oldest first (Seek staff). Record the result with PATCH users/{id}/documents/{type}/status.
+ * @summary Seek Passport uploads not yet marked as provided, oldest first (Seek staff, monitoring only).
  */
 
 export function useUsersControllerListPendingDocuments<TData = Awaited<ReturnType<typeof usersControllerListPendingDocuments>>, TError = ErrorType<ErrorDto>>(
@@ -1476,72 +1475,7 @@ export function useUsersControllerListPendingDocuments<TData = Awaited<ReturnTyp
 
 
 
-/**
- * @summary Record the result of a document check (Seek staff).
- */
-export const usersControllerSetDocumentStatus = (
-    id: string,
-    type: string,
-    updateDocumentStatusDto: UpdateDocumentStatusDto,
- options?: SecondParameter<typeof customInstance>,) => {
-      
-      
-      return customInstance<PassportDto>(
-      {url: `/users/${id}/documents/${type}/status`, method: 'PATCH',
-      headers: {'Content-Type': 'application/json', },
-      data: updateDocumentStatusDto
-    },
-      options);
-    }
-  
-
-
-export const getUsersControllerSetDocumentStatusMutationOptions = <TError = ErrorType<ErrorDto>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerSetDocumentStatus>>, TError,{id: string;type: string;data: UpdateDocumentStatusDto}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof usersControllerSetDocumentStatus>>, TError,{id: string;type: string;data: UpdateDocumentStatusDto}, TContext> => {
-
-const mutationKey = ['usersControllerSetDocumentStatus'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof usersControllerSetDocumentStatus>>, {id: string;type: string;data: UpdateDocumentStatusDto}> = (props) => {
-          const {id,type,data} = props ?? {};
-
-          return  usersControllerSetDocumentStatus(id,type,data,requestOptions)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UsersControllerSetDocumentStatusMutationResult = NonNullable<Awaited<ReturnType<typeof usersControllerSetDocumentStatus>>>
-    export type UsersControllerSetDocumentStatusMutationBody = UpdateDocumentStatusDto
-    export type UsersControllerSetDocumentStatusMutationError = ErrorType<ErrorDto>
-
-    /**
- * @summary Record the result of a document check (Seek staff).
- */
-export const useUsersControllerSetDocumentStatus = <TError = ErrorType<ErrorDto>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerSetDocumentStatus>>, TError,{id: string;type: string;data: UpdateDocumentStatusDto}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof usersControllerSetDocumentStatus>>,
-        TError,
-        {id: string;type: string;data: UpdateDocumentStatusDto},
-        TContext
-      > => {
-
-      const mutationOptions = getUsersControllerSetDocumentStatusMutationOptions(options);
-
-      return useMutation(mutationOptions, queryClient);
-    }
-    export const usersControllerAddDocument = (
+export const usersControllerAddDocument = (
     addDocumentDto: AddDocumentDto,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {

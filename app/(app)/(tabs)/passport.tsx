@@ -90,7 +90,7 @@ function GuarantorTip() {
       <View style={styles.tipHead}>
         <SparklesIcon color={colors.onTint} size={14} />
         <Text style={[styles.tipTitle, { color: colors.onTint }]}>
-          {query.data?.title ?? "Seek AI"}
+          {query.data?.title ?? "Seek tips"}
         </Text>
       </View>
       <Text style={[styles.tipBody, { color: colors.onTint }]}>
