@@ -238,6 +238,61 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
       return useMutation(mutationOptions, queryClient);
     }
+    export const flagsControllerLiftSuspension = (
+    userId: string,
+ options?: SecondParameter<typeof customInstance>,) => {
+      
+      
+      return customInstance<void>(
+      {url: `/flags/lift-suspension/${userId}`, method: 'PATCH'
+    },
+      options);
+    }
+  
+
+
+export const getFlagsControllerLiftSuspensionMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof flagsControllerLiftSuspension>>, TError,{userId: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof flagsControllerLiftSuspension>>, TError,{userId: string}, TContext> => {
+
+const mutationKey = ['flagsControllerLiftSuspension'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof flagsControllerLiftSuspension>>, {userId: string}> = (props) => {
+          const {userId} = props ?? {};
+
+          return  flagsControllerLiftSuspension(userId,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type FlagsControllerLiftSuspensionMutationResult = NonNullable<Awaited<ReturnType<typeof flagsControllerLiftSuspension>>>
+    
+    export type FlagsControllerLiftSuspensionMutationError = ErrorType<unknown>
+
+    export const useFlagsControllerLiftSuspension = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof flagsControllerLiftSuspension>>, TError,{userId: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof flagsControllerLiftSuspension>>,
+        TError,
+        {userId: string},
+        TContext
+      > => {
+
+      const mutationOptions = getFlagsControllerLiftSuspensionMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
     export const flagsControllerMine = (
     
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal

@@ -92,6 +92,9 @@ export default function Filters() {
           <Pressable
             className="absolute left-2 h-10 w-10 items-center justify-center rounded-full"
             onPress={() => router.back()}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+            hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
           >
             <Icon as={ArrowLeft} size="xl" />
           </Pressable>
@@ -101,6 +104,8 @@ export default function Filters() {
           <Pressable
             className="absolute right-2 h-10 justify-center px-2"
             onPress={clear}
+            accessibilityRole="button"
+            hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
           >
             <Text className="font-semibold text-primary-600">Reset</Text>
           </Pressable>

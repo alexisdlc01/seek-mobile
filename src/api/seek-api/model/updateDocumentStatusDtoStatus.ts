@@ -11,4 +11,5 @@ export const UpdateDocumentStatusDtoStatus = {
   VERIFIED: 'VERIFIED',
   EXPIRED: 'EXPIRED',
   REJECTED: 'REJECTED',
+  PROVIDED: 'PROVIDED',
 } as const;

@@ -24,6 +24,7 @@ import type {
   AuthUrlDto,
   ConfirmConnectorDto,
   ConnectImapDto,
+  ConnectionMatchDto,
   ConnectorSettingsDto,
   ConnectorsControllerAuthUrlParams,
   ConnectorsOverviewDto,
@@ -554,6 +555,98 @@ export const useConnectorsControllerSync = <TError = ErrorType<ErrorDto>,
       return useMutation(mutationOptions, queryClient);
     }
     /**
+ * @summary Housing contacts matched in this mailbox (up to 50, newest first). No message content.
+ */
+export const connectorsControllerMatches = (
+    id: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<ConnectionMatchDto[]>(
+      {url: `/connectors/${id}/matches`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getConnectorsControllerMatchesQueryKey = (id?: string,) => {
+    return [
+    `/connectors/${id}/matches`
+    ] as const;
+    }
+
+    
+export const getConnectorsControllerMatchesQueryOptions = <TData = Awaited<ReturnType<typeof connectorsControllerMatches>>, TError = ErrorType<ErrorDto>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof connectorsControllerMatches>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getConnectorsControllerMatchesQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof connectorsControllerMatches>>> = ({ signal }) => connectorsControllerMatches(id, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof connectorsControllerMatches>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ConnectorsControllerMatchesQueryResult = NonNullable<Awaited<ReturnType<typeof connectorsControllerMatches>>>
+export type ConnectorsControllerMatchesQueryError = ErrorType<ErrorDto>
+
+
+export function useConnectorsControllerMatches<TData = Awaited<ReturnType<typeof connectorsControllerMatches>>, TError = ErrorType<ErrorDto>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof connectorsControllerMatches>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof connectorsControllerMatches>>,
+          TError,
+          Awaited<ReturnType<typeof connectorsControllerMatches>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useConnectorsControllerMatches<TData = Awaited<ReturnType<typeof connectorsControllerMatches>>, TError = ErrorType<ErrorDto>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof connectorsControllerMatches>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof connectorsControllerMatches>>,
+          TError,
+          Awaited<ReturnType<typeof connectorsControllerMatches>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useConnectorsControllerMatches<TData = Awaited<ReturnType<typeof connectorsControllerMatches>>, TError = ErrorType<ErrorDto>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof connectorsControllerMatches>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Housing contacts matched in this mailbox (up to 50, newest first). No message content.
+ */
+
+export function useConnectorsControllerMatches<TData = Awaited<ReturnType<typeof connectorsControllerMatches>>, TError = ErrorType<ErrorDto>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof connectorsControllerMatches>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getConnectorsControllerMatchesQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+/**
  * @summary Disconnect a mailbox and delete the emails stored from it.
  */
 export const connectorsControllerDisconnect = (

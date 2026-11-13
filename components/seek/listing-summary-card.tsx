@@ -40,7 +40,7 @@ export function ListingSummaryCard({
     >
       <View style={[styles.photo, { backgroundColor: colors.surfaceAlt }]}>
         {listing.photo ? (
-          <Image source={{ uri: listing.photo }} style={StyleSheet.absoluteFill} contentFit="cover" />
+          <Image source={{ uri: listing.photo }} accessibilityLabel={listing.title} style={StyleSheet.absoluteFill} contentFit="cover" />
         ) : null}
       </View>
       <View style={styles.body}>

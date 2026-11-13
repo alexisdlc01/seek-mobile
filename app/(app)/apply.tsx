@@ -200,7 +200,7 @@ export default function ApplyScreen() {
   const book = passport.data;
   const members = conversation.data?.users ?? [];
   const sharedItems = book.sections.flatMap((section) =>
-    section.items.filter((item) => item.status === "VERIFIED" || item.status === "PENDING"),
+    section.items.filter((item) => item.status === "VERIFIED" || item.status === "PENDING" || item.status === "PROVIDED"),
   );
   const labelOf = (type: string) =>
     book.sections.flatMap((section) => section.items).find((item) => item.type === type)?.label ??
@@ -450,7 +450,7 @@ export default function ApplyScreen() {
                 <CheckCircle2Icon color={colors.success} size={18} />
                 <Text style={[styles.sharedLabel, { color: colors.text }]}>{item.label}</Text>
                 <Text style={[styles.note, { color: colors.mutedText }]}>
-                  {item.status === "VERIFIED" ? "Verified" : "Pending"}
+                  {item.status === "VERIFIED" ? "Verified" : item.status === "PROVIDED" ? "Provided — landlord checks" : "Pending"}
                 </Text>
               </View>
             ))

@@ -142,7 +142,7 @@ export default function ChatScreen() {
       <SafeAreaView className="p-6">
         <VStack className="h-full gap-2">
           <Box className="z-10 flex items-center justify-between flex-row gap-4">
-            <Pressable onPressIn={() => router.back()}>
+            <Pressable onPressIn={() => router.back()} accessibilityRole="button" accessibilityLabel="Go back">
               <Icon as={ArrowLeftIcon} size="xl" />
             </Pressable>
             <Text bold
@@ -355,7 +355,13 @@ function ChatMenu({ conversationId, userId }: ChatMenuProps) {
 
   return (
     <Box>
-      <Pressable onPress={() => setOpen(value => !value)} hitSlop={8}>
+      <Pressable
+        onPress={() => setOpen(value => !value)}
+        hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel="Chat options"
+        accessibilityState={{ expanded: open }}
+      >
         <Icon as={EllipsisVerticalIcon} size="xl" />
       </Pressable>
       {open ? (

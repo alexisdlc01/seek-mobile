@@ -3,6 +3,7 @@
  */
 import type { FlagStatus } from './flagStatus';
 import type { FlagCategory } from './flagCategory';
+import type { FlagTriage } from './flagTriage';
 
 export interface Flag {
   _id: string;
@@ -17,5 +18,10 @@ export interface Flag {
    * @nullable
    */
   supportResponse?: string | null;
+  /**
+   * Automatic AI triage (admins only): category, severity and a short summary.
+   * @nullable
+   */
+  triage?: FlagTriage;
   createdAt: string;
 }

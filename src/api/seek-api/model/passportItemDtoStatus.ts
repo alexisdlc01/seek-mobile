@@ -11,5 +11,6 @@ export const PassportItemDtoStatus = {
   VERIFIED: 'VERIFIED',
   EXPIRED: 'EXPIRED',
   REJECTED: 'REJECTED',
+  PROVIDED: 'PROVIDED',
   MISSING: 'MISSING',
 } as const;

@@ -4,6 +4,7 @@
 import type { ListingPropertyType } from './listingPropertyType';
 import type { ListingFurnishingStatus } from './listingFurnishingStatus';
 import type { ListingEpcRating } from './listingEpcRating';
+import type { ListingModerationStatus } from './listingModerationStatus';
 import type { ListingNation } from './listingNation';
 import type { ListingCriteria } from './listingCriteria';
 import type { ListingPaymentPlansItem } from './listingPaymentPlansItem';
@@ -40,6 +41,13 @@ export interface Listing {
   floorPlanImage: string;
   requirements: string[];
   isVerified: boolean;
+  /**
+   * Automatic check result; null until the listing is first checked.
+   * @nullable
+   */
+  moderationStatus?: ListingModerationStatus;
+  /** What the landlord must fix before the listing goes live. */
+  moderationReasons?: string[];
   isDraft: boolean;
   lastUpdated: string;
   likedBy: string[];

@@ -53,7 +53,11 @@ export function PasswordInput({
           onSubmitEditing={onSubmitEditing}
           returnKeyType={returnKeyType}
         />
-        <InputSlot className="pr-3" onPressIn={() => setShow((c) => !c)}>
+        <InputSlot
+          className="pr-3"
+          accessibilityRole="button"
+          accessibilityLabel={show ? "Hide password" : "Show password"}
+          onPressIn={() => setShow((c) => !c)}>
           <InputIcon
             className="text-secondary-800"
             as={show ? EyeOffIcon : EyeIcon}

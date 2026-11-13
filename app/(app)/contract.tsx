@@ -10,7 +10,7 @@ import {
   useContractsControllerForTenancy,
   useContractsControllerSign,
 } from "@/src/api/seek-api/contracts";
-import type { Contract } from "@/src/api/seek-api/model";
+import type { Contract, TenancyDocument } from "@/src/api/seek-api/model";
 import { formatDate } from "@/src/utils/seek-format";
 import { errorMessage, isWebUrl, openStoredFile, tenancyTitle, type TenancyView } from "@/src/utils/tenancy-view";
 import { useQueryClient } from "@tanstack/react-query";
@@ -77,6 +77,14 @@ function ContractContent({ tenancy }: { tenancy: TenancyView }) {
 
   // A draft is still the landlord's to finish.
   const visible = (contracts.data ?? []).filter((contract) => contract.status !== "DRAFT");
+  // An agreement filed as a tenancy document (the My home tile) stands in when there is nothing to sign.
+  // Only the landlord or their team can file this type now (the API files a tenant's copy as OTHER). Landlord sources first:
+  // Seek-signed, then the landlord's email; an older upload counts only if stored by Seek (a bare external link may be a housemate's).
+  const agreements = (tenancy.documents ?? []).filter((doc) => doc.type === "TENANCY_AGREEMENT");
+  const agreement =
+    agreements.find((doc) => doc.source === "SEEK") ??
+    agreements.find((doc) => doc.source === "EMAIL") ??
+    agreements.find((doc) => !!doc.key);
 
   return (
     <SeekScreen {...shell}>
@@ -84,6 +92,8 @@ function ContractContent({ tenancy }: { tenancy: TenancyView }) {
         <LoadingState label="Loading your contract…" />
       ) : contracts.isError ? (
         <ErrorState error={contracts.error} onRetry={() => contracts.refetch()} title="Couldn't load your contract" />
+      ) : visible.length === 0 && agreement ? (
+        <AgreementDocCard doc={agreement} />
       ) : visible.length === 0 ? (
         <EmptyState
           title="Nothing to sign yet"
@@ -110,6 +120,33 @@ function ContractContent({ tenancy }: { tenancy: TenancyView }) {
 
       <AdviceCard topic="contract" tenancyId={tenancy._id} heading="Seek AI · your contract" />
     </SeekScreen>
+  );
+}
+
+function AgreementDocCard({ doc }: { doc: TenancyDocument }) {
+  const colors = useSeekTheme();
+  const [error, setError] = useState<string | null>(null);
+  const onOpen = async () => {
+    setError(null);
+    try {
+      await openStoredFile(doc);
+    } catch (e) {
+      setError(errorMessage(e, "We couldn't open this document right now. Please try again, or ask your landlord to send it."));
+    }
+  };
+  return (
+    <Card style={styles.card}>
+      <Text style={[styles.title, { color: colors.text }]}>{doc.title}</Text>
+      <Text style={[styles.meta, { color: colors.mutedText }]}>Added {formatDate(doc.addedAt)}.</Text>
+      {error ? (
+        <Text accessibilityRole="alert" style={[styles.meta, { color: colors.danger }]}>
+          {error}
+        </Text>
+      ) : null}
+      <View style={styles.actions}>
+        <SeekButton label="Read contract" compact variant="secondary" onPress={() => void onOpen()} />
+      </View>
+    </Card>
   );
 }
 

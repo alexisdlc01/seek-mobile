@@ -11,6 +11,8 @@ export interface EmailConnectionViewDto {
   label: string;
   emailAddress: string;
   status: EmailConnectionViewDtoStatus;
+  /** Replies can be sent from this mailbox. False for IMAP (read-only). */
+  canSend: boolean;
   /** Only housing emails are synced (your connector settings scope is housing). */
   housingOnly: boolean;
   /** @nullable */

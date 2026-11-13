@@ -18,9 +18,10 @@ export function LandlordBlockedScreen() {
   const signOut = () =>
     remoteLogout(undefined, {
       onSettled: () => {
+        // Navigate first: clearing auth swaps the layout tree and unmounts the navigator.
+        router.replace("/(app)/(tabs)/map");
         localLogout();
         queryClient.clear();
-        router.replace("/(app)/(tabs)/map");
       },
     });
 

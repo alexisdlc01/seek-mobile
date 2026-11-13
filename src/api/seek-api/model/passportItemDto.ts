@@ -41,4 +41,9 @@ export interface PassportItemDto {
    * @nullable
    */
   requestedAt?: string | null;
+  /**
+   * Status REJECTED only: what to fix, from the automatic review. Only for the owner or a viewer with an active share.
+   * @nullable
+   */
+  reason?: string | null;
 }

@@ -25,6 +25,7 @@ export default function AppleOTPInput({ setCode, code }: AppleOTPInputProps) {
     <OTPInput
       ref={ref}
       maxLength={5}
+      accessibilityLabel="Verification code"
       onChange={e => setCode(e)}
       render={({ slots }) => (
         <View className="flex-row gap-2 items-center justify-center my-4">
@@ -40,6 +41,7 @@ export default function AppleOTPInput({ setCode, code }: AppleOTPInputProps) {
 function Slot({ char, isActive, hasFakeCaret }: SlotProps) {
   return (
     <View
+      accessible={false}
       className={cn(
         'w-[50px] h-[50px] items-center justify-center border border-outline-200 rounded-lg bg-background-card',
         {

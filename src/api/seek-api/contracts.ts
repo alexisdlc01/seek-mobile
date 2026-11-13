@@ -1029,6 +1029,68 @@ export const useContractsControllerSend = <TError = ErrorType<ErrorDto>,
       return useMutation(mutationOptions, queryClient);
     }
     /**
+ * @summary Email the signing link again to tenants who have not signed a sent contract (once per 24 hours).
+ */
+export const contractsControllerRemind = (
+    id: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<Contract>(
+      {url: `/contracts/${id}/remind`, method: 'POST', signal
+    },
+      options);
+    }
+  
+
+
+export const getContractsControllerRemindMutationOptions = <TError = ErrorType<ErrorDto>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof contractsControllerRemind>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof contractsControllerRemind>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['contractsControllerRemind'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof contractsControllerRemind>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  contractsControllerRemind(id,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ContractsControllerRemindMutationResult = NonNullable<Awaited<ReturnType<typeof contractsControllerRemind>>>
+    
+    export type ContractsControllerRemindMutationError = ErrorType<ErrorDto>
+
+    /**
+ * @summary Email the signing link again to tenants who have not signed a sent contract (once per 24 hours).
+ */
+export const useContractsControllerRemind = <TError = ErrorType<ErrorDto>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof contractsControllerRemind>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof contractsControllerRemind>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getContractsControllerRemindMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
  * @summary Sign a sent contract. It becomes SIGNED when every tenant has signed.
  */
 export const contractsControllerSign = (

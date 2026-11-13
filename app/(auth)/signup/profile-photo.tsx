@@ -97,7 +97,11 @@ export default function ProfilePhoto() {
   return (
     <AuthGaurd>
       <VStack className="gap-8 px-4 py-20 items-center h-full justify-between">
-        <Pressable onPress={() => setShow(true)}>
+        <Pressable
+          onPress={() => setShow(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Choose profile photo"
+        >
           <Avatar
             size="2xl"
             style={{

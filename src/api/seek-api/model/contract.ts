@@ -23,6 +23,11 @@ export interface Contract {
   /** @nullable */
   signedAt: string | null;
   /**
+   * Last signing reminder sent to the tenants.
+   * @nullable
+   */
+  lastRemindedAt: string | null;
+  /**
    * Set when the contract is Seek's built-in agreement.
    * @nullable
    */

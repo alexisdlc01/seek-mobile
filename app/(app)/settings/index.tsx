@@ -54,9 +54,10 @@ export default function SettingsScreen() {
 
     logoutServer(undefined, {
       onSettled: () => {
+        // Navigate first: clearing auth swaps the layout tree and unmounts the navigator.
+        router.replace("/(app)/(tabs)/map");
         logout();
         queryClient.clear();
-        router.replace("/(app)/(tabs)/map");
       },
     });
   };
@@ -69,9 +70,10 @@ export default function SettingsScreen() {
     deleteAccount(undefined, {
       onSuccess: () => {
         setShowDeleteAccount(false);
+        // Navigate first: clearing auth swaps the layout tree and unmounts the navigator.
+        router.replace("/(app)/(tabs)/map");
         logout();
         queryClient.clear();
-        router.replace("/(app)/(tabs)/map");
       },
       onError: (error) => {
         setShowDeleteAccount(false);

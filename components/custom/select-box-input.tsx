@@ -31,6 +31,9 @@ export function SelectBoxInput({
         <Pressable
           key={option.value}
           onPressIn={() => onChange(option.value)}
+          accessibilityRole="radio"
+          accessibilityState={{ selected: option.value === value }}
+          hitSlop={{ top: 4, bottom: 4 }}
           className={`h-10 w-[31%] grow-0 items-center justify-center rounded-full border border-primary-500 ${option.value === value ? "bg-primary-500" : "bg-background-card"}`}
         >
           <Text

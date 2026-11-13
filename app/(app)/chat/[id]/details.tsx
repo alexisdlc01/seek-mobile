@@ -93,14 +93,14 @@ export default function ChatDetails() {
       <SafeAreaView className="p-6">
         <VStack className="h-full gap-2">
           <Box className="flex items-center justify-between flex-row gap-4">
-            <Pressable onPressIn={() => router.back()}>
+            <Pressable onPressIn={() => router.back()} accessibilityRole="button" accessibilityLabel="Go back">
               <Icon as={ArrowLeftIcon} size="xl" />
             </Pressable>
             <Text bold size="xl" className="text-ellipsis line-clamp-1 flex-shrink">
               {conversation?.name ?? "Chat"}
             </Text>
             {canInvite ? (
-              <Pressable onPress={handleShare} accessibilityLabel="Share an invite">
+              <Pressable onPress={handleShare} accessibilityRole="button" hitSlop={12} accessibilityLabel="Share an invite">
                 <Icon as={PlusIcon} size="xl" />
               </Pressable>
             ) : (

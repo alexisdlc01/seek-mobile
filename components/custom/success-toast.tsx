@@ -30,7 +30,7 @@ export function SuccessToast({ message }: SuccessToastProps) {
             {/*   <Icon color="white" size="lg" as={CloseCircleIcon} /> */}
             {/* </Pressable> */}
           </HStack>
-          <ToastDescription>
+          <ToastDescription accessibilityLiveRegion="polite">
             <Text>{_message}</Text>
           </ToastDescription>
         </VStack>

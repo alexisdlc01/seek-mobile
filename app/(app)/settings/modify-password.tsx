@@ -33,13 +33,14 @@ export default function ModifyPasswordScreen() {
   >({
     mutationFn: (data) => authControllerChangePassword(data),
     onSuccess({ message }) {
+      // Navigate first: clearing auth swaps the layout tree and unmounts the navigator.
+      router.replace("/(auth)/login");
       logout();
       queryClient.clear();
       toast.show({
         placement: "top",
         render: (props) => <SuccessToast {...props} message={message ?? "Password changed."} />,
       });
-      router.replace("/(auth)/login");
     },
     onError(error) {
       toast.show({

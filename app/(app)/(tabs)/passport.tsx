@@ -123,6 +123,9 @@ function statusBadge(item: PassportItemDto): { label: string; tone: BadgeTone } 
       return { label: "Verified", tone: "success" };
     case "PENDING":
       return { label: "Pending", tone: "warning" };
+    case "PROVIDED":
+      // Identity documents: Seek never checks them, the landlord does through the share.
+      return { label: "Provided — landlord checks", tone: "neutral" };
     case "EXPIRED":
       return { label: "Expired", tone: "danger" };
     case "REJECTED":
@@ -146,7 +149,7 @@ function itemDetail(item: PassportItemDto): string | undefined {
     return item.type === "GUARANTOR_AGREEMENT" ? "Invite sent · Pending" : "Requested · Pending";
   }
   if (item.status === "PENDING") return "Waiting for verification";
-  if (item.status === "REJECTED") return "Upload a clearer copy";
+  if (item.status === "REJECTED") return item.reason ?? "Upload a clearer copy";
   if (item.status === "MISSING") return item.required ? "Required to apply" : "Optional";
   return undefined;
 }
@@ -327,7 +330,7 @@ function Profile() {
                 const badge = uploading === item.type
                   ? { label: "Uploading…", tone: "neutral" as BadgeTone }
                   : statusBadge(item);
-                const needsUpload = item.status !== "VERIFIED" && item.status !== "PENDING";
+                const needsUpload = item.status !== "VERIFIED" && item.status !== "PENDING" && item.status !== "PROVIDED";
                 const requestable = (Object.values(RequestReferenceDtoType) as string[]).includes(item.type)
                   ? (item.type as RequestReferenceDtoType)
                   : null;

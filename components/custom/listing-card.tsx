@@ -45,7 +45,7 @@ export function ListingCard({ data, left }: ListingCardProps) {
           <HStack className="gap-4 flex-1">
             <Image
               className="h-24 w-24 rounded-2xl"
-              alt="listing image"
+              alt={`${data.propertyTitle} photo 1`}
               source={{
                 uri: data.photos?.at(0) ?? "https://picsum.photos/200",
               }}
@@ -127,6 +127,8 @@ export function VerticalListingCard({
     <Card className="bg-transparent px-4 pb-5">
       <VStack className="justify-between">
         <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={data.propertyTitle}
           onPress={onPress}
           onLayout={onLayout}
           className="overflow-hidden rounded-t-3xl"
@@ -149,7 +151,7 @@ export function VerticalListingCard({
             data={data.photos}
             decelerationRate={0.9}
             keyExtractor={(item) => item}
-            renderItem={({ item }) => (
+            renderItem={({ item, index }) => (
               <Box
                 style={{
                   width: parentWidth,
@@ -157,7 +159,7 @@ export function VerticalListingCard({
               >
                 <Image
                   className="w-full h-[220px]"
-                  alt="listing image"
+                  alt={`${data.propertyTitle} photo ${index + 1}`}
                   source={{
                     uri: item,
                   }}

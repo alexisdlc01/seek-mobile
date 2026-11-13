@@ -213,6 +213,7 @@ export default function PermissionsScreen() {
                 Location
               </Text>
               <Switch
+                accessibilityLabel="Location"
                 value={permissions.location}
                 onValueChange={() => handlePermissionToggle("location")}
               />
@@ -223,6 +224,7 @@ export default function PermissionsScreen() {
                 Camera
               </Text>
               <Switch
+                accessibilityLabel="Camera"
                 value={permissions.camera}
                 onValueChange={() => handlePermissionToggle("camera")}
               />
@@ -233,6 +235,7 @@ export default function PermissionsScreen() {
                 Photos
               </Text>
               <Switch
+                accessibilityLabel="Photos"
                 value={permissions.photos}
                 onValueChange={() => handlePermissionToggle("photos")}
               />

@@ -31,7 +31,7 @@ export function ErrorToast({ error }: ErrorToastProps) {
             {/*   <Icon color="white" size="lg" as={CloseCircleIcon} /> */}
             {/* </Pressable> */}
           </HStack>
-          <ToastDescription>
+          <ToastDescription accessibilityLiveRegion="assertive">
             <Text>{message}</Text>
           </ToastDescription>
         </VStack>
