@@ -104,14 +104,12 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "426f54d6-8dd3-4b49-a8ea-bad8a8148720"
+        "projectId": "64b71224-6482-46a8-897b-e4edaa3e7622"
       }
     },
     "runtimeVersion": {
       "policy": "appVersion"
     },
-    "updates": {
-      "url": "https://u.expo.dev/426f54d6-8dd3-4b49-a8ea-bad8a8148720"
-    }
+    "owner": "alexisdlc"
   }
 }
