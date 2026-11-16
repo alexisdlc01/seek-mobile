@@ -215,7 +215,7 @@ function Deductions({ tenancy }: { tenancy: TenancyView }) {
   const respond = useContractsControllerRespondToDeductions();
   const [state, setState] = useState<{ text: string; error?: boolean } | null>(null);
 
-  const contract = (contracts.data ?? []).find((item) => item.deductions && item.deductions.items.length > 0);
+  const contract = (contracts.data ?? []).find((item) => item.deductions);
   const deductions = contract?.deductions;
   if (!contract || !deductions) return null;
 
@@ -243,7 +243,7 @@ function Deductions({ tenancy }: { tenancy: TenancyView }) {
       <Card>
         <View style={styles.amountRow}>
           <Text style={[styles.value, { color: colors.text, textAlign: "left" }]}>
-            Total {formatPence(deductions.total)} of {formatPence(tenancy.depositAmount)}
+            Total {formatPence(deductions.total)} of {formatPence(tenancy.depositAmount * Math.max(1, tenancy.tenants.length))}
           </Text>
           <Badge
             label={deductions.status === "ACCEPTED" ? "Agreed" : deductions.status === "DISPUTED" ? "Disputed" : "Waiting for you"}

@@ -22,6 +22,7 @@ import { formatDay, formatPence, pluralise } from "@/src/utils/seek-format";
 import {
   errorMessage,
   frequencyLabel,
+  asTenancyView,
   idOf,
   nextPayment,
   tenancyTitle,
@@ -54,7 +55,17 @@ export default function MyHomeScreen() {
 
 function MyHome() {
   const router = useRouter();
-  const { tenancy, isLoading, isError, error, refetch } = useActiveTenancy();
+  const { tenancy, data, isLoading, isError, error, refetch } = useActiveTenancy();
+  const { data: user } = useAuthControllerCurrentUser();
+  // A follow-on tenancy (renewal) the user can still accept while another one is current.
+  const invites = (data ?? [])
+    .map(asTenancyView)
+    .filter(
+      (item) =>
+        item._id !== tenancy?._id &&
+        item.status === "PENDING_ACCEPTANCE" &&
+        (item.pendingTenants ?? []).some((t) => idOf(t) === user?._id),
+    );
 
   if (isLoading) {
     return (
@@ -83,19 +94,26 @@ function MyHome() {
     );
   }
   if (tenancy.status === "PENDING_ACCEPTANCE") return <PendingTenancy tenancy={tenancy} />;
-  return <HomeContent tenancy={tenancy} />;
+  return <HomeContent tenancy={tenancy} invites={invites} />;
 }
 
 /** A landlord-created tenancy waiting for this student: rent, deposit and bills stay hidden until it is ACTIVE. */
 function PendingTenancy({ tenancy }: { tenancy: TenancyView }) {
+  return (
+    <SeekScreen title="My home">
+      <TenancyInvite tenancy={tenancy} />
+    </SeekScreen>
+  );
+}
+
+function TenancyInvite({ tenancy }: { tenancy: TenancyView }) {
   const colors = useSeekTheme();
   const queryClient = useQueryClient();
   const { data: user } = useAuthControllerCurrentUser();
   const accept = useTenanciesControllerAccept({ mutation: { onSuccess: () => invalidateHomeQueries(queryClient) } });
   const canAccept = (tenancy.pendingTenants ?? []).some((item) => idOf(item) === user?._id);
   return (
-    <SeekScreen title="My home">
-      <Card>
+    <Card>
         <Text style={[styles.noticeTitle, { color: colors.text }]}>Accept your tenancy</Text>
         <Text style={[styles.tileDetail, { color: colors.mutedText }]}>
           {tenancyTitle(tenancy)}
@@ -120,12 +138,11 @@ function PendingTenancy({ tenancy }: { tenancy: TenancyView }) {
             {errorMessage(accept.error, "We couldn't accept this tenancy. Please try again.")}
           </Text>
         ) : null}
-      </Card>
-    </SeekScreen>
+    </Card>
   );
 }
 
-function HomeContent({ tenancy }: { tenancy: TenancyView }) {
+function HomeContent({ tenancy, invites }: { tenancy: TenancyView; invites: TenancyView[] }) {
   const colors = useSeekTheme();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -241,6 +258,9 @@ function HomeContent({ tenancy }: { tenancy: TenancyView }) {
       title="My home"
       subtitle={`${tenancyTitle(tenancy)} · since ${formatDay(tenancy.startDate)}`}
     >
+      {invites.map((invite) => (
+        <TenancyInvite key={invite._id} tenancy={invite} />
+      ))}
       {warnings.length > 0 ? (
         <Card style={{ backgroundColor: colors.warningBg, borderColor: "transparent" }}>
           <View style={styles.row}>
