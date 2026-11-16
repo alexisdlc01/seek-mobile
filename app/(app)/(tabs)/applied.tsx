@@ -3,6 +3,7 @@ import { AuthRequiredScreen } from "@/components/custom/auth-required";
 import { EmptyState, ErrorState, LoadingState } from "@/components/seek/states";
 import { Badge, Card, Divider, SeekButton, SeekScreen } from "@/components/seek/ui";
 import { formatViewing, offeredSlots, ViewingSlots } from "@/components/seek/viewing-slots";
+import { invalidateHomeQueries } from "@/hooks/use-active-tenancy";
 import { useSeekTheme } from "@/hooks/use-seek-theme";
 import {
   getApplicationControllerGetAllMyApplicationsQueryKey,
@@ -181,6 +182,8 @@ function ApplicationCard({
     try {
       await accept.mutateAsync({ id: application._id });
       await queryClient.invalidateQueries({ queryKey: getApplicationControllerGetAllMyApplicationsQueryKey() });
+      // Accepting creates the tenancy and drops holding deposits server-side; tabs stay mounted with stale home data.
+      void invalidateHomeQueries(queryClient);
       router.navigate("/(app)/(tabs)/my-home");
     } catch (error) {
       setMessage({ text: errorMessage(error, "We couldn't accept that offer."), error: true });

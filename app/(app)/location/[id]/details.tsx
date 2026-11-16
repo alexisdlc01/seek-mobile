@@ -24,7 +24,6 @@ import {
   useListingsControllerGetById,
 } from "@/src/api/seek-api/listings";
 import type {
-  DocumentTypesDtoDataItem,
   Listing,
 } from "@/src/api/seek-api/model";
 import { useUsersControllerDocumentTypes } from "@/src/api/seek-api/users";
@@ -71,62 +70,6 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useListingLiked } from "@/hooks/use-listing-liked";
-
-const DOCUMENT_LABELS: Partial<Record<DocumentTypesDtoDataItem, string>> = {
-  IDENTIFICATION: "Identification",
-  PROOF_OF_INCOME: "Proof of income",
-  GUARANTOR_AGREEMENT: "Guarantor agreement",
-  LANDLORD_REFERENCE: "Landlord reference",
-  CHARACTER_REFERENCE: "Character reference",
-};
-
-const REQUIRED_DOCUMENT_MATCHERS: [
-  DocumentTypesDtoDataItem,
-  RegExp,
-][] = [
-  ["IDENTIFICATION", /identification|passport|national id/i],
-  [
-    "PROOF_OF_INCOME",
-    /proof of income|financial support|student loan|scholarship|savings/i,
-  ],
-  ["GUARANTOR_AGREEMENT", /guarantor/i],
-  ["LANDLORD_REFERENCE", /landlord reference|accommodation (letter|reference)/i],
-  ["CHARACTER_REFERENCE", /character reference/i],
-];
-
-function getRequiredDocumentTypes(
-  requirements: Listing["requirements"] | undefined,
-): DocumentTypesDtoDataItem[] {
-  if (!Array.isArray(requirements)) return [];
-
-  const documentTypes = requirements.flatMap((requirement) => {
-    if (typeof requirement === "string") {
-      const match = REQUIRED_DOCUMENT_MATCHERS.find(([, pattern]) =>
-        pattern.test(requirement),
-      );
-      return match ? [match[0]] : [];
-    }
-
-    const value = requirement as unknown as {
-      name?: unknown;
-      desc?: unknown;
-      required?: unknown;
-    };
-    if (!value || typeof value !== "object" || value.required === false) {
-      return [];
-    }
-
-    const text = [value.name, value.desc]
-      .filter((part): part is string => typeof part === "string")
-      .join(" ");
-    const match = REQUIRED_DOCUMENT_MATCHERS.find(([, pattern]) =>
-      pattern.test(text),
-    );
-    return match ? [match[0]] : [];
-  });
-
-  return [...new Set(documentTypes)];
-}
 
 export default function DetailsScreen() {
   const colors = useSeekTheme();
@@ -187,17 +130,13 @@ export default function DetailsScreen() {
     () => data?.photos?.filter((photo) => Boolean(photo)) ?? [],
     [data?.photos],
   );
-  const requiredDocumentTypes = useMemo(
-    () => getRequiredDocumentTypes(data?.requirements),
-    [data?.requirements],
-  );
-  const missingDocumentTypes = useMemo(
-    () =>
-      requiredDocumentTypes.filter(
-        (documentType) => !uploadedDocuments?.data.includes(documentType),
-      ),
-    [requiredDocumentTypes, uploadedDocuments?.data],
-  );
+  // The server decides what this home needs (aliases and "no guarantor" included).
+  const missingDocuments = useMemo(() => {
+    const have = new Set<string>(uploadedDocuments?.data ?? []);
+    return (data?.requiredDocuments ?? [])
+      .filter((doc) => !doc.types.some((type) => have.has(type)))
+      .map((doc) => doc.label);
+  }, [data?.requiredDocuments, uploadedDocuments?.data]);
 
   useFocusEffect(
     useCallback(() => {
@@ -309,13 +248,10 @@ export default function DetailsScreen() {
       return;
     }
 
-    if (missingDocumentTypes.length > 0) {
-      const missingDocuments = missingDocumentTypes
-        .map((documentType) => DOCUMENT_LABELS[documentType])
-        .join(", ");
+    if (missingDocuments.length > 0) {
       Alert.alert(
         "Documents required",
-        `Upload the following before applying: ${missingDocuments}.`,
+        `Upload the following before applying: ${missingDocuments.join(", ")}.`,
         [
           { text: "Not Now", style: "cancel" },
           {
