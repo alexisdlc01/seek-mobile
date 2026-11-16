@@ -128,7 +128,8 @@ export function useLike() {
             exact: false
           },
           (curr) => {
-            if (!curr) return curr;
+            // infinite map queries share this key prefix: {pages, pageParams}
+            if (!Array.isArray(curr)) return curr;
             const old = updateLike({
               listingId: id,
               userId: user._id,
@@ -283,7 +284,8 @@ export function useUnlike() {
             exact: false
           },
           (curr) => {
-            if (!curr) return curr;
+            // infinite map queries share this key prefix: {pages, pageParams}
+            if (!Array.isArray(curr)) return curr;
             const old = updateUnlike({
               listingId: id,
               userId: user._id,
