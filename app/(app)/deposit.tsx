@@ -325,7 +325,7 @@ function AskAboutDeposit({ tenancy }: { tenancy: TenancyView }) {
         </Text>
       ) : ask.data ? (
         <Card>
-          <Text style={[styles.body, { color: colors.text, fontWeight: "600" }]}>{ask.data.title}</Text>
+          <Text style={[styles.body, { color: colors.text, fontWeight: "600" }]}>{ask.variables}</Text>
           <Text style={[styles.body, { color: colors.text }]}>{ask.data.advice}</Text>
         </Card>
       ) : null}
