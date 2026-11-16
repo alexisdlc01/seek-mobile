@@ -27,7 +27,7 @@ import {
 } from "@/src/api/seek-api/conversation";
 import { useListingsControllerGetById } from "@/src/api/seek-api/listings";
 import type { ApplicationDto, PassportDto } from "@/src/api/seek-api/model";
-import { useUsersControllerGetPassport } from "@/src/api/seek-api/users";
+import { getUsersControllerListSharesQueryKey, useUsersControllerGetPassport } from "@/src/api/seek-api/users";
 import { createApplicationInvite } from "@/src/utils/application-invite";
 import { formatDate, initialsOf } from "@/src/utils/seek-format";
 import { errorMessage, idOf } from "@/src/utils/tenancy-view";
@@ -127,6 +127,8 @@ export default function ApplyScreen() {
       void queryClient.invalidateQueries({
         queryKey: getApplicationControllerGetAllMyApplicationsQueryKey(),
       });
+      // The backend creates a document share for the landlord on send.
+      void queryClient.invalidateQueries({ queryKey: getUsersControllerListSharesQueryKey() });
       // The application is in once it is sent; a viewing can only be booked after that.
       let viewingProblem: string | null = null;
       if (slot) {

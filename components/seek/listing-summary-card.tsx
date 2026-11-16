@@ -1,5 +1,9 @@
 import { Badge, SeekButton } from "@/components/seek/ui";
 import { useSeekTheme } from "@/hooks/use-seek-theme";
+import { LikeButton } from "@/components/custom/like-button";
+import { useAuthRequiredAction } from "@/components/custom/auth-required";
+import { useLike, useUnlike } from "@/hooks/like";
+import { useListingLiked } from "@/hooks/use-listing-liked";
 import type { SearchChatListingDto } from "@/src/api/seek-api/model";
 import type { Match } from "@/src/utils/listing-match";
 import { Image } from "expo-image";
@@ -24,6 +28,10 @@ export function ListingSummaryCard({
   onBookViewing?: () => void;
 }) {
   const colors = useSeekTheme();
+  const requireAuth = useAuthRequiredAction("save listings");
+  const { mutate: like } = useLike();
+  const { mutate: unlike } = useUnlike();
+  const liked = useListingLiked(listing.id);
   const price = listing.rentPerPerson ?? listing.monthlyRent;
   const facts = [
     listing.bedrooms ? `${listing.bedrooms} bed` : null,
@@ -42,6 +50,14 @@ export function ListingSummaryCard({
         {listing.photo ? (
           <Image source={{ uri: listing.photo }} accessibilityLabel={listing.title} style={StyleSheet.absoluteFill} contentFit="cover" />
         ) : null}
+        <View style={styles.heart}>
+          <LikeButton
+            size={20}
+            liked={liked}
+            like={() => { if (requireAuth()) like({ id: listing.id }); }}
+            unlike={() => { if (requireAuth()) unlike({ id: listing.id }); }}
+          />
+        </View>
       </View>
       <View style={styles.body}>
         <View style={styles.titleRow}>
@@ -91,6 +107,7 @@ export function ListingSummaryCard({
 const styles = StyleSheet.create({
   card: { borderRadius: 18, borderWidth: StyleSheet.hairlineWidth, overflow: "hidden" },
   photo: { height: 120 },
+  heart: { position: "absolute", top: 8, right: 8 },
   body: { padding: 12, gap: 6, alignItems: "flex-start" },
   titleRow: { flexDirection: "row", alignItems: "baseline", gap: 8, alignSelf: "stretch" },
   title: { flex: 1, fontSize: 16, lineHeight: 21, fontWeight: "700" },

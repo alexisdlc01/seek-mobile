@@ -31,9 +31,11 @@ import type {
   PaymentsControllerConfirmCheckoutParams,
   PaymentsControllerLandlordParams,
   PaymentsControllerMineParams,
+  PaymentsControllerPreviewPlanParams,
   RemindLateDto,
   RemindLateResponseDto,
   ReminderScheduleDto,
+  RentPlanPreviewItemDto,
   RentPlanViewDto,
   StudentPaymentDto,
   UpdateReminderScheduleDto,
@@ -206,6 +208,61 @@ export const usePaymentsControllerUpdatePlan = <TError = ErrorType<ErrorDto>,
       return useMutation(mutationOptions, queryClient);
     }
     /**
+ * @summary The next payments if the tenant switched to this frequency. Read-only: nothing is saved or charged.
+ */
+export const paymentsControllerPreviewPlan = (
+    tenancyId: string,
+    params: PaymentsControllerPreviewPlanParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      return customInstance<RentPlanPreviewItemDto[]>(
+      {url: `/payments/plan/${tenancyId}/preview`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+
+export const getPaymentsControllerPreviewPlanQueryKey = (tenancyId?: string,
+    params?: PaymentsControllerPreviewPlanParams,) => {
+    return [
+    `/payments/plan/${tenancyId}/preview`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+export const getPaymentsControllerPreviewPlanQueryOptions = <TData = Awaited<ReturnType<typeof paymentsControllerPreviewPlan>>, TError = ErrorType<ErrorDto>>(tenancyId: string,
+    params: PaymentsControllerPreviewPlanParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof paymentsControllerPreviewPlan>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPaymentsControllerPreviewPlanQueryKey(tenancyId,params);
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof paymentsControllerPreviewPlan>>> = ({ signal }) => paymentsControllerPreviewPlan(tenancyId,params, requestOptions, signal);
+
+   return  { queryKey, queryFn, enabled: !!(tenancyId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof paymentsControllerPreviewPlan>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type PaymentsControllerPreviewPlanQueryResult = NonNullable<Awaited<ReturnType<typeof paymentsControllerPreviewPlan>>>
+export type PaymentsControllerPreviewPlanQueryError = ErrorType<ErrorDto>
+
+export function usePaymentsControllerPreviewPlan<TData = Awaited<ReturnType<typeof paymentsControllerPreviewPlan>>, TError = ErrorType<ErrorDto>>(
+ tenancyId: string,
+    params: PaymentsControllerPreviewPlanParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof paymentsControllerPreviewPlan>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getPaymentsControllerPreviewPlanQueryOptions(tenancyId,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+/**
  * @summary The tenant's payments, oldest due first.
  */
 export const paymentsControllerMine = (

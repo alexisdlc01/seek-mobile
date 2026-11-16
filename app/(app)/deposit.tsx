@@ -1,7 +1,7 @@
 import { AuthRequiredScreen } from "@/components/custom/auth-required";
-import { AdviceCard, useAdvice } from "@/components/seek/advice-card";
+import { AdviceCard } from "@/components/seek/advice-card";
 import { EmptyState, ErrorState, LoadingState } from "@/components/seek/states";
-import { Badge, Card, Composer, Divider, SectionTitle, SeekButton, SeekScreen } from "@/components/seek/ui";
+import { Badge, Card, Divider, SectionTitle, SeekButton, SeekScreen } from "@/components/seek/ui";
 import { useActiveTenancy } from "@/hooks/use-active-tenancy";
 import { useSeekTheme } from "@/hooks/use-seek-theme";
 import { useAuthControllerCurrentUser } from "@/src/api/seek-api/auth";
@@ -16,7 +16,7 @@ import { depositCapCheck, depositDaysLeft, depositDeadline, errorMessage, openSt
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 const SCHEME_NAMES: Record<string, string> = {
   DPS: "DPS (Deposit Protection Service)",
@@ -74,7 +74,6 @@ function Deposit() {
 }
 
 function DepositContent({ tenancy }: { tenancy: TenancyView }) {
-  const advice = useAdvice({ topic: "deposit", tenancyId: tenancy._id });
   const colors = useSeekTheme();
   const router = useRouter();
   const hasDeposit = tenancy.depositAmount > 0;
@@ -193,7 +192,7 @@ function DepositContent({ tenancy }: { tenancy: TenancyView }) {
 
       {hasDeposit ? <Deductions tenancy={tenancy} /> : null}
 
-      {advice.data?.source === "ai" ? <AskAboutDeposit tenancy={tenancy} /> : null}
+      <AskAboutDeposit tenancy={tenancy} />
 
       <View style={styles.section}>
         <SectionTitle>At move-out</SectionTitle>
@@ -275,36 +274,54 @@ function Deductions({ tenancy }: { tenancy: TenancyView }) {
   );
 }
 
-/** A free-text question about the deposit, answered by Seek AI from the tenancy's facts. */
+/** Canonical questions; each one is routed to its topic by depositAnswer (scripts/deposit-questions.test.mjs). */
+const DEPOSIT_QUESTIONS = [
+  "Which scheme is my deposit in?",
+  "What if my deposit was not protected?",
+  "What can my landlord deduct?",
+  "When do I get my deposit back?",
+  "What if we disagree about the deposit?",
+  "Where is my deposit certificate?",
+  "What is the maximum deposit?",
+];
+
+/** Fixed questions about the deposit, answered from the tenancy's facts. */
 function AskAboutDeposit({ tenancy }: { tenancy: TenancyView }) {
   const colors = useSeekTheme();
-  const [draft, setDraft] = useState("");
   const ask = useMutation({
     mutationFn: (question: string) => aiControllerAdvice({ topic: "deposit", tenancyId: tenancy._id, question }),
   });
 
-  const send = () => {
-    const question = draft.trim();
-    if (!question || ask.isPending) return;
-    ask.mutate(question, { onSuccess: () => setDraft("") });
-  };
-
   return (
     <View style={styles.section}>
-      <SectionTitle>Ask Seek AI about your deposit</SectionTitle>
+      <SectionTitle>Ask about your deposit</SectionTitle>
       <Text style={[styles.body, { color: colors.mutedText }]}>
-        Which scheme holds it, when it must be protected, what can be deducted. Seek AI answers from your tenancy.
+        Pick a question. Answers come from your tenancy and the deposit rules.
       </Text>
-      <Composer
-        label="Ask Seek AI about your deposit"
-        placeholder={ask.isPending ? "Thinking…" : "e.g. Can my landlord keep part of it?"}
-        value={draft}
-        onChangeText={setDraft}
-        onSend={send}
-      />
+      <View style={styles.chips}>
+        {DEPOSIT_QUESTIONS.map((question) => {
+          const on = ask.variables === question;
+          return (
+            <Pressable
+              key={question}
+              accessibilityRole="button"
+              accessibilityState={{ selected: on, disabled: ask.isPending }}
+              disabled={ask.isPending}
+              onPress={() => ask.mutate(question)}
+              style={[
+                styles.chip,
+                { backgroundColor: on ? colors.primary : colors.surface, borderColor: on ? colors.primary : colors.line },
+              ]}
+            >
+              <Text style={[styles.chipText, { color: on ? colors.onPrimary : colors.text }]}>{question}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+      {ask.isPending ? <Text style={[styles.body, { color: colors.mutedText }]}>Thinking…</Text> : null}
       {ask.isError ? (
         <Text accessibilityRole="alert" style={[styles.notice, { color: colors.danger }]}>
-          {errorMessage(ask.error, "Seek AI couldn't answer just now. Please try again.")}
+          {errorMessage(ask.error, "Couldn't answer just now. Please try again.")}
         </Text>
       ) : ask.data ? (
         <Card>
@@ -332,4 +349,7 @@ const styles = StyleSheet.create({
   body: { fontSize: 13.5, lineHeight: 20 },
   self: { alignSelf: "flex-start" },
   actions: { flexDirection: "row", gap: 8, paddingTop: 12 },
+  chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  chip: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 },
+  chipText: { fontSize: 13, fontWeight: "600" },
 });

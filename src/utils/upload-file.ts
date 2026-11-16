@@ -1,4 +1,3 @@
-import { uploadControllerGetPresignedUrl, useUploadControllerGetPresignedUrl } from "@/src/api/seek-api/upload";
 import axios, { AxiosResponse } from "axios";
 import { PresignResDto, UploadControllerGetPresignedUrlParams } from "../api/seek-api/model";
 
@@ -29,12 +28,14 @@ export async function uploadFile({ uri, mimeType, name, folder, access_token }: 
       platform: "mobile",
     }
   });
-  await fetch(resp.data.uploadUrl, {
+  const put = await fetch(resp.data.uploadUrl, {
     method: "PUT",
     body: blob,
     headers: {
       "Content-Type": mimeType,
     },
   });
+  // fetch resolves on 4xx/5xx: never hand back a key S3 rejected, or callers file a missing object.
+  if (!put.ok) throw new Error(`Upload failed (${put.status})`);
   return resp.data;
 }

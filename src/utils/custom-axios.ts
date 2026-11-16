@@ -41,6 +41,8 @@ const AUTH_REQUESTS_THAT_MUST_NOT_REFRESH = new Set([
   "/auth/refresh",
 ]);
 
+const WRONG_PASSWORD_MESSAGE = "Current password is not valid.";
+
 async function refreshSession(refreshToken: string): Promise<TokenPair> {
   const { data } = await axios.post<TokenPair>(
     `${BASE_URL}/auth/refresh`,
@@ -98,7 +100,10 @@ AXIOS_INSTANCE.interceptors.response.use(
       status !== 401 ||
       !originalRequest ||
       originalRequest._retry ||
-      (requestPath && AUTH_REQUESTS_THAT_MUST_NOT_REFRESH.has(requestPath))
+      (requestPath && AUTH_REQUESTS_THAT_MUST_NOT_REFRESH.has(requestPath)) ||
+      // Wrong current password (PATCH /auth/password, POST /auth/change-email) is not an expired token;
+      // replaying would double the hit on the 5/h throttled route.
+      response?.data?.message === WRONG_PASSWORD_MESSAGE
     ) {
       console.error(
         "[ERROR] request failed",
@@ -125,7 +130,12 @@ AXIOS_INSTANCE.interceptors.response.use(
       );
       return AXIOS_INSTANCE(originalRequest);
     } catch (refreshError) {
-      if (useAuth.getState().refreshToken === refreshToken) {
+      // Only a rejected refresh token ends the session; network errors, 5xx and 429 are transient.
+      const refreshStatus = (refreshError as AxiosError).response?.status;
+      if (
+        (refreshStatus === 401 || refreshStatus === 403) &&
+        useAuth.getState().refreshToken === refreshToken
+      ) {
         useAuth.getState().logout();
         queryClient.clear();
       }

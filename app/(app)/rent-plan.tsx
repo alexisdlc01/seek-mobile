@@ -14,6 +14,7 @@ import { useSeekTheme } from "@/hooks/use-seek-theme";
 import {
   usePaymentsControllerGetPlan,
   usePaymentsControllerMine,
+  usePaymentsControllerPreviewPlan,
   usePaymentsControllerUpdatePlan,
 } from "@/src/api/seek-api/payments";
 import type { RentPlanFrequency, UpdateRentPlanDtoFrequency } from "@/src/api/seek-api/model";
@@ -96,6 +97,13 @@ function RentPlanContent({ tenancyId, title }: { tenancyId: string; title: strin
   const planQuery = usePaymentsControllerGetPlan(tenancyId, { query: { retry: 1 } });
   const paymentsQuery = usePaymentsControllerMine({ tenancy: tenancyId }, { query: { retry: 1 } });
   const [draft, setDraft] = useState<Draft | null>(null);
+  // Only the frequency changes the schedule; the server works it out the way saving would.
+  const previewFrequency = draft && draft.frequency !== planQuery.data?.plan.frequency ? draft.frequency : null;
+  const previewQuery = usePaymentsControllerPreviewPlan(
+    tenancyId,
+    { frequency: previewFrequency ?? "MONTHLY" },
+    { query: { enabled: previewFrequency !== null, retry: 1 } },
+  );
   const [message, setMessage] = useState<{ tone: "success" | "warning" | "danger"; text: string } | null>(null);
 
   const refresh = () => invalidateHomeQueries(queryClient);
@@ -337,8 +345,52 @@ function RentPlanContent({ tenancyId, title }: { tenancyId: string; title: strin
         </Card>
       </View>
 
+      {previewFrequency ? (
+        <View style={styles.section}>
+          <SectionTitle hint="Preview · not saved yet">
+            {`Upcoming on the ${PLAN_COPY[previewFrequency].title.toLowerCase()} plan`}
+          </SectionTitle>
+          <Card style={styles.list}>
+            {previewQuery.isLoading ? (
+              <LoadingState label="Working out your payments…" />
+            ) : previewQuery.isError ? (
+              <ErrorState error={previewQuery.error} onRetry={() => previewQuery.refetch()} title="Couldn't preview this plan" />
+            ) : !previewQuery.data?.length ? (
+              <Text style={[styles.empty, { color: colors.mutedText }]}>Nothing scheduled.</Text>
+            ) : (
+              previewQuery.data.map((item, index) => (
+                <View key={item.dueDate}>
+                  {index > 0 ? <Divider /> : null}
+                  <View style={styles.scheduleRow}>
+                    <View style={styles.flex}>
+                      <Text style={[styles.planTitle, { color: colors.text }]}>{formatDate(item.dueDate)}</Text>
+                      {item.coversMonths > 1 ? (
+                        <Text style={[styles.planUnit, { color: colors.mutedText }]}>Covers {item.coversMonths} months</Text>
+                      ) : null}
+                      {item.holdingDepositCredit ? (
+                        <Text style={[styles.planUnit, { color: colors.mutedText }]}>
+                          Holding deposit {formatPence(item.holdingDepositCredit)} applied to first rent
+                        </Text>
+                      ) : null}
+                      {item.status === "LATE" || item.status === "FAILED" ? (
+                        <Text style={[styles.planUnit, { color: colors.danger }]}>
+                          {item.status === "LATE" ? "Overdue" : "Last attempt failed"}
+                        </Text>
+                      ) : null}
+                    </View>
+                    <Text style={[styles.planPrice, { color: colors.text }]}>{formatPence(item.amount)}</Text>
+                  </View>
+                </View>
+              ))
+            )}
+          </Card>
+        </View>
+      ) : null}
+
       <View style={styles.section}>
-        <SectionTitle hint={plan.mode === "simulated" ? "Test mode · no real money" : undefined}>Upcoming</SectionTitle>
+        <SectionTitle hint={plan.mode === "simulated" ? "Test mode · no real money" : undefined}>
+          {previewFrequency ? "Upcoming on your current plan" : "Upcoming"}
+        </SectionTitle>
         <Card style={styles.list}>
           {plan.upcoming.length === 0 ? (
             <Text style={[styles.empty, { color: colors.mutedText }]}>Nothing scheduled.</Text>

@@ -13,6 +13,7 @@ import { useConnectorsControllerOverview } from "@/src/api/seek-api/connectors";
 import {
   getInboxControllerThreadQueryKey,
   getInboxControllerThreadsQueryKey,
+  useInboxControllerFileAttachment,
   useInboxControllerReply,
   useInboxControllerThread,
 } from "@/src/api/seek-api/inbox";
@@ -33,8 +34,17 @@ import {
   View,
 } from "react-native";
 
-function Attachment({ file }: { file: InboxAttachmentDto }) {
+function Attachment({
+  file,
+  onFile,
+}: {
+  file: InboxAttachmentDto;
+  /** Set when the file can be filed by hand: the email is tied to a home and Seek has not filed it. */
+  onFile?: () => Promise<void>;
+}) {
   const colors = useSeekTheme();
+  const [filing, setFiling] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
   const [opening, setOpening] = useState(false);
   const [failed, setFailed] = useState(false);
   const canOpen = Boolean(file.key || isWebUrl(file.url));
@@ -74,6 +84,26 @@ function Attachment({ file }: { file: InboxAttachmentDto }) {
         ) : opening ? (
           <Text style={[styles.attachmentFiled, { color: colors.mutedText }]}>Opening…</Text>
         ) : null}
+        {onFile && !file.filedAs ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`File ${file.name} in My home`}
+            disabled={filing}
+            hitSlop={8}
+            onPress={() => {
+              setFileError(null);
+              setFiling(true);
+              onFile()
+                .catch((error) => setFileError(errorMessage(error)))
+                .finally(() => setFiling(false));
+            }}
+          >
+            <Text style={[styles.attachmentFiled, { color: colors.accent }]}>
+              {filing ? "Filing…" : "File in My home"}
+            </Text>
+          </Pressable>
+        ) : null}
+        {fileError ? <Text style={[styles.attachmentFiled, { color: colors.danger }]}>{fileError}</Text> : null}
       </View>
     </Pressable>
   );
@@ -83,10 +113,12 @@ function EmailBubble({
   message,
   mine,
   provider,
+  onFile,
 }: {
   message: InboxMessageDto;
   mine: boolean;
   provider: string | null;
+  onFile?: (messageId: string, index: number) => Promise<void>;
 }) {
   const colors = useSeekTheme();
   return (
@@ -102,7 +134,11 @@ function EmailBubble({
           <Text style={[styles.text, { color: colors.text }]}>{message.text}</Text>
         ) : null}
         {message.attachments.map((file, index) => (
-          <Attachment key={`${file.name}-${index}`} file={file} />
+          <Attachment
+            key={`${file.name}-${index}`}
+            file={file}
+            onFile={onFile ? () => onFile(message.id, index) : undefined}
+          />
         ))}
       </View>
     </ChatBubble>
@@ -129,6 +165,7 @@ function Thread() {
   const thread = useInboxControllerThread(threadId, { query: { enabled: Boolean(id) } });
   const connectors = useConnectorsControllerOverview();
   const reply = useInboxControllerReply();
+  const fileAttachment = useInboxControllerFileAttachment();
   const [mode, setMode] = useState<"seek" | "email" | null>(null);
   const [draft, setDraft] = useState("");
   const [sendError, setSendError] = useState<string | null>(null);
@@ -136,6 +173,14 @@ function Thread() {
   const prefilled = useRef<string | null>(null);
 
   const data = thread.data;
+  // Same filing as the automatic one, started by hand; only for an email tied to a home.
+  const fileByHand = data?.tenancyId
+    ? async (messageId: string, index: number) => {
+        await fileAttachment.mutateAsync({ messageId, index });
+        await queryClient.invalidateQueries({ queryKey: getInboxControllerThreadQueryKey(threadId) });
+        void queryClient.invalidateQueries({ queryKey: getInboxControllerThreadsQueryKey() });
+      }
+    : undefined;
   // Default to Seek when allowed, otherwise email (email-only threads).
   const activeMode =
     mode ?? (data?.canReplyBySeek ? "seek" : data?.canReplyByEmail ? "email" : null);
@@ -288,7 +333,7 @@ function Thread() {
                     </Text>
                   ) : null}
                   {message.via === "Email" ? (
-                    <EmailBubble message={message} mine={message.me} provider={providerName} />
+                    <EmailBubble message={message} mine={message.me} provider={providerName} onFile={fileByHand} />
                   ) : (
                     <ChatBubble mine={message.me}>{message.text}</ChatBubble>
                   )}

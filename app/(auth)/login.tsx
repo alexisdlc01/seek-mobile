@@ -26,6 +26,7 @@ export default function Login() {
   const toast = useToast();
   const login = useAuth((state) => state.login);
   const clearSignupState = useSignupState((state) => state.clear);
+  const setSignupState = useSignupState((state) => state.setState);
   const hasHydrated = useAuth((state) => state._hasHydrated);
   const isLoggedIn = useAuth(
     (state) => Boolean(state.accessToken) && Boolean(state.refreshToken),
@@ -51,6 +52,14 @@ export default function Login() {
           // 403 = landlord account on the mobile app: keep the server message on screen.
           if (err.response?.status === 403) {
             setBlocked(errorMessage(err));
+            return;
+          }
+          // Unverified account: reopen the OTP screen (it has a Resend button).
+          const userId = (err.response?.data as { userId?: string } | undefined)
+            ?.userId;
+          if (err.response?.status === 401 && userId) {
+            setSignupState({ userId, email: normalizedEmail });
+            router.push("/(auth)/signup/otp");
             return;
           }
           toast.show({

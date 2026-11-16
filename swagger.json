@@ -7646,6 +7646,83 @@
         ]
       }
     },
+    "/inbox/messages/{messageId}/attachments/{index}/file": {
+      "post": {
+        "operationId": "InboxController_fileAttachment",
+        "summary": "File an email attachment in the home's documents. Same as the automatic filing, started by you.",
+        "parameters": [
+          {
+            "name": "messageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "index",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InboxAttachmentDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Inbox"
+        ],
+        "security": [
+          {
+            "access_token": []
+          },
+          {
+            "mobile-token": []
+          }
+        ]
+      }
+    },
     "/inbox/threads/{id}/reply": {
       "post": {
         "operationId": "InboxController_reply",

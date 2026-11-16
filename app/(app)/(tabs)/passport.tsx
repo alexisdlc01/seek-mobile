@@ -35,6 +35,7 @@ import {
 } from "@/src/api/seek-api/users";
 import { useAuth } from "@/src/store/auth-store";
 import { formatDate, initialsOf } from "@/src/utils/seek-format";
+import { formatShareCode, isoDay, normaliseShareCode, shareCodeExpiry } from "@/src/utils/share-code";
 import { errorMessage } from "@/src/utils/tenancy-view";
 import { uploadFile } from "@/src/utils/upload-file";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -56,6 +57,10 @@ import React, { useState, type ReactElement } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 type BadgeTone = "success" | "warning" | "danger" | "neutral";
+
+// Items that ask for a share code and its expiry, or an optional Valid-to date, before the file.
+const SHARE_CODE_TYPE = "RIGHT_TO_RENT";
+const EXPIRING_TYPES: string[] = ["PASSPORT", "VISA"];
 
 function sectionIcon(key: string, color: string): ReactElement {
   switch (key) {
@@ -142,6 +147,13 @@ function itemDetail(item: PassportItemDto): string | undefined {
   if (item.status === "VERIFIED" && item.expiresAt) {
     return `Valid until ${formatDate(item.expiresAt)}`;
   }
+  if (item.status === "PROVIDED" && item.type === SHARE_CODE_TYPE && item.detail) {
+    const code = normaliseShareCode(item.detail);
+    if (code) {
+      return `Code ${formatShareCode(code)}${item.expiresAt ? ` · expires ${formatDate(item.expiresAt)}` : ""}`;
+    }
+  }
+  if (item.status === "PROVIDED" && item.expiresAt) return `Valid to ${formatDate(item.expiresAt)}`;
   if (item.status === "EXPIRED" && item.expiresAt) {
     return `Expired ${formatDate(item.expiresAt)}`;
   }
@@ -182,10 +194,13 @@ function Profile() {
   const [refEmail, setRefEmail] = useState("");
   const [uploading, setUploading] = useState<AddDocumentDtoDocumentType | null>(null);
   const [picking, setPicking] = useState(false);
+  const [detailsFor, setDetailsFor] = useState<AddDocumentDtoDocumentType | null>(null);
+  const [shareCode, setShareCode] = useState("");
+  const [validTo, setValidTo] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ text: string; error?: boolean } | null>(null);
 
-  const upload = async (item: PassportItemDto) => {
+  const upload = async (item: PassportItemDto, extras: { label?: string; expiresAt?: string } = {}) => {
     if (!user || uploading) return;
     setNotice(null);
     try {
@@ -205,19 +220,89 @@ function Profile() {
         access_token: accessToken,
       });
       await addDocument.mutateAsync({
-        data: { documentType: item.type, url: uploaded.fileUrl, key: uploaded.key },
+        data: { documentType: item.type, url: uploaded.fileUrl, key: uploaded.key, ...extras },
       });
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: getUsersControllerGetPassportQueryKey() }),
         queryClient.invalidateQueries({ queryKey: getUsersControllerDocumentTypesQueryKey() }),
       ]);
       setPicking(false);
+      setDetailsFor(null);
+      setShareCode("");
+      setValidTo("");
       setNotice({ text: `${item.label} uploaded.` });
     } catch (error) {
       setNotice({ text: errorMessage(error, "We couldn't upload that file. Please try again."), error: true });
     } finally {
       setUploading(null);
     }
+  };
+
+  const start = (item: PassportItemDto) => {
+    if (item.type !== SHARE_CODE_TYPE && !EXPIRING_TYPES.includes(item.type)) return void upload(item);
+    setValidTo(""); // the date field is shared, so a passport date never carries over to the share code
+    setDetailsFor(detailsFor === item.type ? null : item.type);
+  };
+
+  const detailsForm = (item: PassportItemDto) => {
+    if (item.type === SHARE_CODE_TYPE) {
+      const code = normaliseShareCode(shareCode);
+      const codeExpiresAt = shareCodeExpiry(validTo.trim());
+      return (
+        <View style={styles.askForm}>
+          <ProfileTextField
+            label="Share code"
+            value={shareCode}
+            onChangeText={setShareCode}
+            placeholder="R7K 4P2 9QX"
+            autoCapitalize="characters"
+            autoCorrect={false}
+            error={shareCode.trim() && !code ? "A share code is 9 letters or numbers." : undefined}
+            helperText="From GOV.UK. Then choose the PDF or screenshot of it."
+          />
+          <ProfileTextField
+            label="Expires on"
+            value={validTo}
+            onChangeText={setValidTo}
+            placeholder="YYYY-MM-DD"
+            keyboardType="numbers-and-punctuation"
+            autoCorrect={false}
+            error={
+              validTo.trim() && !codeExpiresAt
+                ? "Use the date shown on GOV.UK (YYYY-MM-DD), from today to 90 days ahead."
+                : undefined
+            }
+            helperText="The expiry date shown on GOV.UK with your code."
+          />
+          <ProfilePrimaryButton
+            title="Choose file"
+            disabled={!code || !codeExpiresAt}
+            loading={uploading === item.type}
+            onPress={() => void upload(item, { label: code ?? undefined, expiresAt: codeExpiresAt ?? undefined })}
+          />
+        </View>
+      );
+    }
+    const expiresAt = validTo.trim() ? isoDay(validTo.trim()) : undefined;
+    return (
+      <View style={styles.askForm}>
+        <ProfileTextField
+          label="Valid to (optional)"
+          value={validTo}
+          onChangeText={setValidTo}
+          placeholder="YYYY-MM-DD"
+          keyboardType="numbers-and-punctuation"
+          autoCorrect={false}
+          error={expiresAt === null ? "Use a valid date in YYYY-MM-DD format." : undefined}
+        />
+        <ProfilePrimaryButton
+          title="Choose file"
+          disabled={expiresAt === null}
+          loading={uploading === item.type}
+          onPress={() => void upload(item, { expiresAt: expiresAt ?? undefined })}
+        />
+      </View>
+    );
   };
 
   // Seek emails the referee; the reply is filed through the connected inbox.
@@ -361,10 +446,11 @@ function Profile() {
                         item.type === "STUDENT_STATUS" && !user?.studentVerified && needsUpload
                           ? () => router.push("/(app)/profile")
                           : needsUpload
-                            ? () => void upload(item)
+                            ? () => start(item)
                             : undefined
                       }
                     />
+                    {!picking && detailsFor === item.type ? detailsForm(item) : null}
                     {canAsk && asking === requestable ? (
                       <View style={styles.askForm}>
                         <ProfileTextField label="Their name" value={refName} onChangeText={setRefName} autoCapitalize="words" />
@@ -477,8 +563,9 @@ function Profile() {
                   title={item.label}
                   subtitle={item.status === "MISSING" ? "Not added yet" : "Replace with a new file"}
                   chevron
-                  onPress={() => void upload(item)}
+                  onPress={() => start(item)}
                 />
+                {detailsFor === item.type ? detailsForm(item) : null}
               </View>
             ))}
           </Card>

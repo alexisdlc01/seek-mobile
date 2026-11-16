@@ -8,7 +8,9 @@ import React, { useCallback, useState } from 'react';
 import { Button, ButtonText } from '@/components/ui/button';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Redirect, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { useApplicationControllerJoinApplication } from '@/src/api/seek-api/application';
+import { getApplicationControllerGetAllMyApplicationsQueryKey, useApplicationControllerJoinApplication } from '@/src/api/seek-api/application';
+import { getUsersControllerListSharesQueryKey } from '@/src/api/seek-api/users';
+import { useQueryClient } from '@tanstack/react-query';
 import { Loader } from '@/components/custom/loader';
 import { useToast } from '@/components/ui/toast';
 import { errorToast } from '@/src/utils/error-toast';
@@ -27,11 +29,18 @@ export default function ApplicationAddedPage() {
   const [isLoadingJoin, setLoadingJoin] = useState<boolean>(true);
   const toast = useToast();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   useFocusEffect(
     useCallback(() => {
       if (!id || !invite) return;
       mutate({ id, params: { invite } }, {
+        onSuccess() {
+          // Applied and Messages tabs stay mounted and read this cached list.
+          queryClient.invalidateQueries({ queryKey: getApplicationControllerGetAllMyApplicationsQueryKey() });
+          // Backend creates a document share for the new member when the household was already sent.
+          queryClient.invalidateQueries({ queryKey: getUsersControllerListSharesQueryKey() });
+        },
         onError(error) {
           errorToast({ toast, data: error.response?.data });
           router.replace("/(app)/(tabs)/map");
@@ -40,7 +49,7 @@ export default function ApplicationAddedPage() {
           setLoadingJoin(false);
         }
       });
-    }, [id, invite, mutate, router, toast])
+    }, [id, invite, mutate, router, toast, queryClient])
   );
 
   const isLoading = isLoadingJoin;

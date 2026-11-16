@@ -22,6 +22,7 @@ import type {
 
 import type {
   ErrorDto,
+  InboxAttachmentDto,
   InboxControllerThreadsParams,
   InboxReplyDto,
   InboxThreadDetailDto,
@@ -284,6 +285,72 @@ export const useInboxControllerReply = <TError = ErrorType<ErrorDto>,
       > => {
 
       const mutationOptions = getInboxControllerReplyMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+
+
+/**
+ * @summary File an email attachment in the home's documents. Same as the automatic filing, started by you.
+ */
+export const inboxControllerFileAttachment = (
+    messageId: string,
+    index: number,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<InboxAttachmentDto>(
+      {url: `/inbox/messages/${messageId}/attachments/${index}/file`, method: 'POST', signal
+    },
+      options);
+    }
+  
+
+
+export const getInboxControllerFileAttachmentMutationOptions = <TError = ErrorType<ErrorDto>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof inboxControllerFileAttachment>>, TError,{messageId: string;index: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof inboxControllerFileAttachment>>, TError,{messageId: string;index: number}, TContext> => {
+
+const mutationKey = ['inboxControllerFileAttachment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof inboxControllerFileAttachment>>, {messageId: string;index: number}> = (props) => {
+          const {messageId,index} = props ?? {};
+
+          return  inboxControllerFileAttachment(messageId,index,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type InboxControllerFileAttachmentMutationResult = NonNullable<Awaited<ReturnType<typeof inboxControllerFileAttachment>>>
+    
+    export type InboxControllerFileAttachmentMutationError = ErrorType<ErrorDto>
+
+    /**
+ * @summary File an email attachment in the home's documents. Same as the automatic filing, started by you.
+ */
+export const useInboxControllerFileAttachment = <TError = ErrorType<ErrorDto>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof inboxControllerFileAttachment>>, TError,{messageId: string;index: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof inboxControllerFileAttachment>>,
+        TError,
+        {messageId: string;index: number},
+        TContext
+      > => {
+
+      const mutationOptions = getInboxControllerFileAttachmentMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

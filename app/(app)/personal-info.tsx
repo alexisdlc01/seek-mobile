@@ -5,6 +5,7 @@ import {
   useProfileTypography,
 } from "@/components/custom/profile-screen";
 import { Loader } from "@/components/custom/loader";
+import { ErrorState } from "@/components/seek/states";
 import { SuccessToast } from "@/components/custom/success-toast";
 import {
   Actionsheet,
@@ -48,16 +49,32 @@ import React, { ReactNode, useCallback, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
 export default function PersonalInformationScreen() {
-  const {
-    data: user,
-    isLoading: loadingUser,
-    isError,
-  } = useAuthControllerCurrentUser();
-  const { data: documents, isLoading: loadingDocuments } =
-    useUsersControllerDocumentTypes();
+  const userQuery = useAuthControllerCurrentUser();
+  const documentsQuery = useUsersControllerDocumentTypes();
+  const { data: user, isLoading: loadingUser } = userQuery;
+  const { data: documents, isLoading: loadingDocuments } = documentsQuery;
+
+  const failed = userQuery.isError ? userQuery : documentsQuery.isError ? documentsQuery : null;
+  if (failed) {
+    return (
+      <ProfileScreen
+        title="Personal Information"
+        fallbackHref="/(app)/profile"
+        alwaysReturnToFallback
+      >
+        <ErrorState
+          error={failed.error}
+          onRetry={() => {
+            if (userQuery.isError) userQuery.refetch();
+            if (documentsQuery.isError) documentsQuery.refetch();
+          }}
+        />
+      </ProfileScreen>
+    );
+  }
 
   return (
-    <Loader isLoading={loadingUser || loadingDocuments || !user || isError}>
+    <Loader isLoading={loadingUser || loadingDocuments || !user}>
       {user ? (
         <PersonalInformationContent
           user={user}

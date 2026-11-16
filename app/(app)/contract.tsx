@@ -12,7 +12,7 @@ import {
 } from "@/src/api/seek-api/contracts";
 import type { Contract, TenancyDocument } from "@/src/api/seek-api/model";
 import { formatDate } from "@/src/utils/seek-format";
-import { errorMessage, isWebUrl, openStoredFile, tenancyTitle, type TenancyView } from "@/src/utils/tenancy-view";
+import { errorMessage, idOf, isWebUrl, openStoredFile, tenancyTitle, type TenancyView } from "@/src/utils/tenancy-view";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
@@ -159,7 +159,8 @@ function ContractCard({ contract, tenancy }: { contract: Contract; tenancy: Tena
   const [message, setMessage] = useState<{ text: string; error?: boolean } | null>(null);
 
   const total = Math.max(1, tenancy.tenants.length);
-  const signedBy = new Set(contract.signatures.map((signature) => signature.user));
+  // signatures.user comes back populated ({ _id, name, profilePicUrl }) from GET /contracts/tenancy/:id.
+  const signedBy = new Set(contract.signatures.map((signature) => idOf(signature.user)));
   const iSigned = user ? signedBy.has(user._id) : false;
   const signed = contract.status === "SIGNED";
 

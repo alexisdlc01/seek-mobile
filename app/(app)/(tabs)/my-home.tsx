@@ -33,6 +33,7 @@ import { useRouter } from "expo-router";
 import {
   BellIcon,
   FileTextIcon,
+  LandmarkIcon,
   PiggyBankIcon,
   ReceiptIcon,
   TriangleAlertIcon,
@@ -90,6 +91,7 @@ function MyHome() {
           actionLabel="Find a home"
           onAction={() => router.navigate("/(app)/(tabs)/map")}
         />
+        <NotificationsSection />
       </SeekScreen>
     );
   }
@@ -102,6 +104,7 @@ function PendingTenancy({ tenancy }: { tenancy: TenancyView }) {
   return (
     <SeekScreen title="My home">
       <TenancyInvite tenancy={tenancy} />
+      <NotificationsSection />
     </SeekScreen>
   );
 }
@@ -142,10 +145,63 @@ function TenancyInvite({ tenancy }: { tenancy: TenancyView }) {
   );
 }
 
-function HomeContent({ tenancy, invites }: { tenancy: TenancyView; invites: TenancyView[] }) {
+/** Shown on every My home state, so students without an active tenancy still see offers, viewings and rejections. */
+function NotificationsSection({ onLayout }: { onLayout?: (y: number) => void }) {
   const colors = useSeekTheme();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const notifications = useNotificationsControllerList({ query: { retry: 1 } });
+  const markRead = useNotificationsControllerMarkRead({
+    mutation: { onSuccess: () => invalidateHomeQueries(queryClient) },
+  });
+  const unread = (notifications.data ?? []).filter((item) => !item.readAt);
+  return (
+    <View style={styles.section} onLayout={(event) => onLayout?.(event.nativeEvent.layout.y)}>
+        <SectionTitle hint={unread.length > 0 ? `${unread.length} new` : undefined}>Notifications</SectionTitle>
+        <Card style={styles.list}>
+          {notifications.isLoading ? (
+            <LoadingState label="Loading notifications…" />
+          ) : notifications.isError ? (
+            <ErrorState error={notifications.error} onRetry={() => notifications.refetch()} title="Couldn't load notifications" />
+          ) : (notifications.data ?? []).length === 0 ? (
+            <Text style={[styles.empty, { color: colors.mutedText }]}>No notifications yet.</Text>
+          ) : (
+            (notifications.data ?? []).map((item) => (
+              <Pressable
+                key={item._id}
+                accessibilityRole="button"
+                accessibilityLabel={item.title}
+                onPress={() => {
+                  if (!item.readAt) markRead.mutate({ id: item._id });
+                  const href = routeForNotification(item);
+                  if (href) router.push(href);
+                }}
+                style={styles.notification}
+              >
+                <View
+                  style={[
+                    styles.dot,
+                    { backgroundColor: item.readAt ? "transparent" : colors.accent },
+                  ]}
+                />
+                <View style={styles.flex}>
+                  <Text style={[styles.notificationTitle, { color: colors.text }]}>{item.title}</Text>
+                  {item.body ? (
+                    <Text style={[styles.tileDetail, { color: colors.mutedText }]}>{item.body}</Text>
+                  ) : null}
+                </View>
+                <Text style={[styles.tileDetail, { color: colors.mutedText }]}>{formatDay(item.createdAt)}</Text>
+              </Pressable>
+            ))
+          )}
+        </Card>
+      </View>
+  );
+}
+
+function HomeContent({ tenancy, invites }: { tenancy: TenancyView; invites: TenancyView[] }) {
+  const colors = useSeekTheme();
+  const router = useRouter();
   const tenancyId = tenancy._id;
 
   const payments = usePaymentsControllerMine({ tenancy: tenancyId }, { query: { retry: 1 } });
@@ -153,9 +209,6 @@ function HomeContent({ tenancy, invites }: { tenancy: TenancyView; invites: Tena
   const bills = useBillsControllerForTenancy(tenancyId, { query: { retry: 1 } });
   const repairs = useRepairsControllerForTenancy(tenancyId, { query: { retry: 1 } });
   const notifications = useNotificationsControllerList({ query: { retry: 1 } });
-  const markRead = useNotificationsControllerMarkRead({
-    mutation: { onSuccess: () => invalidateHomeQueries(queryClient) },
-  });
 
   const planView = plan.data;
   const next = payments.data ? nextPayment(payments.data) : undefined;
@@ -165,6 +218,11 @@ function HomeContent({ tenancy, invites }: { tenancy: TenancyView; invites: Tena
   const allBills = bills.data ?? [];
   const owedBills = allBills.filter((bill) => !bill.includedInRent && bill.status === "DUE" && !bill.myPaid);
   const owedTotal = owedBills.reduce((sum, bill) => sum + bill.myShare, 0);
+  // Same condition as the council tax row in bills.tsx "Not set up" branch: no certificate yet and no council tax bill at all.
+  // shortcut: tenants' full-time status isn't in the API, so the copy says "likely"; add a real check if it ever is.
+  const hasCouncilTaxBill = allBills.some((bill) => bill.category === "COUNCIL_TAX");
+  const exemptionOnFile = (tenancy.documents ?? []).some((doc) => doc.type === "COUNCIL_TAX_EXEMPTION");
+  const showCouncilTaxHint = !!bills.data && !hasCouncilTaxBill && !exemptionOnFile;
   const includedCount = allBills.filter((bill) => bill.includedInRent).length;
 
   const openRepairs = (repairs.data ?? []).filter((item) => item.status !== "FIXED");
@@ -275,6 +333,24 @@ function HomeContent({ tenancy, invites }: { tenancy: TenancyView; invites: Tena
         </Card>
       ) : null}
 
+      {showCouncilTaxHint ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="You likely owe no council tax"
+          onPress={() => router.push("/(app)/bills")}
+        >
+          <Card tone="tint">
+            <View style={styles.row}>
+              <LandmarkIcon color={colors.onTint} size={18} />
+              <Text style={[styles.noticeTitle, { color: colors.onTint }]}>You likely owe no council tax</Text>
+            </View>
+            <Text style={[styles.noticeBody, { color: colors.onTint }]}>
+              A household of full-time students usually owes no council tax. Upload your exemption certificate in Bills.
+            </Text>
+          </Card>
+        </Pressable>
+      ) : null}
+
       <Card tone="hero">
         {payments.isLoading ? (
           <LoadingState label="Loading your rent…" />
@@ -339,46 +415,7 @@ function HomeContent({ tenancy, invites }: { tenancy: TenancyView; invites: Tena
         })}
       </View>
 
-      <View style={styles.section} onLayout={(event) => (notificationsY.current = event.nativeEvent.layout.y)}>
-        <SectionTitle hint={unread.length > 0 ? `${unread.length} new` : undefined}>Notifications</SectionTitle>
-        <Card style={styles.list}>
-          {notifications.isLoading ? (
-            <LoadingState label="Loading notifications…" />
-          ) : notifications.isError ? (
-            <ErrorState error={notifications.error} onRetry={() => notifications.refetch()} title="Couldn't load notifications" />
-          ) : (notifications.data ?? []).length === 0 ? (
-            <Text style={[styles.empty, { color: colors.mutedText }]}>No notifications yet.</Text>
-          ) : (
-            (notifications.data ?? []).slice(0, 4).map((item) => (
-              <Pressable
-                key={item._id}
-                accessibilityRole="button"
-                accessibilityLabel={item.title}
-                onPress={() => {
-                  if (!item.readAt) markRead.mutate({ id: item._id });
-                  const href = routeForNotification(item);
-                  if (href) router.push(href);
-                }}
-                style={styles.notification}
-              >
-                <View
-                  style={[
-                    styles.dot,
-                    { backgroundColor: item.readAt ? "transparent" : colors.accent },
-                  ]}
-                />
-                <View style={styles.flex}>
-                  <Text style={[styles.notificationTitle, { color: colors.text }]}>{item.title}</Text>
-                  {item.body ? (
-                    <Text style={[styles.tileDetail, { color: colors.mutedText }]}>{item.body}</Text>
-                  ) : null}
-                </View>
-                <Text style={[styles.tileDetail, { color: colors.mutedText }]}>{formatDay(item.createdAt)}</Text>
-              </Pressable>
-            ))
-          )}
-        </Card>
-      </View>
+      <NotificationsSection onLayout={(y) => (notificationsY.current = y)} />
 
       <HomeAdmin tenancy={tenancy} />
 

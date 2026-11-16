@@ -6,6 +6,7 @@ import {
   useProfileTypography,
 } from "@/components/custom/profile-screen";
 import { Loader } from "@/components/custom/loader";
+import { ErrorState } from "@/components/seek/states";
 import {
   Avatar,
   AvatarFallbackText,
@@ -64,7 +65,16 @@ function refreshCurrentUser(updatedUser: UserDto) {
 }
 
 export default function EditBasicInformationScreen() {
-  const { data: user, isLoading } = useAuthControllerCurrentUser();
+  const { data: user, isLoading, isError, error, refetch } =
+    useAuthControllerCurrentUser();
+
+  if (isError && !user) {
+    return (
+      <ProfileScreen title="Edit Basic Information">
+        <ErrorState error={error} onRetry={() => refetch()} />
+      </ProfileScreen>
+    );
+  }
 
   return (
     <Loader isLoading={isLoading || !user}>
