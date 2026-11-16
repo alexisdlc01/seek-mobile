@@ -40,6 +40,11 @@ export interface BillViewDto {
    * @nullable
    */
   paidByName: string | null;
+  /**
+   * Name of the user in addedBy.
+   * @nullable
+   */
+  addedByName?: string | null;
   shares: BillShareDto[];
   /** The signed-in tenant's share, in pence (0 if they don't share it). */
   myShare: number;

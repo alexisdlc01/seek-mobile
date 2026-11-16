@@ -186,6 +186,7 @@ function BillsContent({ tenancy }: { tenancy: TenancyView }) {
           ? `due ${formatDay(bill.dueDate)}`
           : null,
       people > 1 ? `split ${pluralise(people, "way")} · total ${formatPence(bill.amount)}` : null,
+      bill.source === "EMAIL" && bill.addedByName ? `From ${bill.addedByName.split(" ")[0]}'s inbox` : null,
     ]
       .filter(Boolean)
       .join(" · ");
