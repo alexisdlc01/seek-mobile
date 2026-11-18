@@ -14,4 +14,5 @@ export const ApplicationDtoStage = {
   ACCEPTED: 'ACCEPTED',
   SIGNED: 'SIGNED',
   REJECTED: 'REJECTED',
+  WITHDRAWN: 'WITHDRAWN',
 } as const;

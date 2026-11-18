@@ -1,8 +1,8 @@
 /**
  * import { AxiosError, AxiosResponse } from 'axios';
  */
-import type { RentPlanFrequency } from './rentPlanFrequency';
+import type { PaymentsControllerPreviewPlanFrequency } from './paymentsControllerPreviewPlanFrequency';
 
 export type PaymentsControllerPreviewPlanParams = {
-frequency: RentPlanFrequency;
+frequency: PaymentsControllerPreviewPlanFrequency;
 };

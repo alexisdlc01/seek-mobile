@@ -230,7 +230,7 @@ function RentPlanContent({ tenancyId, title }: { tenancyId: string; title: strin
           {restricted
             ? (plan.restrictionReason ??
               "Rent can be taken at most one month in advance here, so only monthly is offered.")
-            : "This home lets you pay ahead, so every plan is open."}
+            : "Paying ahead is optional and always your choice, never required. You can always pay monthly."}
         </Text>
       </Card>
 
@@ -432,6 +432,17 @@ function RentPlanContent({ tenancyId, title }: { tenancyId: string; title: strin
         ) : null}
       </View>
 
+      {plan.bankTransferInstructions ? (
+        <View style={styles.section}>
+          <SectionTitle>Pay by bank transfer</SectionTitle>
+          <Card>
+            <Text selectable style={[styles.bankInstructions, { color: colors.text }]}>
+              {plan.bankTransferInstructions}
+            </Text>
+          </Card>
+        </View>
+      ) : null}
+
       <View style={styles.section}>
         <SectionTitle hint={frequencyLabel(saved.frequency)}>Payment history</SectionTitle>
         <Card style={styles.list}>
@@ -515,4 +526,5 @@ const styles = StyleSheet.create({
   },
   footer: { padding: 16, gap: 8, borderTopWidth: 1 },
   footerNote: { fontSize: 12, textAlign: "center" },
+  bankInstructions: { fontSize: 13.5, lineHeight: 20 },
 });

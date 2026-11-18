@@ -31,6 +31,11 @@ export interface BillViewDto {
    * @nullable
    */
   paidBy: string | null;
+  /**
+   * Mailbox owner whose synced inbox this bill came from (EMAIL bills only).
+   * @nullable
+   */
+  addedBy: string | null;
   status: BillViewDtoStatus;
   source: BillViewDtoSource;
   /** @nullable */
@@ -44,7 +49,7 @@ export interface BillViewDto {
    * Name of the user in addedBy.
    * @nullable
    */
-  addedByName?: string | null;
+  addedByName: string | null;
   shares: BillShareDto[];
   /** The signed-in tenant's share, in pence (0 if they don't share it). */
   myShare: number;

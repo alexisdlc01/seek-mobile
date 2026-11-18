@@ -130,6 +130,9 @@ function DocumentsContent({ tenancy }: { tenancy: TenancyView }) {
                   right={
                     <View style={styles.actions}>
                       {doc.source === "SEEK" ? <Badge label="Seek" tone="info" /> : null}
+                      {doc.type === "TENANCY_AGREEMENT" && doc.confirmedByLandlord === false ? (
+                        <Badge label="From email — awaiting landlord confirmation" tone="warning" />
+                      ) : null}
                       <SeekButton
                         label={openingId === doc._id ? "Opening…" : "Open"}
                         variant="tint"
@@ -153,7 +156,7 @@ function DocumentsContent({ tenancy }: { tenancy: TenancyView }) {
 const styles = StyleSheet.create({
   section: { gap: 8 },
   list: { padding: 0, gap: 0, overflow: "hidden" },
-  actions: { flexDirection: "row", alignItems: "center", gap: 6 },
+  actions: { flexDirection: "row", flexWrap: "wrap", justifyContent: "flex-end", alignItems: "center", gap: 6 },
   note: { fontSize: 13.5, lineHeight: 20 },
   notice: { fontSize: 13, lineHeight: 19, fontWeight: "600" },
 });

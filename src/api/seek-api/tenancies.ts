@@ -24,9 +24,11 @@ import type {
   AddTenancyDocumentDto,
   CreateTenancyDto,
   DepositReceivedDto,
+  EndTenancyDto,
   ErrorDto,
   PrescribedInfoDto,
   Tenancy,
+  UpdateBankTransferInstructionsDto,
   UpdateDepositDto,
   UpdateEnergyAllowanceDto
 } from './model';
@@ -571,6 +573,70 @@ export const useTenanciesControllerEnergyAllowance = <TError = ErrorType<ErrorDt
       return useMutation(mutationOptions, queryClient);
     }
     /**
+ * @summary Set the bank-transfer payment instructions without changing deposit protection.
+ */
+export const tenanciesControllerBankTransferInstructions = (
+    id: string,
+    updateBankTransferInstructionsDto: UpdateBankTransferInstructionsDto,
+ options?: SecondParameter<typeof customInstance>,) => {
+      
+      
+      return customInstance<Tenancy>(
+      {url: `/tenancies/${id}/bank-transfer-instructions`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: updateBankTransferInstructionsDto
+    },
+      options);
+    }
+  
+
+
+export const getTenanciesControllerBankTransferInstructionsMutationOptions = <TError = ErrorType<ErrorDto>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof tenanciesControllerBankTransferInstructions>>, TError,{id: string;data: UpdateBankTransferInstructionsDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof tenanciesControllerBankTransferInstructions>>, TError,{id: string;data: UpdateBankTransferInstructionsDto}, TContext> => {
+
+const mutationKey = ['tenanciesControllerBankTransferInstructions'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof tenanciesControllerBankTransferInstructions>>, {id: string;data: UpdateBankTransferInstructionsDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  tenanciesControllerBankTransferInstructions(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TenanciesControllerBankTransferInstructionsMutationResult = NonNullable<Awaited<ReturnType<typeof tenanciesControllerBankTransferInstructions>>>
+    export type TenanciesControllerBankTransferInstructionsMutationBody = UpdateBankTransferInstructionsDto
+    export type TenanciesControllerBankTransferInstructionsMutationError = ErrorType<ErrorDto>
+
+    /**
+ * @summary Set the bank-transfer payment instructions without changing deposit protection.
+ */
+export const useTenanciesControllerBankTransferInstructions = <TError = ErrorType<ErrorDto>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof tenanciesControllerBankTransferInstructions>>, TError,{id: string;data: UpdateBankTransferInstructionsDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof tenanciesControllerBankTransferInstructions>>,
+        TError,
+        {id: string;data: UpdateBankTransferInstructionsDto},
+        TContext
+      > => {
+
+      const mutationOptions = getTenanciesControllerBankTransferInstructionsMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
  * @summary Record the day the deposit was received. The 30-day protection deadline runs from it.
  */
 export const tenanciesControllerDepositReceived = (
@@ -761,6 +827,132 @@ export const useTenanciesControllerAddDocument = <TError = ErrorType<ErrorDto>,
       > => {
 
       const mutationOptions = getTenanciesControllerAddDocumentMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Confirm that a tenancy agreement imported from a tenant's mailbox is genuine.
+ */
+export const tenanciesControllerConfirmDocument = (
+    id: string,
+    docId: string,
+ options?: SecondParameter<typeof customInstance>,) => {
+      
+      
+      return customInstance<Tenancy>(
+      {url: `/tenancies/${id}/documents/${docId}/confirm`, method: 'PATCH'
+    },
+      options);
+    }
+  
+
+
+export const getTenanciesControllerConfirmDocumentMutationOptions = <TError = ErrorType<ErrorDto>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof tenanciesControllerConfirmDocument>>, TError,{id: string;docId: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof tenanciesControllerConfirmDocument>>, TError,{id: string;docId: string}, TContext> => {
+
+const mutationKey = ['tenanciesControllerConfirmDocument'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof tenanciesControllerConfirmDocument>>, {id: string;docId: string}> = (props) => {
+          const {id,docId} = props ?? {};
+
+          return  tenanciesControllerConfirmDocument(id,docId,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TenanciesControllerConfirmDocumentMutationResult = NonNullable<Awaited<ReturnType<typeof tenanciesControllerConfirmDocument>>>
+    
+    export type TenanciesControllerConfirmDocumentMutationError = ErrorType<ErrorDto>
+
+    /**
+ * @summary Confirm that a tenancy agreement imported from a tenant's mailbox is genuine.
+ */
+export const useTenanciesControllerConfirmDocument = <TError = ErrorType<ErrorDto>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof tenanciesControllerConfirmDocument>>, TError,{id: string;docId: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof tenanciesControllerConfirmDocument>>,
+        TError,
+        {id: string;docId: string},
+        TContext
+      > => {
+
+      const mutationOptions = getTenanciesControllerConfirmDocumentMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary End a tenancy early, remove future unpaid rent and refund unused paid rent.
+ */
+export const tenanciesControllerEnd = (
+    id: string,
+    endTenancyDto: EndTenancyDto,
+ options?: SecondParameter<typeof customInstance>,) => {
+      
+      
+      return customInstance<Tenancy>(
+      {url: `/tenancies/${id}/end`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: endTenancyDto
+    },
+      options);
+    }
+  
+
+
+export const getTenanciesControllerEndMutationOptions = <TError = ErrorType<ErrorDto>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof tenanciesControllerEnd>>, TError,{id: string;data: EndTenancyDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof tenanciesControllerEnd>>, TError,{id: string;data: EndTenancyDto}, TContext> => {
+
+const mutationKey = ['tenanciesControllerEnd'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof tenanciesControllerEnd>>, {id: string;data: EndTenancyDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  tenanciesControllerEnd(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TenanciesControllerEndMutationResult = NonNullable<Awaited<ReturnType<typeof tenanciesControllerEnd>>>
+    export type TenanciesControllerEndMutationBody = EndTenancyDto
+    export type TenanciesControllerEndMutationError = ErrorType<ErrorDto>
+
+    /**
+ * @summary End a tenancy early, remove future unpaid rent and refund unused paid rent.
+ */
+export const useTenanciesControllerEnd = <TError = ErrorType<ErrorDto>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof tenanciesControllerEnd>>, TError,{id: string;data: EndTenancyDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof tenanciesControllerEnd>>,
+        TError,
+        {id: string;data: EndTenancyDto},
+        TContext
+      > => {
+
+      const mutationOptions = getTenanciesControllerEndMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

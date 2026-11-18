@@ -137,6 +137,11 @@ function AgreementDocCard({ doc }: { doc: TenancyDocument }) {
   return (
     <Card style={styles.card}>
       <Text style={[styles.title, { color: colors.text }]}>{doc.title}</Text>
+      {doc.type === "TENANCY_AGREEMENT" && doc.confirmedByLandlord === false ? (
+        <View style={styles.actions}>
+          <Badge label="From email — awaiting landlord confirmation" tone="warning" />
+        </View>
+      ) : null}
       <Text style={[styles.meta, { color: colors.mutedText }]}>Added {formatDate(doc.addedAt)}.</Text>
       {error ? (
         <Text accessibilityRole="alert" style={[styles.meta, { color: colors.danger }]}>

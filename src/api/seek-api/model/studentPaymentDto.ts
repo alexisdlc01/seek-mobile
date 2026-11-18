@@ -7,6 +7,7 @@ import type { StudentPaymentDtoProvider } from './studentPaymentDtoProvider';
 import type { StudentPaymentDtoProviderRef } from './studentPaymentDtoProviderRef';
 import type { StudentPaymentDtoPayoutStatus } from './studentPaymentDtoPayoutStatus';
 import type { StudentPaymentDtoTransferRef } from './studentPaymentDtoTransferRef';
+import type { StudentPaymentDtoRefundRef } from './studentPaymentDtoRefundRef';
 
 export interface StudentPaymentDto {
   _id: string;
@@ -50,4 +51,15 @@ export interface StudentPaymentDto {
   lastReminderAt: string | null;
   /** A paid holding deposit the landlord must refund within 7 days (Tenant Fees Act), e.g. after declining the household. */
   refundDue: boolean;
+  /** Amount due back to the payer, in pence. */
+  refundAmount: number;
+  /** Amount actually refunded, in pence. */
+  refundedAmount: number;
+  /** @nullable */
+  refundedAt: string | null;
+  /**
+   * Stripe refund id, or the simulated refund reference.
+   * @nullable
+   */
+  refundRef?: StudentPaymentDtoRefundRef;
 }

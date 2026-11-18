@@ -288,10 +288,7 @@ export const useInboxControllerReply = <TError = ErrorType<ErrorDto>,
 
       return useMutation(mutationOptions, queryClient);
     }
-    
-
-
-/**
+    /**
  * @summary File an email attachment in the home's documents. Same as the automatic filing, started by you.
  */
 export const inboxControllerFileAttachment = (

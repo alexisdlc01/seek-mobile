@@ -19,6 +19,4 @@ export interface UpdateUserProfileDto {
   /** Replaces the landlord's registrations. Verification is kept for unchanged numbers. */
   registrations?: RegistrationInputDto[];
   notificationPrefs?: NotificationPrefsInputDto;
-  /** Stripe Connect account (acct_...) that receives rent payouts. Landlords only. Empty string clears it. */
-  stripeAccountId?: string;
 }

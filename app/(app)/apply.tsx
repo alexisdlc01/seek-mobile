@@ -221,6 +221,9 @@ export default function ApplyScreen() {
   const holdingSet = home.holdingDeposit != null && home.holdingDeposit > 0;
   const holding = holdingSet ? Math.min(home.holdingDeposit ?? 0, weeklyCap) : weeklyCap;
   const offered = offeredSlots(home);
+  const offerDeadline = application?.offerExpiresAt
+    ? `If offered, you must accept by ${formatDate(application.offerExpiresAt)}.`
+    : "If offered, your acceptance deadline will be shown in Seek.";
 
   const criteria = home.criteria;
   const householdSize = Math.max(1, members.length);
@@ -432,7 +435,7 @@ export default function ApplyScreen() {
       <Card tone="tint">
         <Text style={[styles.noteTitle, { color: colors.onTint }]}>If you&apos;re offered the home</Text>
         <Text style={[styles.noteBody, { color: colors.onTint }]}>
-          {`The holding deposit is ${holdingSet ? "" : "at most "}£${holding} each (never more than one week's rent). It is refundable, it goes towards your first rent, and the landlord must decide within 15 days. Sending this application costs you nothing.`}
+          {`The holding deposit is ${holdingSet ? "" : "at most "}£${holding} each (never more than one week's rent). It is refundable and goes towards your first rent. ${offerDeadline} Sending this application costs you nothing.`}
         </Text>
         <Text style={[styles.noteBody, { color: colors.onTint }]}>
           {`Rent is £${rentEach} a month each (£${home.monthlyRent} for the home, split ${people} ${people === 1 ? "way" : "ways"}).`}

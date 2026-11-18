@@ -39,6 +39,11 @@ export interface Tenancy {
    */
   depositReceivedAt: string | null;
   /**
+   * Instructions for paying this tenancy by bank transfer.
+   * @maxLength 1000
+   */
+  bankTransferInstructions?: string;
+  /**
    * When the landlord gave tenants the deposit's prescribed information.
    * @nullable
    */

@@ -12,6 +12,11 @@ export interface RentPlanViewDto {
   plan: RentPlan;
   /** Rent per tenant per month, in pence. */
   monthlyRent: number;
+  /**
+   * Landlord's instructions for paying by bank transfer.
+   * @maxLength 1000
+   */
+  bankTransferInstructions?: string;
   nation: string;
   /** England: MONTHLY only. */
   allowedFrequencies: RentPlanViewDtoAllowedFrequenciesItem[];
