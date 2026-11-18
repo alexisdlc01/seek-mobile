@@ -2,7 +2,7 @@
  * import { AxiosError, AxiosResponse } from 'axios';
  */
 import type { MessageDto } from './messageDto';
-import type { UserDto } from './userDto';
+import type { PublicUserDto } from './publicUserDto';
 
 export interface ConversationDto {
   _id: string;
@@ -12,6 +12,6 @@ export interface ConversationDto {
   createdAt: string;
   groupDescription: string;
   avatar: string;
-  users: UserDto[];
+  users: PublicUserDto[];
   messages: MessageDto[];
 }

@@ -1,5 +1,6 @@
 import { AuthRequiredScreen } from "@/components/custom/auth-required";
 import { AdviceCard } from "@/components/seek/advice-card";
+import { HomeAdmin } from "@/components/seek/home-admin";
 import { EmptyState, ErrorState, LoadingState } from "@/components/seek/states";
 import { Badge, Card, Divider, SectionTitle, SeekButton, SeekScreen } from "@/components/seek/ui";
 import { useActiveTenancy } from "@/hooks/use-active-tenancy";
@@ -201,6 +202,8 @@ function DepositContent({ tenancy }: { tenancy: TenancyView }) {
           dispute service decides.
         </Text>
       </View>
+
+      <HomeAdmin tenancy={tenancy} only="photos" photoStage="CHECK_OUT" />
     </SeekScreen>
   );
 }

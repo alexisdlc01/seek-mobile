@@ -25,10 +25,15 @@ export interface ApplicationDto {
   /** @nullable */
   offeredAt?: string | null;
   /**
-   * Deadline for the household to accept the offer (15 days after it was made).
+   * Deadline for the household to accept the offer.
    * @nullable
    */
   offerExpiresAt?: string | null;
+  /**
+   * When the last offer lapsed unaccepted; a lapsed household goes to the back of the offer queue.
+   * @nullable
+   */
+  offerExpiredAt?: string | null;
   /**
    * Holding deposit per room in whole pounds, recorded with the offer.
    * @nullable

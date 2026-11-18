@@ -2,7 +2,7 @@ import { Badge, Card, SectionTitle, SeekButton } from "@/components/seek/ui";
 import { invalidateHomeQueries } from "@/hooks/use-active-tenancy";
 import { useSeekTheme } from "@/hooks/use-seek-theme";
 import { useAuthControllerCurrentUser } from "@/src/api/seek-api/auth";
-import type { AddTenancyDocumentDtoType } from "@/src/api/seek-api/model";
+import type { AddTenancyDocumentDtoStage, AddTenancyDocumentDtoType } from "@/src/api/seek-api/model";
 import { useTenanciesControllerAddDocument } from "@/src/api/seek-api/tenancies";
 import { useAuth } from "@/src/store/auth-store";
 import { formatDate } from "@/src/utils/seek-format";
@@ -14,6 +14,7 @@ import React, { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 const CHECK_IN = "Check-in photo";
+const CHECK_OUT = "Check-out photo";
 const INSURANCE = "Contents insurance";
 
 type Kind = "photos" | "insurance" | "councilTax";
@@ -25,7 +26,15 @@ type Kind = "photos" | "insurance" | "councilTax";
  * endpoint; nothing here is sent to a third party.
  */
 /** `only` shows a single card (used by Bills to file a certificate or policy in place). */
-export function HomeAdmin({ tenancy, only }: { tenancy: TenancyView; only?: Exclude<Kind, "photos"> }) {
+export function HomeAdmin({
+  tenancy,
+  only,
+  photoStage = "CHECK_IN",
+}: {
+  tenancy: TenancyView;
+  only?: Kind;
+  photoStage?: AddTenancyDocumentDtoStage;
+}) {
   const colors = useSeekTheme();
   const queryClient = useQueryClient();
   const accessToken = useAuth((state) => state.accessToken);
@@ -35,7 +44,10 @@ export function HomeAdmin({ tenancy, only }: { tenancy: TenancyView; only?: Excl
   const [notice, setNotice] = useState<{ text: string; error?: boolean } | null>(null);
 
   const docs = tenancy.documents ?? [];
-  const photos = docs.filter((doc) => doc.type === "INVENTORY" && doc.title.startsWith(CHECK_IN));
+  const photoTitle = photoStage === "CHECK_OUT" ? CHECK_OUT : CHECK_IN;
+  const photos = docs.filter(
+    (doc) => doc.type === "INVENTORY" && (doc.stage === photoStage || (!doc.stage && photoStage === "CHECK_IN")),
+  );
   const insurance = docs.find((doc) => doc.title.startsWith(INSURANCE));
   const councilTax = docs.find((doc) => doc.type === "COUNCIL_TAX_EXEMPTION");
 
@@ -52,7 +64,7 @@ export function HomeAdmin({ tenancy, only }: { tenancy: TenancyView; only?: Excl
       setBusy(kind);
       const type: AddTenancyDocumentDtoType =
         kind === "photos" ? "INVENTORY" : kind === "councilTax" ? "COUNCIL_TAX_EXEMPTION" : "OTHER";
-      const title = kind === "photos" ? CHECK_IN : kind === "insurance" ? INSURANCE : "Council tax exemption";
+      const title = kind === "photos" ? photoTitle : kind === "insurance" ? INSURANCE : "Council tax exemption";
       for (const [index, asset] of result.assets.entries()) {
         const uploaded = await uploadFile({
           uri: asset.uri,
@@ -65,10 +77,11 @@ export function HomeAdmin({ tenancy, only }: { tenancy: TenancyView; only?: Excl
           id: tenancy._id,
           data: {
             type,
-            title: kind === "photos" ? `${CHECK_IN} ${photos.length + index + 1}` : title,
+            title: kind === "photos" ? `${photoTitle} ${photos.length + index + 1}` : title,
             url: uploaded.fileUrl,
             key: uploaded.key,
             source: "UPLOAD",
+            stage: kind === "photos" ? photoStage : undefined,
           },
         });
       }
@@ -104,15 +117,18 @@ export function HomeAdmin({ tenancy, only }: { tenancy: TenancyView; only?: Excl
         </Text>
       ) : null}
 
-      {only ? null : (
+      {only && only !== "photos" ? null : (
       <Card style={styles.card}>
         <View style={styles.head}>
-          <Text style={[styles.title, { color: colors.text }]}>Check-in photos</Text>
+          <Text style={[styles.title, { color: colors.text }]}>
+            {photoStage === "CHECK_OUT" ? "Check-out photos" : "Check-in photos"}
+          </Text>
           <Badge label={photos.length > 0 ? `${photos.length} saved` : "None yet"} tone={photos.length > 0 ? "success" : "neutral"} />
         </View>
         <Text style={[styles.body, { color: colors.mutedText }]}>
-          Photograph every room and any damage in your first days. Dated photos are your best evidence if the landlord
-          later tries to take money from your deposit.
+          {photoStage === "CHECK_OUT"
+            ? "Photograph every room and its condition when you leave. Dated photos are your evidence if deposit deductions are disputed."
+            : "Photograph every room and any damage in your first days. Dated photos are your best evidence if the landlord later tries to take money from your deposit."}
         </Text>
         {action("photos", photos.length > 0 ? "Add more photos" : "Add photos")}
       </Card>

@@ -446,7 +446,7 @@ export const useApplicationControllerApproveApplication = <TError = ErrorType<vo
       return useMutation(mutationOptions, queryClient);
     }
     /**
- * @summary Make an offer. The household has 15 days to accept; the holding deposit is recorded.
+ * @summary Make an offer. The household has 30 days to accept; the holding deposit is recorded.
  */
 export const applicationControllerOfferApplication = (
     id: string,
@@ -492,7 +492,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type ApplicationControllerOfferApplicationMutationError = ErrorType<void>
 
     /**
- * @summary Make an offer. The household has 15 days to accept; the holding deposit is recorded.
+ * @summary Make an offer. The household has 30 days to accept; the holding deposit is recorded.
  */
 export const useApplicationControllerOfferApplication = <TError = ErrorType<void>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof applicationControllerOfferApplication>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}

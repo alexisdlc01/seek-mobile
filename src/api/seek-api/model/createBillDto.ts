@@ -16,5 +16,6 @@ export interface CreateBillDto {
   includedInRent?: boolean;
   /** Tenant ids. Defaults to every tenant. */
   splitBetween?: string[];
+  /** Accepted but ignored: client-created bills are always MANUAL. */
   source?: CreateBillDtoSource;
 }

@@ -1,11 +1,8 @@
 /**
  * import { AxiosError, AxiosResponse } from 'axios';
  */
-import type { StudentPaymentDtoStatus } from './studentPaymentDtoStatus';
+import type { RentPlanPreviewItemDtoStatus } from './rentPlanPreviewItemDtoStatus';
 
-/**
- * One payment as it would stand after switching plan. Nothing is saved.
- */
 export interface RentPlanPreviewItemDto {
   dueDate: string;
   /** In pence, after any holding deposit credit. */
@@ -14,5 +11,5 @@ export interface RentPlanPreviewItemDto {
   coversMonths: number;
   /** Holding deposit taken off this payment, in pence. */
   holdingDepositCredit: number;
-  status: StudentPaymentDtoStatus;
+  status: RentPlanPreviewItemDtoStatus;
 }

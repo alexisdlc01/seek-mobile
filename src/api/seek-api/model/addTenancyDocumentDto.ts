@@ -3,6 +3,7 @@
  */
 import type { AddTenancyDocumentDtoType } from './addTenancyDocumentDtoType';
 import type { AddTenancyDocumentDtoSource } from './addTenancyDocumentDtoSource';
+import type { AddTenancyDocumentDtoStage } from './addTenancyDocumentDtoStage';
 
 export interface AddTenancyDocumentDto {
   type: AddTenancyDocumentDtoType;
@@ -11,4 +12,6 @@ export interface AddTenancyDocumentDto {
   /** Private upload key from /upload/presign. */
   key?: string;
   source?: AddTenancyDocumentDtoSource;
+  /** Inventory stage; defaults to check-in. */
+  stage?: AddTenancyDocumentDtoStage;
 }

@@ -2,6 +2,9 @@
  * import { AxiosError, AxiosResponse } from 'axios';
  */
 
+/**
+ * Accepted but ignored: client-created bills are always MANUAL.
+ */
 export type CreateBillDtoSource = typeof CreateBillDtoSource[keyof typeof CreateBillDtoSource];
 
 
