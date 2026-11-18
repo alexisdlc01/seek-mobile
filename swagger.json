@@ -9900,8 +9900,8 @@
         "properties": {
           "endDate": {
             "type": "string",
-            "format": "date-time",
-            "description": "The first day no longer covered by the tenancy."
+            "format": "date",
+            "description": "The first London calendar day no longer covered by the tenancy."
           }
         },
         "required": [
@@ -12218,7 +12218,8 @@
               "PENDING",
               "PAID",
               "FAILED",
-              "LATE"
+              "LATE",
+              "CANCELLED"
             ]
           },
           "dueDate": {
@@ -12408,7 +12409,8 @@
               "PENDING",
               "PAID",
               "FAILED",
-              "LATE"
+              "LATE",
+              "CANCELLED"
             ]
           }
         },
@@ -12482,7 +12484,8 @@
               "PENDING",
               "PAID",
               "FAILED",
-              "LATE"
+              "LATE",
+              "CANCELLED"
             ]
           },
           "dueDate": {
@@ -12838,7 +12841,8 @@
               "PENDING",
               "PAID",
               "FAILED",
-              "LATE"
+              "LATE",
+              "CANCELLED"
             ]
           }
         },
@@ -12862,7 +12866,8 @@
               "PENDING",
               "PAID",
               "FAILED",
-              "LATE"
+              "LATE",
+              "CANCELLED"
             ]
           },
           "provider": {

@@ -12,4 +12,5 @@ export const StudentPaymentDtoStatus = {
   PAID: 'PAID',
   FAILED: 'FAILED',
   LATE: 'LATE',
+  CANCELLED: 'CANCELLED',
 } as const;

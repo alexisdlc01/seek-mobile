@@ -3,6 +3,6 @@
  */
 
 export interface EndTenancyDto {
-  /** The first day no longer covered by the tenancy. */
+  /** The first London calendar day no longer covered by the tenancy. */
   endDate: string;
 }
