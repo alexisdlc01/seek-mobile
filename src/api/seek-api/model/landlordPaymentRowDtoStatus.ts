@@ -12,4 +12,5 @@ export const LandlordPaymentRowDtoStatus = {
   PAID: 'PAID',
   FAILED: 'FAILED',
   LATE: 'LATE',
+  CANCELLED: 'CANCELLED',
 } as const;
