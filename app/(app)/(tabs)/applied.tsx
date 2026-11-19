@@ -79,7 +79,7 @@ function Applied() {
           application={application}
           shares={(shares.data ?? []).filter((share) => share.active)}
           holdingDeposit={(payments.data ?? []).find(
-            (payment) => payment.kind === "HOLDING_DEPOSIT" && payment.application === application._id && !payment.refundDue,
+            (payment) => payment.kind === "HOLDING_DEPOSIT" && payment.application === application._id && !payment.refundDue && !payment.refundedAt,
           )}
         />
       ))}

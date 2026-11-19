@@ -298,10 +298,20 @@ function ConnectedEmail() {
                     }
                     right={
                       connection ? (
-                        <Badge
-                          label={connection.status === "ERROR" ? "Needs attention" : "Connected"}
-                          tone={connection.status === "ERROR" ? "warning" : "success"}
-                        />
+                        connection.status === "ERROR" && provider.provider !== "DEMO" ? (
+                          <SeekButton
+                            label={busy === provider.provider ? "Connecting…" : "Reconnect"}
+                            variant="tint"
+                            compact
+                            disabled={busy !== null}
+                            onPress={() => void connect(provider)}
+                          />
+                        ) : (
+                          <Badge
+                            label={connection.status === "ERROR" ? "Needs attention" : "Connected"}
+                            tone={connection.status === "ERROR" ? "warning" : "success"}
+                          />
+                        )
                       ) : (
                         <SeekButton
                           label={busy === provider.provider ? "Connecting…" : "Connect"}
