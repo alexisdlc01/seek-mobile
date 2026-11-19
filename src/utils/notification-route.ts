@@ -15,7 +15,11 @@ const MOBILE_ROUTES = new Set<string>([
 /** Where a notification leads in the app: its mobile path, then its web link. */
 export function routeForNotification(notification: Notification): Href | null {
   const target = notification.target;
-  if (typeof target?.mobile === "string" && MOBILE_ROUTES.has(target.mobile)) return target.mobile as Href;
+  if (typeof target?.mobile === "string" && MOBILE_ROUTES.has(target.mobile)) {
+    // Deposit deductions concern the tenancy in target.id, which may not be the student's current one.
+    if (target.mobile === "/(app)/deposit" && typeof target.id === "string") return { pathname: "/(app)/deposit", params: { tenancy: target.id } } as Href;
+    return target.mobile as Href;
+  }
   const link = notification.link ? resolveAdviceLink(notification.link) : null;
   return link?.kind === "route" ? link.href : null;
 }

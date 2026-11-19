@@ -13,9 +13,9 @@ import {
 } from "@/src/api/seek-api/contracts";
 import { aiControllerAdvice } from "@/src/api/seek-api/ai";
 import { formatDate, formatPence } from "@/src/utils/seek-format";
-import { depositCapCheck, depositDaysLeft, depositDeadline, errorMessage, openStoredFile, tenancyTitle, type TenancyView } from "@/src/utils/tenancy-view";
+import { asTenancyView, depositCapCheck, depositDaysLeft, depositDeadline, errorMessage, openStoredFile, tenancyTitle, type TenancyView } from "@/src/utils/tenancy-view";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
@@ -42,7 +42,10 @@ export default function DepositScreen() {
 function Deposit() {
   const router = useRouter();
   const query = useActiveTenancy();
-  const tenancy = query.tenancy;
+  const { tenancy: tenancyParam } = useLocalSearchParams<{ tenancy?: string }>();
+  // A notification can point at a past tenancy; fall back to the active one when it is not among the student's.
+  const requested = tenancyParam ? (query.data ?? []).map(asTenancyView).find((item) => item._id === tenancyParam) : undefined;
+  const tenancy = requested ?? query.tenancy;
   const shell = { title: "Deposit", back: true, fallbackHref: "/(app)/(tabs)/my-home" } as const;
 
   if (query.isLoading) {
