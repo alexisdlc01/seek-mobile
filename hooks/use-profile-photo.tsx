@@ -7,11 +7,11 @@ export const useProfilePicture = (initalValue?: string) => {
     const [cameraStatus, requestCameraPermission] = ImagePicker.useCameraPermissions();
     const [image, setImage] = useState<string | undefined>(initalValue);
 
-    const _pickImage = useCallback(async (useCamera: boolean) => {
+    const _pickImage = useCallback(async (useCamera: boolean, crop = true) => {
         const options: ImagePicker.ImagePickerOptions = {
             mediaTypes: ["images"],
-            allowsEditing: true,
-            aspect: [1, 1],
+            allowsEditing: crop,
+            ...(crop && { aspect: [1, 1] as [number, number] }),
             quality: 0.5,
         };
 
@@ -48,8 +48,8 @@ export const useProfilePicture = (initalValue?: string) => {
         requestLibraryPermission,
     ]);
 
-    const pickImage = async (useCamera: boolean) => {
-        const image = await _pickImage(useCamera);
+    const pickImage = async (useCamera: boolean, crop = true) => {
+        const image = await _pickImage(useCamera, crop);
         setImage(image?.uri);
         return image;
     }
