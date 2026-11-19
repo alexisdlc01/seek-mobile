@@ -205,7 +205,7 @@ export default function ApplyScreen() {
   const book = passport.data;
   const members = conversation.data?.users ?? [];
   const sharedItems = book.sections.flatMap((section) =>
-    section.items.filter((item) => item.status === "VERIFIED" || item.status === "PENDING" || item.status === "PROVIDED"),
+    section.items.filter((item) => item.source !== "request" && (item.status === "VERIFIED" || item.status === "PENDING" || item.status === "PROVIDED")),
   );
   const labelOf = (type: string) =>
     book.sections.flatMap((section) => section.items).find((item) => item.type === type)?.label ??
@@ -245,7 +245,7 @@ export default function ApplyScreen() {
   });
   const hasVerified = (passport: PassportDto | undefined, types: string[]) =>
     !!passport?.sections.some((section) =>
-      section.items.some((item) => types.includes(item.type) && item.status === "VERIFIED"),
+      section.items.some((item) => types.includes(item.type) && (item.status === "VERIFIED" || item.status === "PROVIDED")),
     );
   const countOf = (test: (passport: PassportDto | undefined) => boolean) =>
     household.filter((person) => test(person.passport)).length;
