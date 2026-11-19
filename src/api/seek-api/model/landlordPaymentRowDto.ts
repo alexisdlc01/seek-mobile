@@ -51,7 +51,7 @@ export interface LandlordPaymentRowDto {
    */
   nextPayout: string | null;
   /**
-   * HELD: Seek holds this payment until payouts are set up. TRANSFERRED: released since.
+   * Legacy only (no new card payment is ever held). HELD: an old payment Seek collected before the landlord could take card payments. TRANSFERRED: released since.
    * @nullable
    */
   payoutStatus: LandlordPaymentRowDtoPayoutStatus;

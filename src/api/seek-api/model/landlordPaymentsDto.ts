@@ -26,9 +26,9 @@ export interface LandlordPaymentsDto {
    * @nullable
    */
   nextPayoutDate: string | null;
-  /** True when card payments can't reach the landlord yet (no Stripe payout account able to take them): Seek holds them until payouts are set up. */
+  /** True when tenants can't pay this landlord by card yet (no Stripe account able to take card payments): card payment is blocked until setup is finished. */
   payoutsOnHold: boolean;
-  /** Paid this month but held by Seek until payouts are set up, pence (after Seek's fee). */
+  /** Legacy: paid this month but held by Seek from before direct card payments, pence (after Seek's fee). */
   held: number;
   rows: LandlordPaymentRowDto[];
 }
