@@ -18,7 +18,7 @@ import { errorToast } from "@/src/utils/error-toast";
 import { useToast } from "@/components/ui/toast";
 import { getConversationControllerGetConversationQueryKey, useConversationControllerGetConversation, useConversationControllerSendMessage } from "@/src/api/seek-api/conversation";
 import { getInboxControllerThreadsQueryKey } from "@/src/api/seek-api/inbox";
-import { useAuthControllerCurrentUser } from "@/src/api/seek-api/auth";
+import { authControllerCurrentUser, useAuthControllerCurrentUser } from "@/src/api/seek-api/auth";
 import { queryClient } from "@/app/_layout";
 import { ConversationDto, ErrorDto, MessageDto, UserDto } from "@/src/api/seek-api/model";
 import { Loader } from "@/components/custom/loader";
@@ -127,8 +127,29 @@ export default function ChatScreen() {
 
     clientRef.current = client;
 
-    client.emit(EventNames.JOIN, conversationId);
-    client.emit(EventNames.SEEN, conversationId);
+    // A new connection (first or after a reconnect) is in no room: join again and catch up on missed messages.
+    client.on("connect", () => {
+      client.emit(EventNames.JOIN, conversationId);
+      client.emit(EventNames.SEEN, conversationId);
+      void queryClient.invalidateQueries({ queryKey: getConversationControllerGetConversationQueryKey(conversationId) });
+    });
+    client.io.on("reconnect_attempt", () => {
+      const token = useAuth.getState().accessToken;
+      if (token) client.io.opts.extraHeaders = { ...client.io.opts.extraHeaders, Authorization: `Bearer ${token}` };
+    });
+    // The server drops the socket when the access token expires and socket.io never reconnects after that.
+    // Any authenticated request refreshes the token on 401; one attempt only, so a failed refresh cannot loop.
+    client.on("disconnect", (reason) => {
+      if (reason !== "io server disconnect") return;
+      authControllerCurrentUser()
+        .then(() => {
+          const token = useAuth.getState().accessToken;
+          if (!token) return;
+          client.io.opts.extraHeaders = { ...client.io.opts.extraHeaders, Authorization: `Bearer ${token}` };
+          client.connect();
+        })
+        .catch(() => {});
+    });
     client.on(EventNames.NEW_MESSAGE, (message: MessageDto) => {
       addMessage(message);
       client.emit(EventNames.SEEN, conversationId);
