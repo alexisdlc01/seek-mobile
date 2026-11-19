@@ -1,5 +1,7 @@
 import "@/global.css";
-import { Slot, SplashScreen } from "expo-router";
+import { Slot, SplashScreen, useRouter } from "expo-router";
+import * as Notifications from "expo-notifications";
+import { forgetPushToken, hrefForPushResponse, registerForPush } from "@/src/utils/push";
 import "react-native-reanimated";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -27,6 +29,22 @@ export default function RootLayout() {
       SplashScreen.hide();
     }
   }, [_hasHydrated]);
+
+  // push: register once per session, then route taps (warm + cold start)
+  const router = useRouter();
+  const signedIn = useAuth((state) => Boolean(state.accessToken));
+  useEffect(() => {
+    if (!_hasHydrated) return;
+    if (signedIn) void registerForPush();
+    else forgetPushToken();
+  }, [_hasHydrated, signedIn]);
+  useEffect(() => {
+    if (!_hasHydrated) return;
+    const open = (response: Notifications.NotificationResponse) => router.push(hrefForPushResponse(response));
+    void Notifications.getLastNotificationResponseAsync().then((r) => r && open(r)).catch(() => {});
+    const sub = Notifications.addNotificationResponseReceivedListener(open);
+    return () => sub.remove();
+  }, [_hasHydrated, router]);
 
   return (
     <QueryClientProvider client={queryClient}>

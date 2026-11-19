@@ -19,6 +19,7 @@ import { useSeekTheme, useThemedStyles } from "@/hooks/use-seek-theme";
 import { useAuthControllerLogout } from "@/src/api/seek-api/auth";
 import { useUsersControllerDeleteMe } from "@/src/api/seek-api/users";
 import { useAuth } from "@/src/store/auth-store";
+import { unregisterFromPush } from "@/src/utils/push";
 import { useRouter } from "expo-router";
 import {
   KeyRoundIcon,
@@ -52,14 +53,16 @@ export default function SettingsScreen() {
       return;
     }
 
-    logoutServer(undefined, {
-      onSettled: () => {
-        // Navigate first: clearing auth swaps the layout tree and unmounts the navigator.
-        router.replace("/(auth)/login");
-        logout();
-        queryClient.clear();
-      },
-    });
+    void unregisterFromPush().then(() =>
+      logoutServer(undefined, {
+        onSettled: () => {
+          // Navigate first: clearing auth swaps the layout tree and unmounts the navigator.
+          router.replace("/(auth)/login");
+          logout();
+          queryClient.clear();
+        },
+      }),
+    );
   };
 
   const handleDeleteAccount = () => {
