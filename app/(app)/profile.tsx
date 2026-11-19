@@ -43,7 +43,7 @@ import { UserDto } from "@/src/api/seek-api/model";
 import { useUsersControllerSetProfilePic } from "@/src/api/seek-api/users";
 import { useAuth } from "@/src/store/auth-store";
 import { uploadFile } from "@/src/utils/upload-file";
-import { Redirect, useRouter } from "expo-router";
+import { Redirect, useRouter, useSegments } from "expo-router";
 import {
   CameraIcon,
   CircleHelpIcon,
@@ -92,6 +92,8 @@ function ProfileContent({ user }: { user: UserDto }) {
   const colors = useSeekTheme();
   const profileTypography = useProfileTypography();
   const router = useRouter();
+  // Opened as the Profile tab there is nothing to go back to.
+  const isTab = (useSegments() as string[]).includes("(tabs)");
   const toast = useToast();
   const localLogout = useAuth((state) => state.logout);
   const accessToken = useAuth((state) => state.accessToken);
@@ -170,6 +172,7 @@ function ProfileContent({ user }: { user: UserDto }) {
     <>
       <ProfileScreen
         title="Profile"
+        showBack={!isTab}
         fallbackHref="/(app)/(tabs)/map"
         contentContainerStyle={styles.content}
       >

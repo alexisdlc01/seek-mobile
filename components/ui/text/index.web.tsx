@@ -1,4 +1,5 @@
 import React from 'react';
+import { StyleSheet, type StyleProp, type TextStyle } from 'react-native';
 import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
 import { textStyle } from './styles';
 
@@ -16,6 +17,7 @@ const Text = React.forwardRef<React.ComponentRef<'span'>, ITextProps>(
       sub,
       italic,
       highlight,
+      style,
       ...props
     }: { className?: string } & ITextProps,
     ref
@@ -34,6 +36,8 @@ const Text = React.forwardRef<React.ComponentRef<'span'>, ITextProps>(
           class: className,
         })}
         {...props}
+        // Screens pass React Native style arrays; a DOM <span> crashes on an array, so flatten it.
+        style={StyleSheet.flatten(style as StyleProp<TextStyle>) as React.CSSProperties}
         ref={ref}
       />
     );
