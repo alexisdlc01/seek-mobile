@@ -7,7 +7,7 @@ import {
   HouseIcon,
   InboxIcon,
   MapIcon,
-  WalletIcon,
+  UserRoundIcon,
 } from "lucide-react-native";
 
 export default function TabLayout() {
@@ -32,7 +32,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="map"
         options={{
-          title: "Map",
+          title: "Search",
           tabBarIcon: ({ color }) => <MapIcon size={24} color={color} />,
         }}
       />
@@ -43,6 +43,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <ClipboardListIcon size={24} color={color} />,
         }}
       />
+      {/* Search space: Search, Applied. My home space: My home (rent plan, deposit, bills, contract are opened from it). */}
       <Tabs.Screen
         name="my-home"
         options={{
@@ -50,6 +51,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <HouseIcon size={24} color={color} />,
         }}
       />
+      {/* Always visible, in both spaces. */}
       <Tabs.Screen
         name="inbox"
         options={{
@@ -58,12 +60,14 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="rent"
+        name="profile"
         options={{
-          title: "Rent",
-          tabBarIcon: ({ color }) => <WalletIcon size={24} color={color} />,
+          title: "Profile",
+          tabBarIcon: ({ color }) => <UserRoundIcon size={24} color={color} />,
         }}
       />
+      {/* Reached from My home ("Rent plan" button), not from the tab bar. */}
+      <Tabs.Screen name="rent" options={{ href: null }} />
       {/* Reached from the map (Seek AI search bar, profile button), not from the tab bar. */}
       <Tabs.Screen name="seek-ai" options={{ href: null }} />
       <Tabs.Screen name="passport" options={{ href: null }} />
