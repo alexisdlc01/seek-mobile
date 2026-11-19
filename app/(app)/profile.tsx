@@ -1,4 +1,5 @@
 import { queryClient } from "@/app/_layout";
+import { unregisterFromPush } from "@/src/utils/push";
 import {
   ProfileActionRow,
   ProfileScreen,
@@ -151,15 +152,17 @@ function ProfileContent({ user }: { user: UserDto }) {
   );
 
   const confirmLogout = () => {
-    remoteLogout(undefined, {
-      onSettled: () => {
-        setShowLogout(false);
-        // Navigate first: clearing auth swaps the layout tree and unmounts the navigator.
-        router.replace("/(auth)/login");
-        localLogout();
-        queryClient.clear();
-      },
-    });
+    void unregisterFromPush().then(() =>
+      remoteLogout(undefined, {
+        onSettled: () => {
+          setShowLogout(false);
+          // Navigate first: clearing auth swaps the layout tree and unmounts the navigator.
+          router.replace("/(auth)/login");
+          localLogout();
+          queryClient.clear();
+        },
+      }),
+    );
   };
 
   const iconProps = {
