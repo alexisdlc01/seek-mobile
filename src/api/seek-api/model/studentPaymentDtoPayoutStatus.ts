@@ -3,7 +3,7 @@
  */
 
 /**
- * HELD: paid by card while the landlord's payouts weren't set up, so Seek holds the money. TRANSFERRED: Seek has since sent it to the landlord. Null: it goes straight to the landlord.
+ * Legacy only, never written for new charges. HELD: an old card payment Seek collected before the landlord could take card payments. TRANSFERRED: Seek has since sent it to the landlord. Null: it went straight to the landlord.
  * @nullable
  */
 export type StudentPaymentDtoPayoutStatus = typeof StudentPaymentDtoPayoutStatus[keyof typeof StudentPaymentDtoPayoutStatus] | null;

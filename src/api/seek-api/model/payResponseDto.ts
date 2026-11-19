@@ -13,4 +13,9 @@ export interface PayResponseDto {
    * @nullable
    */
   clientSecret: string | null;
+  /**
+   * Landlord's Stripe connected account the charge lives on (pass it as stripeAccount to Stripe.js). Null for simulated or legacy payments.
+   * @nullable
+   */
+  stripeAccountId: string | null;
 }
