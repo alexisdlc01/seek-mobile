@@ -4,13 +4,16 @@ import { Badge, Card, Divider, ListRow, SectionTitle, SeekButton, SeekScreen } f
 import { invalidateHomeQueries, useActiveTenancy } from "@/hooks/use-active-tenancy";
 import { useSeekTheme } from "@/hooks/use-seek-theme";
 import { useRepairsControllerCreate, useRepairsControllerForTenancy } from "@/src/api/seek-api/repairs";
+import { useAuth } from "@/src/store/auth-store";
 import { formatDate, formatDay } from "@/src/utils/seek-format";
 import { errorMessage, tenancyTitle, type TenancyView } from "@/src/utils/tenancy-view";
+import { uploadFile } from "@/src/utils/upload-file";
 import { useQueryClient } from "@tanstack/react-query";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { WrenchIcon } from "lucide-react-native";
 import React, { useState } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { Image, Linking, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 export default function RepairsScreen() {
   return (
@@ -61,15 +64,19 @@ function Repairs() {
 function RepairsContent({ tenancy }: { tenancy: TenancyView }) {
   const colors = useSeekTheme();
   const queryClient = useQueryClient();
-  const query = useRepairsControllerForTenancy(tenancy._id, { query: { retry: 1 } });
+  const query = useRepairsControllerForTenancy(tenancy._id, { query: { retry: 1, staleTime: 5 * 60 * 1000 } });
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const accessToken = useAuth((state) => state.accessToken);
+  const [photos, setPhotos] = useState<{ uri: string; mimeType: string }[]>([]);
+  const [sending, setSending] = useState(false);
   const [message, setMessage] = useState<{ tone: "success" | "danger"; text: string } | null>(null);
   const create = useRepairsControllerCreate({
     mutation: {
       onSuccess: () => {
         setTitle("");
         setDescription("");
+        setPhotos([]);
         setMessage({ tone: "success", text: "Sent to your landlord. You'll see updates here." });
         invalidateHomeQueries(queryClient);
       },
@@ -77,7 +84,7 @@ function RepairsContent({ tenancy }: { tenancy: TenancyView }) {
     },
   });
 
-  const canSend = title.trim().length > 0 && !create.isPending;
+  const canSend = title.trim().length > 0 && !create.isPending && !sending;
   const repairs = [...(query.data ?? [])].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const notice = message
     ? message.tone === "success"
@@ -114,7 +121,7 @@ function RepairsContent({ tenancy }: { tenancy: TenancyView }) {
           />
           <TextInput
             accessibilityLabel="More detail"
-            placeholder="Add detail: where, since when, any photos you can send your landlord by message"
+            placeholder="Add detail: where, since when"
             placeholderTextColor={colors.mutedText}
             value={description}
             onChangeText={setDescription}
@@ -123,24 +130,53 @@ function RepairsContent({ tenancy }: { tenancy: TenancyView }) {
             selectionColor={colors.accent}
             style={[...input, styles.multiline]}
           />
+          <View style={styles.photos}>
+            {photos.map((photo) => (
+              <Image key={photo.uri} source={{ uri: photo.uri }} style={styles.thumb} accessibilityLabel="Selected photo" />
+            ))}
+          </View>
+          {photos.length < 5 ? (
+            <SeekButton
+              label="Add a photo"
+              onPress={async () => {
+                // quality < 1 makes the picker re-encode to JPEG (never HEIC); no crop, photos stay as shot.
+                const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.5 });
+                const asset = result.canceled ? null : result.assets[0];
+                if (asset) setPhotos((current) => [...current, { uri: asset.uri, mimeType: asset.mimeType ?? "image/jpeg" }]);
+              }}
+            />
+          ) : null}
           {message && notice ? (
             <Text accessibilityRole="alert" style={[styles.notice, { color: notice.fg }]}>
               {message.text}
             </Text>
           ) : null}
           <SeekButton
-            label={create.isPending ? "Sending…" : "Send to my landlord"}
+            label={create.isPending || sending ? "Sending…" : "Send to my landlord"}
             onPress={
               canSend
-                ? () => {
+                ? async () => {
                     setMessage(null);
-                    create.mutate({
-                      data: {
-                        tenancy: tenancy._id,
-                        title: title.trim(),
-                        ...(description.trim() ? { description: description.trim() } : {}),
-                      },
-                    });
+                    setSending(true);
+                    try {
+                      const uploaded = await Promise.all(
+                        photos.map((photo, index) =>
+                          uploadFile({ uri: photo.uri, mimeType: photo.mimeType, name: `repair-${index}`, folder: "private", access_token: accessToken }),
+                        ),
+                      );
+                      create.mutate({
+                        data: {
+                          tenancy: tenancy._id,
+                          title: title.trim(),
+                          ...(description.trim() ? { description: description.trim() } : {}),
+                          ...(uploaded.length ? { photoKeys: uploaded.map((file) => file.key) } : {}),
+                        },
+                      });
+                    } catch (error) {
+                      setMessage({ tone: "danger", text: errorMessage(error) });
+                    } finally {
+                      setSending(false);
+                    }
                   }
                 : undefined
             }
@@ -180,6 +216,15 @@ function RepairsContent({ tenancy }: { tenancy: TenancyView }) {
                     />
                   }
                 />
+                {repair.photoUrls?.length ? (
+                  <View style={[styles.photos, styles.listPhotos]}>
+                    {repair.photoUrls.map((url) => (
+                      <Pressable key={url} onPress={() => Linking.openURL(url)} accessibilityRole="link" accessibilityLabel="Open photo">
+                        <Image source={{ uri: url }} style={styles.thumb} />
+                      </Pressable>
+                    ))}
+                  </View>
+                ) : null}
               </View>
             ))}
           </Card>
@@ -200,6 +245,9 @@ const styles = StyleSheet.create({
     fontSize: 14.5,
   },
   multiline: { minHeight: 96, textAlignVertical: "top" },
+  photos: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  listPhotos: { paddingHorizontal: 16, paddingBottom: 12 },
+  thumb: { width: 56, height: 56, borderRadius: 8 },
   note: { fontSize: 13.5, lineHeight: 20 },
   notice: { fontSize: 13, lineHeight: 19, fontWeight: "600" },
 });

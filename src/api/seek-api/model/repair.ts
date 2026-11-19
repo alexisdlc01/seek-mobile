@@ -10,6 +10,9 @@ export interface Repair {
   reportedBy: string;
   title: string;
   description?: string;
+  /** Private upload keys of the attached photos (max 5). */
+  photoKeys: string[];
+  photoUrls?: string[];
   status: RepairStatus;
   /** @nullable */
   scheduledFor: string | null;
