@@ -44,7 +44,7 @@ const PLAN_COPY: Record<RentPlanFrequency, { title: string; months: number; unit
   SIX_MONTHS: { title: "Half-year", months: 6, unit: "every 6 months" },
   YEARLY: { title: "Full year", months: 12, unit: "once a year" },
 };
-const PLAN_ORDER: RentPlanFrequency[] = ["MONTHLY", "SIX_MONTHS", "YEARLY"];
+const PLAN_ORDER: RentPlanFrequency[] = ["MONTHLY", "SIX_MONTHS"];
 
 export default function RentPlanScreen() {
   return (
