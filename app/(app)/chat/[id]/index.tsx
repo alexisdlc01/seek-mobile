@@ -17,6 +17,7 @@ import { useAuth } from "@/src/store/auth-store";
 import { errorToast } from "@/src/utils/error-toast";
 import { useToast } from "@/components/ui/toast";
 import { getConversationControllerGetConversationQueryKey, useConversationControllerGetConversation, useConversationControllerSendMessage } from "@/src/api/seek-api/conversation";
+import { getInboxControllerThreadsQueryKey } from "@/src/api/seek-api/inbox";
 import { useAuthControllerCurrentUser } from "@/src/api/seek-api/auth";
 import { queryClient } from "@/app/_layout";
 import { ConversationDto, ErrorDto, MessageDto, UserDto } from "@/src/api/seek-api/model";
@@ -28,6 +29,7 @@ import { getApplicationLink } from "@/components/links";
 enum EventNames {
   NEW_MESSAGE = "message:new",
   JOIN = "conversation:join",
+  SEEN = "conversation:seen",
 }
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000"
@@ -126,11 +128,16 @@ export default function ChatScreen() {
     clientRef.current = client;
 
     client.emit(EventNames.JOIN, conversationId);
+    client.emit(EventNames.SEEN, conversationId);
     client.on(EventNames.NEW_MESSAGE, (message: MessageDto) => {
       addMessage(message);
+      client.emit(EventNames.SEEN, conversationId);
     });
 
-    return () => { client.disconnect(); };
+    return () => {
+      client.disconnect();
+      void queryClient.invalidateQueries({ queryKey: getInboxControllerThreadsQueryKey() });
+    };
   }, [accessToken, addMessage, conversationId]);
 
   if (!conversationId) {

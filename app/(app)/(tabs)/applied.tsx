@@ -96,6 +96,10 @@ function stageBadge(application: ApplicationDto) {
       return { label: "Accepted", tone: "success" as const };
     case "REJECTED":
       return { label: "Not successful", tone: "danger" as const };
+    case "SIGNED":
+      return { label: "Signed", tone: "success" as const };
+    case "WITHDRAWN":
+      return { label: "Withdrawn", tone: "neutral" as const };
     default:
       return application.qualified
         ? { label: "In the qualified queue", tone: "success" as const }
