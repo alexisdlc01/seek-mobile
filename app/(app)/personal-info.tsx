@@ -167,7 +167,7 @@ function PersonalInformationContent({
   const uploadIdentification = useCallback(
     async (camera: boolean) => {
       setShowIdSources(false);
-      const image = await pickImage(camera);
+      const image = await pickImage(camera, false);
       if (!image) return;
 
       setUploadingType("IDENTIFICATION");
