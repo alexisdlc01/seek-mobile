@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "881940510661",
+    "project_id": "seek-f7a18",
+    "storage_bucket": "seek-f7a18.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:881940510661:android:cd1b4082b6089b7896bdac",
+        "android_client_info": {
+          "package_name": "com.seek.seekapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAwZnn5rTf3NM0_-QNHW4GTpcPT0Q0Yt10"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
