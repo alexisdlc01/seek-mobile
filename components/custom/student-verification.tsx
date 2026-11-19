@@ -12,6 +12,7 @@ import { useThemedStyles } from "@/hooks/use-seek-theme";
 import { getAuthControllerCurrentUserQueryKey } from "@/src/api/seek-api/auth";
 import type { UserDto } from "@/src/api/seek-api/model";
 import {
+  getUsersControllerGetPassportQueryKey,
   useUsersControllerSendStudentEmailCode,
   useUsersControllerVerifyStudentEmail,
 } from "@/src/api/seek-api/users";
@@ -67,6 +68,8 @@ export function StudentVerificationCard({ user }: { user: UserDto }) {
         onSuccess: () => {
           setError("");
           queryClient.invalidateQueries({ queryKey: getAuthControllerCurrentUserQueryKey() });
+          // Student status is a passport item, and the Passport tab stays mounted.
+          queryClient.invalidateQueries({ queryKey: getUsersControllerGetPassportQueryKey() });
         },
         onError: (e) => setError(messageOf(e, "We couldn't check the code.")),
       },

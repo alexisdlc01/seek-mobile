@@ -11,6 +11,7 @@ import {
   useApplicationControllerGetAllMyApplications,
   useApplicationControllerScheduleViewing,
 } from "@/src/api/seek-api/application";
+import { useAuthControllerCurrentUser } from "@/src/api/seek-api/auth";
 import type { ApplicationDto, DocumentShareDto, StudentPaymentDto } from "@/src/api/seek-api/model";
 import { getPaymentsControllerMineQueryKey, usePaymentsControllerMine } from "@/src/api/seek-api/payments";
 import { useUsersControllerListShares } from "@/src/api/seek-api/users";
@@ -121,6 +122,7 @@ function ApplicationCard({
   const queryClient = useQueryClient();
   const { mutateAsync: schedule, isPending } = useApplicationControllerScheduleViewing();
   const accept = useApplicationControllerAcceptOffer();
+  const { data: me } = useAuthControllerCurrentUser();
   const [paying, setPaying] = useState(false);
   const [picking, setPicking] = useState(false);
   const [slot, setSlot] = useState<string | null>(null);
@@ -296,7 +298,8 @@ function ApplicationCard({
         <View style={styles.actions}>
           {application.stage === "NOT_SENT" ? (
             <SeekButton
-              label="Finish application"
+              // Only the owner can send; housemates see the household and why they can't.
+              label={idOf(application.owner) === me?._id ? "Finish application" : "View application"}
               compact
               onPress={() => router.push({ pathname: "/(app)/apply", params: { listingId } })}
             />

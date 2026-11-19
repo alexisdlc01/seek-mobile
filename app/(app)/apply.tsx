@@ -61,7 +61,10 @@ export default function ApplyScreen() {
   // opening this screen never leaves anything behind.
   const [created, setCreated] = useState<ApplicationDto | undefined>();
   const existing = mine.data?.find((application) => idOf(application.listing) === listingId);
-  const application = created ?? existing;
+  // The refetched row carries members and criteria; the create response does not.
+  const application = existing ?? created;
+  // Only the owner may send (the API answers 403 to joined housemates).
+  const isOwner = !application || idOf(application.owner) === me?._id;
   const alreadySent = application ? application.stage !== "NOT_SENT" : false;
 
   const conversationId = idOf(application?.conversation) ?? "";
@@ -302,13 +305,17 @@ export default function ApplyScreen() {
       footer={
         <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.line }]}>
           {message ? <Text style={[styles.error, { color: colors.danger }]}>{message}</Text> : null}
-          <SeekButton
-            label={busy === "send" ? "Sending…" : "Send application"}
-            disabled={busy !== null || missingDocs.length > 0}
-            onPress={() => void send()}
-          />
+          {isOwner ? (
+            <SeekButton
+              label={busy === "send" ? "Sending…" : "Send application"}
+              disabled={busy !== null || missingDocs.length > 0}
+              onPress={() => void send()}
+            />
+          ) : null}
           <Text style={[styles.footerNote, { color: colors.mutedText }]}>
-            {waiting.length === 0
+            {!isOwner
+              ? "Only the person who started this application can send it. Keep your passport ready so the household qualifies."
+              : waiting.length === 0
               ? "Every passport is ready, so you join the landlord's qualified queue. The first qualified household gets the offer. There is no bidding."
               : `Sends now for ${readyCount}. ${waitingNames.join(", ")} passport${waiting.length === 1 ? "" : "s"} join${waiting.length === 1 ? "s" : ""} as soon as ${waiting.length === 1 ? "it's" : "they're"} verified, and you only join the qualified queue then. There is no bidding.`}
           </Text>
