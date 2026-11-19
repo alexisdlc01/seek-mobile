@@ -381,6 +381,13 @@ function ChatMenu({ conversationId, userId }: ChatMenuProps) {
           <VStack className="absolute right-0 top-8 z-50 w-48 rounded-xl bg-background-card py-1 shadow-hard-5">
             <MenuItem label="Group details" onPress={openDetails} />
             {canInvite ? <MenuItem label="Invite" onPress={() => void invite()} /> : null}
+            <MenuItem
+              label="Report someone"
+              onPress={() => {
+                close();
+                router.push(`/(app)/chat/${conversationId}/report`);
+              }}
+            />
             {canLeave ? <MenuItem label="Leave group" onPress={leave} destructive /> : null}
           </VStack>
         </>
