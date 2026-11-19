@@ -55,6 +55,8 @@ export default function ChatDetails() {
   // Only group admins (creator, and landlord once sent) may mint an invite,
   // so only they are shown the control that does it.
   const canInvite = isApplicationAdmin(application, currentUser?._id);
+  // Only the owner may delete (403 otherwise); housemates leave from the chat's ⋮ menu.
+  const isOwner = Boolean(currentUser?._id) && application?.owner === currentUser?._id;
 
   const isLoading = loadingApplication || loadingConversation;
   const isError = errorApplication || errorConversation;
@@ -108,6 +110,7 @@ export default function ChatDetails() {
             )}
           </Box>
 
+          {isOwner ? (
           <Box className="flex-row">
             <Button
               variant="link"
@@ -118,6 +121,7 @@ export default function ChatDetails() {
               <ButtonText>Delete Application</ButtonText>
             </Button>
           </Box>
+          ) : null}
 
           <Divider />
 
@@ -154,7 +158,7 @@ export default function ChatDetails() {
             )}
           />
         </VStack>
-        {application?._id && (
+        {isOwner && application?._id && (
           <DeleteGroupModal open={open} setOpen={setOpen} applicationId={application?._id} />
         )}
       </SafeAreaView>

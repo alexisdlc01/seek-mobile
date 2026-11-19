@@ -92,7 +92,6 @@ export default function DetailsScreen() {
     data,
     isLoading,
     isError,
-    refetch,
   } = useListingsControllerGetById(id, {
     query: {
       initialData: () =>
@@ -202,9 +201,6 @@ export default function DetailsScreen() {
           setSavedOverride(previous);
           errorToast({ toast, data: error.response?.data });
         },
-        onSettled() {
-          void refetch();
-        },
       },
     );
   }
@@ -221,9 +217,6 @@ export default function DetailsScreen() {
         onError(error) {
           setSavedOverride(previous);
           errorToast({ toast, data: error.response?.data });
-        },
-        onSettled() {
-          void refetch();
         },
       },
     );

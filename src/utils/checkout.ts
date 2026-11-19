@@ -12,10 +12,13 @@ export type CheckoutOutcome = "paid" | "pending" | "cancelled";
  * auth session, then confirms it. Throws the API error if the checkout can't start.
  */
 export async function payWithCheckout(paymentId: string): Promise<CheckoutOutcome> {
-  const back = Linking.createURL("/pay", { queryParams: { checkout: "success", payment: paymentId } });
+  // Same rewrite as the backend (seekapp:///pay -> seekapp://pay, which Stripe accepts), so the URL
+  // Stripe returns to starts with `back`: Android's auth session only resolves on that prefix.
+  const appUrl = (url: string) => url.replace(/^(seekapp|seek):\/\/\/+/, "$1://");
+  const back = appUrl(Linking.createURL("/pay", { queryParams: { checkout: "success", payment: paymentId } }));
   // Stripe fills in {CHECKOUT_SESSION_ID}, so it must stay literal (not URL-encoded).
   const successUrl = `${back}&session_id={CHECKOUT_SESSION_ID}`;
-  const cancelUrl = Linking.createURL("/pay", { queryParams: { checkout: "cancelled", payment: paymentId } });
+  const cancelUrl = appUrl(Linking.createURL("/pay", { queryParams: { checkout: "cancelled", payment: paymentId } }));
   const checkout = await paymentsControllerCheckout(paymentId, { successUrl, cancelUrl });
   // Already paid (the list was stale): nothing to open.
   if (checkout.status === "PAID") return "paid";
