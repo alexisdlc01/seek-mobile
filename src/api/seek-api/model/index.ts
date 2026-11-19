@@ -217,6 +217,7 @@ export * from './providerAvailabilityDto';
 export * from './providerAvailabilityDtoProvider';
 export * from './publicUserDto';
 export * from './publicUserDtoRole';
+export * from './pushTokenDto';
 export * from './registrationDto';
 export * from './registrationDtoKind';
 export * from './registrationDtoStatus';

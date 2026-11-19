@@ -95,6 +95,13 @@
           "isAndroidBackgroundLocationEnabled": false
         }
       ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/android-icon-monochrome.png",
+          "color": "#ffffff"
+        }
+      ],
       "./plugins/withSceneLifecycle"
     ],
     "experiments": {
