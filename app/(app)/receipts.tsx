@@ -43,7 +43,16 @@ function Receipts() {
                 icon={<ReceiptIcon size={20} color="#888" />}
                 title={`${KIND_LABEL[item.kind] ?? item.kind} · ${formatPence(item.amount)}`}
                 subtitle={`Paid ${formatDate(item.paidAt ?? item.dueDate)}`}
-                right={<Badge label="Paid" tone="success" />}
+                right={
+                  item.refundedAt ? (
+                    <Badge
+                      label={item.refundedAmount < item.amount ? `Partially refunded · ${formatPence(item.refundedAmount)}` : "Refunded"}
+                      tone="neutral"
+                    />
+                  ) : (
+                    <Badge label="Paid" tone="success" />
+                  )
+                }
                 chevron
                 onPress={() => router.push({ pathname: "/(app)/receipt", params: { id: item._id } })}
               />
