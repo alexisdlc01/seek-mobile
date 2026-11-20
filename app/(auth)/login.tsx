@@ -12,6 +12,7 @@ import { useAuth } from "@/src/store/auth-store";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 import { isValidEmail, normalizeEmail } from "@/src/utils/validate-email";
+import { afterAuthHref, useAuthRedirect } from "@/src/store/auth-redirect-store";
 import { useSignupState } from "@/src/store/signup-store";
 import { errorMessage } from "@/src/utils/tenancy-view";
 import { Text } from "@/components/ui/text";
@@ -46,7 +47,7 @@ export default function Login() {
             refreshToken: refresh_token,
           });
           clearSignupState();
-          router.replace("/(app)/(tabs)/map");
+          router.replace(afterAuthHref(useAuthRedirect.getState().pendingHref));
         },
         onError: (err) => {
           // 403 = landlord account on the mobile app: keep the server message on screen.
@@ -78,7 +79,7 @@ export default function Login() {
   }
 
   if (isLoggedIn) {
-    return <Redirect href="/(app)/(tabs)/map" />;
+    return <Redirect href={afterAuthHref(useAuthRedirect.getState().pendingHref)} />;
   }
 
   const isSubmitDisabled =
