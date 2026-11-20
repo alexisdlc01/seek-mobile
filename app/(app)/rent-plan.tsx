@@ -19,7 +19,7 @@ import {
 } from "@/src/api/seek-api/payments";
 import type { RentPlanFrequency, UpdateRentPlanDtoFrequency } from "@/src/api/seek-api/model";
 import { payWithCheckout } from "@/src/utils/checkout";
-import { formatDate, formatDay, formatPence } from "@/src/utils/seek-format";
+import { formatDate, formatDay, formatInstantDay, formatPence } from "@/src/utils/seek-format";
 import {
   errorMessage,
   frequencyLabel,
@@ -460,7 +460,7 @@ function RentPlanContent({ tenancyId, title }: { tenancyId: string; title: strin
                   <View style={styles.flex}>
                     <Text style={[styles.planTitle, { color: colors.text }]}>{formatDate(item.dueDate)}</Text>
                     <Text style={[styles.planUnit, { color: colors.mutedText }]}>
-                      {item.paidAt ? `Paid ${formatDay(item.paidAt)}` : "Paid"}
+                      {item.paidAt ? `Paid ${formatInstantDay(item.paidAt)}` : "Paid"}
                     </Text>
                     {item.holdingDepositCredit ? (
                       <Text style={[styles.planUnit, { color: colors.mutedText }]}>

@@ -5,7 +5,7 @@ import { Badge, Card, Divider, ListRow, SectionTitle, SeekButton, SeekScreen } f
 import { useActiveTenancy } from "@/hooks/use-active-tenancy";
 import { useSeekTheme } from "@/hooks/use-seek-theme";
 import type { TenancyDocument } from "@/src/api/seek-api/model";
-import { formatDate } from "@/src/utils/seek-format";
+import { formatInstantDate } from "@/src/utils/seek-format";
 import { errorMessage, openStoredFile, tenancyTitle, type TenancyView } from "@/src/utils/tenancy-view";
 import { useRouter } from "expo-router";
 import { FileTextIcon } from "lucide-react-native";
@@ -126,7 +126,7 @@ function DocumentsContent({ tenancy }: { tenancy: TenancyView }) {
                 <ListRow
                   icon={<FileTextIcon color={colors.accent} size={20} />}
                   title={doc.title || TYPE_LABEL[doc.type] || "Document"}
-                  subtitle={`${TYPE_LABEL[doc.type] ?? "Document"} · added ${formatDate(doc.addedAt)}`}
+                  subtitle={`${TYPE_LABEL[doc.type] ?? "Document"} · added ${formatInstantDate(doc.addedAt)}`}
                   right={
                     <View style={styles.actions}>
                       {doc.source === "SEEK" ? <Badge label="Seek" tone="info" /> : null}

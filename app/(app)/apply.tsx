@@ -29,7 +29,7 @@ import { useListingsControllerGetById } from "@/src/api/seek-api/listings";
 import type { ApplicationDto, PassportDto } from "@/src/api/seek-api/model";
 import { getUsersControllerListSharesQueryKey, useUsersControllerGetPassport } from "@/src/api/seek-api/users";
 import { createApplicationInvite } from "@/src/utils/application-invite";
-import { formatDate, initialsOf } from "@/src/utils/seek-format";
+import { formatDate, formatInstantDate, initialsOf } from "@/src/utils/seek-format";
 import { errorMessage, idOf } from "@/src/utils/tenancy-view";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -215,7 +215,7 @@ export default function ApplyScreen() {
   const missingDocs = home.requiredDocuments
     ? home.requiredDocuments.filter((doc) => !doc.types.some((type) => present.has(type))).map((doc) => doc.label)
     : book.missingRequired.map((item) => labelOf(item));
-  const nextExpiry = formatDate(new Date(Date.now() + SHARE_DAYS * 86_400_000).toISOString());
+  const nextExpiry = formatInstantDate(new Date(Date.now() + SHARE_DAYS * 86_400_000).toISOString());
 
   const people = Math.max(1, home.numOfPeople || 1);
   const rentEach = Math.round(home.monthlyRent / people);
@@ -225,7 +225,7 @@ export default function ApplyScreen() {
   const holding = holdingSet ? Math.min(home.holdingDeposit ?? 0, weeklyCap) : weeklyCap;
   const offered = offeredSlots(home);
   const offerDeadline = application?.offerExpiresAt
-    ? `If offered, you must accept by ${formatDate(application.offerExpiresAt)}.`
+    ? `If offered, you must accept by ${formatInstantDate(application.offerExpiresAt)}.`
     : "If offered, your acceptance deadline will be shown in Seek.";
 
   const criteria = home.criteria;

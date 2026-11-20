@@ -26,6 +26,7 @@ import type { Listing } from "@/src/api/seek-api/model";
 import { FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AuthRequiredScreen } from "@/components/custom/auth-required";
+import { ErrorState } from "@/components/seek/states";
 import { useListingLiked } from "@/hooks/use-listing-liked";
 
 type TriggerProps = {
@@ -45,8 +46,8 @@ export default function SavedListings() {
 
 function AuthenticatedSavedListings() {
   const colors = useSeekTheme();
-  const { data: liked } = useListingsControllerGetLiked();
-  const { data: applied } = useApplicationControllerGetAllMyApplications();
+  const { data: liked, isError: likedError, refetch: refetchLiked } = useListingsControllerGetLiked();
+  const { data: applied, isError: appliedError, refetch: refetchApplied } = useApplicationControllerGetAllMyApplications();
 
   return (
     <SafeAreaView
@@ -69,7 +70,13 @@ function AuthenticatedSavedListings() {
               data={liked?.data ?? []}
               keyExtractor={(item) => item._id}
               renderItem={({ item }) => <SavedListingCard data={item} />}
-              ListEmptyComponent={<EmptyState text="No liked listings yet" />}
+              ListEmptyComponent={
+                likedError ? (
+                  <ErrorState title="Couldn't load liked listings" onRetry={() => void refetchLiked()} />
+                ) : (
+                  <EmptyState text="No liked listings yet" />
+                )
+              }
             />
           </AccordionContent>
         </AccordionItem>
@@ -93,7 +100,13 @@ function AuthenticatedSavedListings() {
               renderItem={({ item }) => (
                 <SavedListingCard data={item.listing} />
               )}
-              ListEmptyComponent={<EmptyState text="No applications yet" />}
+              ListEmptyComponent={
+                appliedError ? (
+                  <ErrorState title="Couldn't load applications" onRetry={() => void refetchApplied()} />
+                ) : (
+                  <EmptyState text="No applications yet" />
+                )
+              }
             />
           </AccordionContent>
         </AccordionItem>

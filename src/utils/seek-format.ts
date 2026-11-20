@@ -25,6 +25,24 @@ export function formatDate(iso: string | null | undefined): string {
   return day ? `${day} ${new Date(iso as string).getUTCFullYear()}` : "";
 }
 
+/** "1 Dec" for a real instant (paidAt, sentAt, offerExpiresAt...), read on the Europe/London calendar like the emails. */
+export function formatInstantDay(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", day: "numeric", month: "numeric" }).formatToParts(date);
+  const get = (type: string) => Number(parts.find((part) => part.type === type)?.value);
+  return `${get("day")} ${MONTHS[get("month") - 1]}`;
+}
+
+/** "1 Dec 2026" for a real instant. */
+export function formatInstantDate(iso: string | null | undefined): string {
+  const day = formatInstantDay(iso);
+  if (!day) return "";
+  const year = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", year: "numeric" }).format(new Date(iso as string));
+  return `${day} ${year}`;
+}
+
 export function pluralise(count: number, singular: string, plural = `${singular}s`): string {
   return `${count} ${count === 1 ? singular : plural}`;
 }

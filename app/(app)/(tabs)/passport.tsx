@@ -34,7 +34,7 @@ import {
   useUsersControllerRevokeShare,
 } from "@/src/api/seek-api/users";
 import { useAuth } from "@/src/store/auth-store";
-import { formatDate, initialsOf } from "@/src/utils/seek-format";
+import { formatDate, formatInstantDate, initialsOf } from "@/src/utils/seek-format";
 import { formatShareCode, isoDay, normaliseShareCode, shareCodeExpiry } from "@/src/utils/share-code";
 import { errorMessage } from "@/src/utils/tenancy-view";
 import { uploadFile } from "@/src/utils/upload-file";
@@ -150,7 +150,7 @@ function itemDetail(item: PassportItemDto): string | undefined {
   if (item.status === "PROVIDED" && item.type === SHARE_CODE_TYPE && item.detail) {
     const code = normaliseShareCode(item.detail);
     if (code) {
-      return `Code ${formatShareCode(code)}${item.expiresAt ? ` · expires ${formatDate(item.expiresAt)}` : ""}`;
+      return `Code ${formatShareCode(code)}${item.expiresAt ? ` · expires ${formatInstantDate(item.expiresAt)}` : ""}`;
     }
   }
   if (item.status === "PROVIDED" && item.expiresAt) return `Valid to ${formatDate(item.expiresAt)}`;
@@ -510,7 +510,7 @@ function Profile() {
                   <ListRow
                     icon={<UserRoundIcon color={colors.accent} size={20} />}
                     title={place ? `${place} · ${who}` : who}
-                    subtitle={`Until ${formatDate(share.expiresAt)}`}
+                    subtitle={`Until ${formatInstantDate(share.expiresAt)}`}
                     right={
                       <SeekButton
                         label="Stop sharing"

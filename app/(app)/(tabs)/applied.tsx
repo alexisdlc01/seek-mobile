@@ -16,7 +16,7 @@ import type { ApplicationDto, DocumentShareDto, StudentPaymentDto } from "@/src/
 import { getPaymentsControllerMineQueryKey, usePaymentsControllerMine } from "@/src/api/seek-api/payments";
 import { useUsersControllerListShares } from "@/src/api/seek-api/users";
 import { payWithCheckout } from "@/src/utils/checkout";
-import { formatDate, formatDay, formatPence } from "@/src/utils/seek-format";
+import { formatInstantDate, formatInstantDay, formatPence } from "@/src/utils/seek-format";
 import { errorMessage, idOf } from "@/src/utils/tenancy-view";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
@@ -223,15 +223,15 @@ function ApplicationCard({
                   application.readiness != null ? ` (${Math.round(application.readiness)}% ready)` : ""
                 }. You join the queue once your whole household meets the criteria.`
             : canBook
-              ? `${place != null ? `#${place} of ${application.queueSize ?? place} qualified · ` : ""}Sent ${formatDay(application.sentAt ?? application.createdAt)}. The first qualified household gets the offer.`
-              : `Sent ${formatDay(application.sentAt ?? application.createdAt)}.`
+              ? `${place != null ? `#${place} of ${application.queueSize ?? place} qualified · ` : ""}Sent ${formatInstantDay(application.sentAt ?? application.createdAt)}. The first qualified household gets the offer.`
+              : `Sent ${formatInstantDay(application.sentAt ?? application.createdAt)}.`
         }
       />
       {offer ? (
         <Row
           label="Offer"
           value={`The landlord has offered you this home${
-            application.offerExpiresAt ? `. Accept by ${formatDay(application.offerExpiresAt)}` : ""
+            application.offerExpiresAt ? `. Accept by ${formatInstantDay(application.offerExpiresAt)}` : ""
           }.${
             holdingDeposit
               ? ` Holding deposit ${formatPence(holdingDeposit.amount)} each, ${
@@ -254,7 +254,7 @@ function ApplicationCard({
       />
       <Row
         label="Shared documents"
-        value={share ? `Visible to the landlord until ${formatDate(share.expiresAt)}` : "Not shared"}
+        value={share ? `Visible to the landlord until ${formatInstantDate(share.expiresAt)}` : "Not shared"}
       />
 
       {sent ? <AdviceCard topic="application" applicationId={application._id} heading="Seek AI · your place" /> : null}

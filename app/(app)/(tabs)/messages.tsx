@@ -12,6 +12,7 @@ import { Pressable } from "@/components/ui/pressable";
 import { useRouter } from "expo-router";
 import { getApplicationControllerGetAllMyApplicationsQueryKey, useApplicationControllerGetAllMyApplications } from "@/src/api/seek-api/application";
 import { Loader } from "@/components/custom/loader";
+import { ErrorState } from "@/components/seek/states";
 import { ApplicationDto } from "@/src/api/seek-api/model";
 import { useMemo } from "react";
 import { useSeekTheme } from "@/hooks/use-seek-theme";
@@ -34,11 +35,14 @@ export default function MessagesScreen() {
 }
 
 function AuthenticatedMessagesScreen() {
-  const { data: applications, isLoading } = useApplicationControllerGetAllMyApplications();
+  const { data: applications, isLoading, isError, error, refetch } = useApplicationControllerGetAllMyApplications();
 
   return (
     <SafeAreaView className="h-full bg-background-0">
       <Loader isLoading={isLoading}>
+        {isError && !applications ? (
+          <ErrorState error={error} onRetry={() => void refetch()} title="Couldn't load your messages" />
+        ) : (
         <FlatList
           className="px-6"
           ListHeaderComponent={
@@ -55,6 +59,7 @@ function AuthenticatedMessagesScreen() {
             </Text>
           )}
         />
+        )}
       </Loader>
     </SafeAreaView>
   );

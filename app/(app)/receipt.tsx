@@ -2,7 +2,7 @@ import { AuthRequiredScreen } from "@/components/custom/auth-required";
 import { ErrorState, LoadingState, EmptyState } from "@/components/seek/states";
 import { Card, Divider, ListRow, SeekScreen } from "@/components/seek/ui";
 import { usePaymentsControllerMine } from "@/src/api/seek-api/payments";
-import { formatDate, formatPence } from "@/src/utils/seek-format";
+import { formatDate, formatInstantDate, formatPence } from "@/src/utils/seek-format";
 import type { TenancyView } from "@/src/utils/tenancy-view";
 import { tenancyTitle } from "@/src/utils/tenancy-view";
 import { useLocalSearchParams } from "expo-router";
@@ -28,7 +28,7 @@ function Receipt() {
   const tenancy = payment?.tenancy as unknown as TenancyView | null | undefined;
   const rows: [string, string][] = payment
     ? [
-        ["Paid on", formatDate(payment.paidAt ?? payment.dueDate)],
+        ["Paid on", payment.paidAt ? formatInstantDate(payment.paidAt) : formatDate(payment.dueDate)],
         ["For", `${KIND_LABEL[payment.kind] ?? payment.kind} due ${formatDate(payment.dueDate)}`],
         ...(payment.holdingDepositCredit
           ? ([["Holding deposit credited", formatPence(payment.holdingDepositCredit)]] as [string, string][])

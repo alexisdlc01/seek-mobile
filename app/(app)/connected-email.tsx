@@ -30,7 +30,7 @@ import type {
 } from "@/src/api/seek-api/model";
 import { getInboxControllerThreadsQueryKey } from "@/src/api/seek-api/inbox";
 import { useInboxPrefs } from "@/src/store/inbox-prefs-store";
-import { formatDate, pluralise } from "@/src/utils/seek-format";
+import { formatInstantDate, pluralise } from "@/src/utils/seek-format";
 import { errorMessage } from "@/src/utils/tenancy-view";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Linking from "expo-linking";
@@ -93,7 +93,7 @@ function describe(connection: EmailConnectionViewDto): string {
   const parts = [
     connection.emailAddress,
     `${pluralise(connection.emailCount, "email")} from ${pluralise(connection.contactCount, "contact")}`,
-    connection.lastSyncAt ? `synced ${formatDate(connection.lastSyncAt)}` : "not synced yet",
+    connection.lastSyncAt ? `synced ${formatInstantDate(connection.lastSyncAt)}` : "not synced yet",
   ];
   return parts.join(" · ");
 }

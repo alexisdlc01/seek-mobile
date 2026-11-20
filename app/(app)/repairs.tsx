@@ -5,7 +5,7 @@ import { invalidateHomeQueries, useActiveTenancy } from "@/hooks/use-active-tena
 import { useSeekTheme } from "@/hooks/use-seek-theme";
 import { useRepairsControllerCreate, useRepairsControllerForTenancy } from "@/src/api/seek-api/repairs";
 import { useAuth } from "@/src/store/auth-store";
-import { formatDate, formatDay } from "@/src/utils/seek-format";
+import { formatInstantDate, formatInstantDay } from "@/src/utils/seek-format";
 import { errorMessage, tenancyTitle, type TenancyView } from "@/src/utils/tenancy-view";
 import { uploadFile } from "@/src/utils/upload-file";
 import { useQueryClient } from "@tanstack/react-query";
@@ -204,10 +204,10 @@ function RepairsContent({ tenancy }: { tenancy: TenancyView }) {
                   title={repair.title}
                   subtitle={
                     repair.status === "FIXED"
-                      ? `Fixed${repair.fixedAt ? ` ${formatDate(repair.fixedAt)}` : ""}`
+                      ? `Fixed${repair.fixedAt ? ` ${formatInstantDate(repair.fixedAt)}` : ""}`
                       : repair.status === "SCHEDULED" && repair.scheduledFor
-                        ? `Visit booked ${formatDay(repair.scheduledFor)}`
-                        : `Reported ${formatDay(repair.createdAt)}`
+                        ? `Visit booked ${formatInstantDay(repair.scheduledFor)}`
+                        : `Reported ${formatInstantDay(repair.createdAt)}`
                   }
                   right={
                     <Badge
