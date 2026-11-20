@@ -1,6 +1,6 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text } from "@/components/ui/text";
-import { FlatList } from "react-native";
+import { Alert, FlatList } from "react-native";
 import { Divider } from "@/components/ui/divider";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
@@ -10,12 +10,17 @@ import { Users2Icon, ArrowRightIcon } from "lucide-react-native";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { Pressable } from "@/components/ui/pressable";
 import { useRouter } from "expo-router";
-import { useApplicationControllerGetAllMyApplications } from "@/src/api/seek-api/application";
+import { getApplicationControllerGetAllMyApplicationsQueryKey, useApplicationControllerGetAllMyApplications } from "@/src/api/seek-api/application";
 import { Loader } from "@/components/custom/loader";
 import { ApplicationDto } from "@/src/api/seek-api/model";
 import { useMemo } from "react";
 import { useSeekTheme } from "@/hooks/use-seek-theme";
 import { AuthRequiredScreen } from "@/components/custom/auth-required";
+import { leaveApplication } from "@/src/utils/application-invite";
+import { queryClient } from "@/app/_layout";
+import { errorToast } from "@/src/utils/error-toast";
+import { useToast } from "@/components/ui/toast";
+import { useAuthControllerCurrentUser } from "@/src/api/seek-api/auth";
 
 export default function MessagesScreen() {
   return (
@@ -61,12 +66,42 @@ type MessageItemProps = {
 
 function MessageItem({ data }: MessageItemProps) {
   const colors = useSeekTheme();
+  const toast = useToast();
+  const { data: user } = useAuthControllerCurrentUser();
+  const canLeave =
+    Boolean(user) && data.owner !== user?._id && data.applicants.includes(user!._id);
+
+  function leave() {
+    Alert.alert("Leave group?", "You'll stop seeing this application's chat.", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Leave",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await leaveApplication(data._id);
+            await queryClient.invalidateQueries({
+              queryKey: getApplicationControllerGetAllMyApplicationsQueryKey(),
+            });
+          } catch {
+            errorToast({
+              toast,
+              data: { message: "Could not leave the group.", statusCode: -1 },
+            });
+          }
+        },
+      },
+    ]);
+  }
+
   function LeaveButton() {
     return (
-      <Box className="bg-red-600 p-2 items-center">
-        <Icon as={ArrowRightIcon} fill="white" size="xl" />
-        <Text className="text-primary-950">Leave</Text>
-      </Box>
+      <Pressable accessibilityRole="button" accessibilityLabel="Leave group" onPress={leave}>
+        <Box className="bg-red-600 p-2 items-center justify-center h-full">
+          <Icon as={ArrowRightIcon} fill="white" size="xl" />
+          <Text className="text-primary-950">Leave</Text>
+        </Box>
+      </Pressable>
     );
   }
 
@@ -83,7 +118,7 @@ function MessageItem({ data }: MessageItemProps) {
   const router = useRouter();
 
   return (
-    <Swipeable friction={2} renderRightActions={() => <LeaveButton />}>
+    <Swipeable friction={2} enabled={canLeave} renderRightActions={() => <LeaveButton />}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={data.conversation.name}
