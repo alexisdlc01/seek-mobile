@@ -54,6 +54,12 @@ export default function MyHomeScreen() {
   );
 }
 
+const TENANT_COMPLIANCE_TEXT: Record<string, string> = {
+  DEPOSIT_NOT_YET_RECEIVED:
+    "Your landlord has not recorded when they received your deposit. Ask them for the protection certificate.",
+  DEPOSIT_UNPROTECTED: "Your deposit is not recorded as protected. Ask your landlord for the scheme certificate.",
+};
+
 function MyHome() {
   const router = useRouter();
   const { tenancy, data, isLoading, isError, error, refetch } = useActiveTenancy();
@@ -305,10 +311,8 @@ function HomeContent({ tenancy, invites }: { tenancy: TenancyView; invites: Tena
     },
   ];
 
-  const warnings = tenancy.compliance.filter(
-    (item) =>
-      item.kind === "DEPOSIT_UNPROTECTED" || item.kind === "DEPOSIT_NOT_YET_RECEIVED" || item.severity === "high",
-  );
+  // Backend messages are written for the landlord, so only deposit items are shown, in tenant wording.
+  const warnings = tenancy.compliance.filter((item) => item.kind in TENANT_COMPLIANCE_TEXT);
 
   return (
     <SeekScreen
@@ -327,7 +331,7 @@ function HomeContent({ tenancy, invites }: { tenancy: TenancyView; invites: Tena
           </View>
           {warnings.slice(0, 3).map((item) => (
             <Text key={`${item.kind}-${item.message}`} style={[styles.noticeBody, { color: colors.warning }]}>
-              {item.message}
+              {TENANT_COMPLIANCE_TEXT[item.kind]}
             </Text>
           ))}
         </Card>
