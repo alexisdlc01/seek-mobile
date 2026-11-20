@@ -89,7 +89,7 @@ export default function PrivacyPolicyScreen() {
             <RetentionRow information="Tenancy records, contracts, payments, tenancy messages, inventories and photos" retention="6 years after the tenancy ends" />
             <RetentionRow information="Imported emails and other non-tenancy messages" retention="Deleted on mailbox disconnect or within 30 days of account deletion" />
             <RetentionRow information="Mailbox tokens and IMAP credentials" retention="Deleted or revoked immediately on disconnect or account deletion" />
-            <RetentionRow information="Identity documents" retention="Deleted within 30 days after verification; we may retain the result and date" />
+            <RetentionRow information="Identity documents" retention="Deleted 30 days after you last share them with a landlord, or as soon as you replace them or close your account" />
           </VStack>
           <Text className="text-slate-700">Stripe may keep its own regulated records under its privacy policy. Backups expire through our normal secure rotation.</Text>
         </VStack>
