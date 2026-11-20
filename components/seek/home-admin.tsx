@@ -5,7 +5,7 @@ import { useAuthControllerCurrentUser } from "@/src/api/seek-api/auth";
 import type { AddTenancyDocumentDtoStage, AddTenancyDocumentDtoType } from "@/src/api/seek-api/model";
 import { useTenanciesControllerAddDocument } from "@/src/api/seek-api/tenancies";
 import { useAuth } from "@/src/store/auth-store";
-import { formatDate } from "@/src/utils/seek-format";
+import { formatInstantDate } from "@/src/utils/seek-format";
 import { errorMessage, type TenancyView } from "@/src/utils/tenancy-view";
 import { uploadFile } from "@/src/utils/upload-file";
 import { useQueryClient } from "@tanstack/react-query";
@@ -48,8 +48,8 @@ export function HomeAdmin({
   const photos = docs.filter(
     (doc) => doc.type === "INVENTORY" && (doc.stage === photoStage || (!doc.stage && photoStage === "CHECK_IN")),
   );
-  const insurance = docs.find((doc) => doc.title.startsWith(INSURANCE));
-  const councilTax = docs.find((doc) => doc.type === "COUNCIL_TAX_EXEMPTION");
+  const insurance = docs.findLast((doc) => doc.title.startsWith(INSURANCE));
+  const councilTax = docs.findLast((doc) => doc.type === "COUNCIL_TAX_EXEMPTION");
 
   const add = async (kind: Kind) => {
     if (!user || busy) return;
@@ -142,7 +142,7 @@ export function HomeAdmin({
         </View>
         <Text style={[styles.body, { color: colors.mutedText }]}>
           {insurance
-            ? `Policy added ${formatDate(insurance.addedAt)}.`
+            ? `Policy added ${formatInstantDate(insurance.addedAt)}.`
             : "Your landlord's insurance covers the building, not your belongings. Keep your own policy document here so your housemates and you can find it when you need to claim."}
         </Text>
         {action("insurance", insurance ? "Replace policy" : "Add policy")}
@@ -157,7 +157,7 @@ export function HomeAdmin({
         </View>
         <Text style={[styles.body, { color: colors.mutedText }]}>
           {councilTax
-            ? `Exemption certificate added ${formatDate(councilTax.addedAt)}. Send it to your council if they ask.`
+            ? `Exemption certificate added ${formatInstantDate(councilTax.addedAt)}. Send it to your council if they ask.`
             : "A house where every tenant is a full-time student is usually exempt from council tax. Get a certificate from your university, add it here and send it to your council."}
         </Text>
         {action("councilTax", councilTax ? "Replace certificate" : "Add certificate")}

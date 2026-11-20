@@ -11,7 +11,7 @@ import {
   useContractsControllerSign,
 } from "@/src/api/seek-api/contracts";
 import type { Contract, TenancyDocument } from "@/src/api/seek-api/model";
-import { formatDate } from "@/src/utils/seek-format";
+import { formatInstantDate } from "@/src/utils/seek-format";
 import { errorMessage, idOf, isWebUrl, openStoredFile, tenancyTitle, type TenancyView } from "@/src/utils/tenancy-view";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
@@ -142,7 +142,7 @@ function AgreementDocCard({ doc }: { doc: TenancyDocument }) {
           <Badge label="From email — awaiting landlord confirmation" tone="warning" />
         </View>
       ) : null}
-      <Text style={[styles.meta, { color: colors.mutedText }]}>Added {formatDate(doc.addedAt)}.</Text>
+      <Text style={[styles.meta, { color: colors.mutedText }]}>Added {formatInstantDate(doc.addedAt)}.</Text>
       {error ? (
         <Text accessibilityRole="alert" style={[styles.meta, { color: colors.danger }]}>
           {error}
@@ -210,8 +210,8 @@ function ContractCard({ contract, tenancy }: { contract: Contract; tenancy: Tena
       </View>
       <Text style={[styles.meta, { color: colors.mutedText }]}>
         {signed
-          ? `Everyone signed on ${formatDate(contract.signedAt)}.`
-          : `${signedBy.size} of ${total} tenants have signed${contract.sentAt ? ` · sent ${formatDate(contract.sentAt)}` : ""}.`}
+          ? `Everyone signed on ${formatInstantDate(contract.signedAt)}.`
+          : `${signedBy.size} of ${total} tenants have signed${contract.sentAt ? ` · sent ${formatInstantDate(contract.sentAt)}` : ""}.`}
       </Text>
 
       {message ? (
@@ -226,7 +226,7 @@ function ContractCard({ contract, tenancy }: { contract: Contract; tenancy: Tena
       {contract.inventory && contract.inventory.items.length > 0 ? (
         <View style={styles.confirm}>
           <Text style={[styles.title, { color: colors.text, fontSize: 14 }]}>
-            Check-in inventory · {formatDate(contract.inventory.recordedAt)}
+            Check-in inventory · {formatInstantDate(contract.inventory.recordedAt)}
           </Text>
           {contract.inventory.items.map((item, index) => (
             <Text key={`${item.room}-${item.item}-${index}`} style={[styles.meta, { color: colors.mutedText }]}>

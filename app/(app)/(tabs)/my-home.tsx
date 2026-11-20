@@ -18,7 +18,7 @@ import {
 } from "@/src/api/seek-api/payments";
 import { useRepairsControllerForTenancy } from "@/src/api/seek-api/repairs";
 import { routeForNotification } from "@/src/utils/notification-route";
-import { formatDay, formatPence, pluralise } from "@/src/utils/seek-format";
+import { formatDay, formatInstantDay, formatPence, pluralise } from "@/src/utils/seek-format";
 import {
   errorMessage,
   frequencyLabel,
@@ -190,7 +190,7 @@ function NotificationsSection({ onLayout }: { onLayout?: (y: number) => void }) 
                     <Text style={[styles.tileDetail, { color: colors.mutedText }]}>{item.body}</Text>
                   ) : null}
                 </View>
-                <Text style={[styles.tileDetail, { color: colors.mutedText }]}>{formatDay(item.createdAt)}</Text>
+                <Text style={[styles.tileDetail, { color: colors.mutedText }]}>{formatInstantDay(item.createdAt)}</Text>
               </Pressable>
             ))
           )}

@@ -79,11 +79,12 @@ export default function ChatScreen() {
   const listRef = useRef<FlatList<MessageDto>>(null);
 
   useEffect(() => {
-    if (isError || isUserError) {
+    // A failed background refetch keeps the cached conversation: only leave when there is nothing to show.
+    if ((isError && !conversation) || isUserError) {
       console.log("failed to get messages")
       router.navigate("/(app)/(tabs)/map");
     }
-  }, [isError, isUserError, router]);
+  }, [isError, conversation, isUserError, router]);
 
   const [message, setMessage] = useState<string>("");
   function sendMessage(id: string) {
@@ -106,6 +107,7 @@ export default function ChatScreen() {
       }
     }, {
       onError(error) {
+        setMessage((current) => current || message);
         errorToast({
           toast,
           data: error.response?.data as ErrorDto | undefined,

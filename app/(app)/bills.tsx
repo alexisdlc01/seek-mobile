@@ -13,7 +13,7 @@ import {
   useBillsControllerMarkPaid,
 } from "@/src/api/seek-api/bills";
 import type { BillViewDto, CreateBillDtoCategory } from "@/src/api/seek-api/model";
-import { formatDay, formatPence, pluralise } from "@/src/utils/seek-format";
+import { formatDay, formatInstantDay, formatPence, pluralise } from "@/src/utils/seek-format";
 import { errorMessage, tenancyTitle, type TenancyView } from "@/src/utils/tenancy-view";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
@@ -180,7 +180,7 @@ function BillsContent({ tenancy }: { tenancy: TenancyView }) {
       CATEGORY_LABEL[bill.category],
       bill.status === "PAID"
         ? bill.paidAt
-          ? `paid ${formatDay(bill.paidAt)}`
+          ? `paid ${formatInstantDay(bill.paidAt)}`
           : "paid"
         : bill.dueDate
           ? `due ${formatDay(bill.dueDate)}`

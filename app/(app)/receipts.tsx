@@ -2,7 +2,7 @@ import { AuthRequiredScreen } from "@/components/custom/auth-required";
 import { EmptyState, ErrorState, LoadingState } from "@/components/seek/states";
 import { Badge, Card, Divider, ListRow, SeekScreen } from "@/components/seek/ui";
 import { usePaymentsControllerMine } from "@/src/api/seek-api/payments";
-import { formatDate, formatPence } from "@/src/utils/seek-format";
+import { formatDate, formatInstantDate, formatPence } from "@/src/utils/seek-format";
 import { useRouter } from "expo-router";
 import { ReceiptIcon } from "lucide-react-native";
 import React from "react";
@@ -42,7 +42,7 @@ function Receipts() {
               <ListRow
                 icon={<ReceiptIcon size={20} color="#888" />}
                 title={`${KIND_LABEL[item.kind] ?? item.kind} · ${formatPence(item.amount)}`}
-                subtitle={`Paid ${formatDate(item.paidAt ?? item.dueDate)}`}
+                subtitle={`Paid ${item.paidAt ? formatInstantDate(item.paidAt) : formatDate(item.dueDate)}`}
                 right={
                   item.refundedAt ? (
                     <Badge

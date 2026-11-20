@@ -59,7 +59,8 @@ export default function ChatDetails() {
   const isOwner = Boolean(currentUser?._id) && application?.owner === currentUser?._id;
 
   const isLoading = loadingApplication || loadingConversation;
-  const isError = errorApplication || errorConversation;
+  // A failed background refetch keeps the cached data: only leave when there is nothing to show.
+  const isError = (errorApplication && !application) || (errorConversation && !conversation);
 
   useEffect(() => {
     if (isError) {
