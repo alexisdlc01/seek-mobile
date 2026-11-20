@@ -201,8 +201,7 @@ function DepositContent({ tenancy }: { tenancy: TenancyView }) {
       <View style={styles.section}>
         <SectionTitle>At move-out</SectionTitle>
         <Text style={[styles.body, { color: colors.mutedText }]}>
-          Your landlord has 10 days after you leave to agree any deductions. If you disagree, the scheme&apos;s free
-          dispute service decides.
+          Any deductions must be agreed with you. If you disagree, the scheme&apos;s free dispute service decides.
         </Text>
       </View>
 
@@ -251,7 +250,7 @@ function Deductions({ tenancy }: { tenancy: TenancyView }) {
             Total {formatPence(deductions.total)} of {formatPence(tenancy.depositAmount * Math.max(1, tenancy.tenants.length))}
           </Text>
           <Badge
-            label={deductions.status === "ACCEPTED" ? "Agreed" : deductions.status === "DISPUTED" ? "Disputed" : "Waiting for you"}
+            label={deductions.status === "ACCEPTED" ? "Agreed" : deductions.status === "DISPUTED" ? "Disputed" : mine ? "Waiting for housemates" : "Waiting for you"}
             tone={tone}
           />
         </View>
@@ -269,6 +268,9 @@ function Deductions({ tenancy }: { tenancy: TenancyView }) {
             <SeekButton label={respond.isPending ? "Saving…" : "Agree"} compact disabled={respond.isPending} onPress={() => answer(true)} />
             <SeekButton label="Dispute" compact variant="secondary" disabled={respond.isPending} onPress={() => answer(false)} />
           </View>
+        ) : null}
+        {mine && !state ? (
+          <Text style={[styles.notice, { color: colors.success }]}>You agreed to the deductions.</Text>
         ) : null}
         {state ? (
           <Text accessibilityRole="alert" style={[styles.notice, { color: state.error ? colors.danger : colors.success }]}>

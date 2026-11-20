@@ -89,7 +89,7 @@ export default function ChatScreen() {
   const [message, setMessage] = useState<string>("");
   function sendMessage(id: string) {
     if (!user) return;
-    if (message.length === 0) {
+    if (message.trim().length === 0) {
       return;
     }
     if (!clientRef.current) {
