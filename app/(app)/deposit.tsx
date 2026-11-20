@@ -220,7 +220,7 @@ function Deductions({ tenancy }: { tenancy: TenancyView }) {
   const respond = useContractsControllerRespondToDeductions();
   const [state, setState] = useState<{ text: string; error?: boolean } | null>(null);
 
-  const contract = (contracts.data ?? []).find((item) => item.deductions);
+  const contract = (contracts.data ?? []).find((item) => item.status !== "DRAFT" && item.deductions);
   const deductions = contract?.deductions;
   if (!contract || !deductions) return null;
 

@@ -7,13 +7,34 @@ const HOURS = [10, 12, 14, 16, 18];
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-/** "Mon 9 Nov, 14:00" in the viewer's time zone. */
+const LONDON = "Europe/London";
+
+/** Calendar/clock parts of an instant on the Europe/London wall clock. */
+function londonParts(date: Date) {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: LONDON, year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric", hourCycle: "h23",
+  }).formatToParts(date);
+  const get = (type: string) => Number(parts.find((part) => part.type === type)?.value);
+  return { year: get("year"), month: get("month"), day: get("day"), hour: get("hour"), minute: get("minute") };
+}
+
+/** The UTC instant of a London wall-clock time (DST-safe: one correction pass). */
+export function londonInstant(year: number, month: number, day: number, hour: number): Date {
+  const wall = Date.UTC(year, month - 1, day, hour);
+  const seen = londonParts(new Date(wall));
+  const offset = Date.UTC(seen.year, seen.month - 1, seen.day, seen.hour, seen.minute) - wall;
+  return new Date(wall - offset);
+}
+
+/** "Mon 9 Nov, 14:00" on the Europe/London clock, like the emails and push titles. */
 export function formatViewing(iso: string | null | undefined): string {
   if (!iso) return "";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
-  const time = `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
-  return `${WEEKDAYS[date.getDay()]} ${date.getDate()} ${MONTHS[date.getMonth()]}, ${time}`;
+  const p = londonParts(date);
+  const time = `${String(p.hour).padStart(2, "0")}:${String(p.minute).padStart(2, "0")}`;
+  const weekday = WEEKDAYS[new Date(Date.UTC(p.year, p.month - 1, p.day)).getUTCDay()];
+  return `${weekday} ${p.day} ${MONTHS[p.month - 1]}, ${time}`;
 }
 
 /** The upcoming viewing times a landlord offers on a listing (`viewingSlots`). */
@@ -41,24 +62,26 @@ export function ViewingSlots({
 }) {
   const colors = useSeekTheme();
   const days = useMemo(() => {
-    const start = new Date();
-    start.setHours(0, 0, 0, 0);
+    const today = londonParts(new Date());
+    // Calendar days on the London clock; Date.UTC rolls over month ends.
     return Array.from({ length: DAYS }, (_, index) => {
-      const day = new Date(start);
-      day.setDate(start.getDate() + index + 1);
-      return day;
+      const day = new Date(Date.UTC(today.year, today.month - 1, today.day + index + 1));
+      return { year: day.getUTCFullYear(), month: day.getUTCMonth() + 1, day: day.getUTCDate(), weekday: day.getUTCDay() };
     });
   }, []);
   const selected = value ? new Date(value) : null;
+  const sel = selected && !Number.isNaN(selected.getTime()) ? londonParts(selected) : null;
+  const sameDay = (day: (typeof days)[number], p: NonNullable<typeof sel>) =>
+    day.year === p.year && day.month === p.month && day.day === p.day;
   const [dayIndex, setDayIndex] = useState<number>(() => {
     if (!selected) return 0;
-    const found = days.findIndex((day) => day.toDateString() === selected.toDateString());
+    const found = sel ? days.findIndex((day) => sameDay(day, sel)) : -1;
     return found >= 0 ? found : 0;
   });
 
   const pick = (index: number, hour: number) => {
-    const when = new Date(days[index]);
-    when.setHours(hour, 0, 0, 0);
+    const day = days[index];
+    const when = londonInstant(day.year, day.month, day.day, hour);
     setDayIndex(index);
     onChange(selected && selected.getTime() === when.getTime() ? null : when.toISOString());
   };
@@ -100,14 +123,14 @@ export function ViewingSlots({
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {days.map((day, index) => (
           <Pressable
-            key={day.toISOString()}
+            key={`${day.year}-${day.month}-${day.day}`}
             accessibilityRole="button"
             accessibilityState={{ selected: index === dayIndex }}
             onPress={() => setDayIndex(index)}
             style={[styles.chip, chip(index === dayIndex)]}
           >
             <Text style={[styles.chipText, { color: index === dayIndex ? colors.onPrimary : colors.text }]}>
-              {WEEKDAYS[day.getDay()]} {day.getDate()}
+              {WEEKDAYS[day.weekday]} {day.day}
             </Text>
           </Pressable>
         ))}
@@ -115,9 +138,7 @@ export function ViewingSlots({
       <View style={styles.times}>
         {HOURS.map((hour) => {
           const on =
-            selected != null &&
-            selected.toDateString() === days[dayIndex].toDateString() &&
-            selected.getHours() === hour;
+            sel != null && sameDay(days[dayIndex], sel) && sel.hour === hour && sel.minute === 0;
           return (
             <Pressable
               key={hour}
