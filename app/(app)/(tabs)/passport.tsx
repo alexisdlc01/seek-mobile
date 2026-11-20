@@ -33,7 +33,6 @@ import {
   useUsersControllerRequestReference,
   useUsersControllerRevokeShare,
 } from "@/src/api/seek-api/users";
-import { useAuth } from "@/src/store/auth-store";
 import { formatDate, formatInstantDate, initialsOf } from "@/src/utils/seek-format";
 import { formatShareCode, isoDay, normaliseShareCode, shareCodeExpiry } from "@/src/utils/share-code";
 import { errorMessage } from "@/src/utils/tenancy-view";
@@ -181,7 +180,6 @@ function Profile() {
   const colors = useSeekTheme();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const accessToken = useAuth((state) => state.accessToken);
   const { data: user } = useAuthControllerCurrentUser();
   const passport = useUsersControllerGetPassport();
   const shares = useUsersControllerListShares();
@@ -217,7 +215,6 @@ function Profile() {
         mimeType: asset.mimeType ?? "application/pdf",
         name: `${user._id}-${item.type}`,
         folder: "private",
-        access_token: accessToken,
       });
       await addDocument.mutateAsync({
         data: { documentType: item.type, url: uploaded.fileUrl, key: uploaded.key, ...extras },

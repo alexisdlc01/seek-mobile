@@ -31,7 +31,6 @@ import {
   useUsersControllerAddDocument,
   useUsersControllerDocumentTypes,
 } from "@/src/api/seek-api/users";
-import { useAuth } from "@/src/store/auth-store";
 import { errorToast } from "@/src/utils/error-toast";
 import { uploadFile } from "@/src/utils/upload-file";
 import * as DocumentPicker from "expo-document-picker";
@@ -97,7 +96,6 @@ function PersonalInformationContent({
   const profileTypography = useProfileTypography();
   const documentIconProps = { color: colors.accent, size: 25, strokeWidth: 2 };
   const toast = useToast();
-  const accessToken = useAuth((state) => state.accessToken);
   const { pickImage } = useProfilePicture();
   const { mutate: addDocument } = useUsersControllerAddDocument();
   const [showIdSources, setShowIdSources] = useState(false);
@@ -152,7 +150,6 @@ function PersonalInformationContent({
         mimeType: asset.mimeType ?? "application/pdf",
         name: `${user._id}-${documentType}`,
         folder: "private",
-        access_token: accessToken,
       });
       finishDocument(documentType, uploaded.fileUrl, uploaded.key);
     } catch {
@@ -177,7 +174,6 @@ function PersonalInformationContent({
           mimeType: image.mimeType ?? "image/jpeg",
           name: `${user._id}-identification`,
           folder: "private",
-          access_token: accessToken,
         });
         finishDocument("IDENTIFICATION", uploaded.fileUrl, uploaded.key);
       } catch {
@@ -188,7 +184,7 @@ function PersonalInformationContent({
         });
       }
     },
-    [accessToken, finishDocument, pickImage, toast, user._id],
+    [finishDocument, pickImage, toast, user._id],
   );
 
   return (

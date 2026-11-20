@@ -97,7 +97,6 @@ function ProfileContent({ user }: { user: UserDto }) {
   const isTab = (useSegments() as string[]).includes("(tabs)");
   const toast = useToast();
   const localLogout = useAuth((state) => state.logout);
-  const accessToken = useAuth((state) => state.accessToken);
   const { mutate: updateProfilePicture } = useUsersControllerSetProfilePic();
   const { mutate: remoteLogout, isPending: isLoggingOut } =
     useAuthControllerLogout();
@@ -119,7 +118,6 @@ function ProfileContent({ user }: { user: UserDto }) {
           mimeType: selectedImage.mimeType ?? "image/jpeg",
           name: `${user._id}-profile`,
           folder: "public",
-          access_token: accessToken,
         });
 
         updateProfilePicture(
@@ -148,7 +146,7 @@ function ProfileContent({ user }: { user: UserDto }) {
         setShowImagePicker(false);
       }
     },
-    [accessToken, pickImage, toast, updateProfilePicture, user._id],
+    [pickImage, toast, updateProfilePicture, user._id],
   );
 
   const confirmLogout = () => {

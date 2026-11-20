@@ -4,7 +4,6 @@ import { useSeekTheme } from "@/hooks/use-seek-theme";
 import { useAuthControllerCurrentUser } from "@/src/api/seek-api/auth";
 import type { AddTenancyDocumentDtoStage, AddTenancyDocumentDtoType } from "@/src/api/seek-api/model";
 import { useTenanciesControllerAddDocument } from "@/src/api/seek-api/tenancies";
-import { useAuth } from "@/src/store/auth-store";
 import { formatInstantDate } from "@/src/utils/seek-format";
 import { errorMessage, type TenancyView } from "@/src/utils/tenancy-view";
 import { uploadFile } from "@/src/utils/upload-file";
@@ -37,7 +36,6 @@ export function HomeAdmin({
 }) {
   const colors = useSeekTheme();
   const queryClient = useQueryClient();
-  const accessToken = useAuth((state) => state.accessToken);
   const { data: user } = useAuthControllerCurrentUser();
   const addDocument = useTenanciesControllerAddDocument();
   const [busy, setBusy] = useState<Kind | null>(null);
@@ -71,7 +69,6 @@ export function HomeAdmin({
           mimeType: asset.mimeType ?? "application/pdf",
           name: `${tenancy._id}-${type}-${Date.now()}-${index}`,
           folder: "private",
-          access_token: accessToken,
         });
         await addDocument.mutateAsync({
           id: tenancy._id,

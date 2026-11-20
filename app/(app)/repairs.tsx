@@ -4,7 +4,6 @@ import { Badge, Card, Divider, ListRow, SectionTitle, SeekButton, SeekScreen } f
 import { invalidateHomeQueries, useActiveTenancy } from "@/hooks/use-active-tenancy";
 import { useSeekTheme } from "@/hooks/use-seek-theme";
 import { useRepairsControllerCreate, useRepairsControllerForTenancy } from "@/src/api/seek-api/repairs";
-import { useAuth } from "@/src/store/auth-store";
 import { formatInstantDate, formatInstantDay } from "@/src/utils/seek-format";
 import { errorMessage, tenancyTitle, type TenancyView } from "@/src/utils/tenancy-view";
 import { uploadFile } from "@/src/utils/upload-file";
@@ -67,7 +66,6 @@ function RepairsContent({ tenancy }: { tenancy: TenancyView }) {
   const query = useRepairsControllerForTenancy(tenancy._id, { query: { retry: 1, staleTime: 5 * 60 * 1000 } });
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const accessToken = useAuth((state) => state.accessToken);
   const [photos, setPhotos] = useState<{ uri: string; mimeType: string }[]>([]);
   const [sending, setSending] = useState(false);
   const [message, setMessage] = useState<{ tone: "success" | "danger"; text: string } | null>(null);
@@ -161,7 +159,7 @@ function RepairsContent({ tenancy }: { tenancy: TenancyView }) {
                     try {
                       const uploaded = await Promise.all(
                         photos.map((photo, index) =>
-                          uploadFile({ uri: photo.uri, mimeType: photo.mimeType, name: `repair-${index}`, folder: "private", access_token: accessToken }),
+                          uploadFile({ uri: photo.uri, mimeType: photo.mimeType, name: `repair-${index}`, folder: "private" }),
                         ),
                       );
                       create.mutate({

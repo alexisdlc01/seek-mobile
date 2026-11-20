@@ -67,7 +67,6 @@ export default function ProfilePhoto() {
           mimeType,
           name: `${userId}-profile`,
           folder: "public",
-          access_token: accessToken,
         });
         fileUrl = data.fileUrl;
       } catch {
