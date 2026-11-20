@@ -469,7 +469,14 @@ function RentPlanContent({ tenancyId, title }: { tenancyId: string; title: strin
                     ) : null}
                   </View>
                   <Text style={[styles.planPrice, { color: colors.text }]}>{formatPence(item.amount)}</Text>
-                  <Badge label="Paid" tone="success" />
+                  {item.refundedAt ? (
+                    <Badge
+                      label={item.refundedAmount < item.amount ? `Partially refunded · ${formatPence(item.refundedAmount)}` : "Refunded"}
+                      tone="neutral"
+                    />
+                  ) : (
+                    <Badge label="Paid" tone="success" />
+                  )}
                 </View>
               </View>
             ))
