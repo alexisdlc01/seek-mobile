@@ -27,7 +27,7 @@ import { ListingsControllerGetFilteredListingsPropertyType } from "@/src/api/see
 import { ScrollView } from "react-native";
 import { useEffect, useState } from "react";
 
-const MAX_MONTHLY_RENT = 5000;
+const MAX_RENT_PER_PERSON = 2000;
 
 const PROPERTY_TYPES = [
   { label: "Any", value: "" },
@@ -59,21 +59,21 @@ export default function Filters() {
   const { data, setValue, clear } = useFilterStore();
   const {
     amenities,
-    monthlyRentMax,
+    maxRent,
     numOfPeople,
     propertyType,
   } = data;
-  const committedMonthlyRentMax = Math.min(
-    MAX_MONTHLY_RENT,
-    Math.max(0, monthlyRentMax ?? 0),
+  const committedMaxRent = Math.min(
+    MAX_RENT_PER_PERSON,
+    Math.max(0, maxRent ?? 0),
   );
   const [monthlyRentDraft, setMonthlyRentDraft] = useState(
-    committedMonthlyRentMax,
+    committedMaxRent,
   );
 
   useEffect(() => {
-    setMonthlyRentDraft(committedMonthlyRentMax);
-  }, [committedMonthlyRentMax]);
+    setMonthlyRentDraft(committedMaxRent);
+  }, [committedMaxRent]);
 
   const setPropertyType = (value: string) => {
     setValue("propertyType")(
@@ -83,7 +83,7 @@ export default function Filters() {
 
   const monthlyRentLabel = monthlyRentDraft === 0
     ? "Any price"
-    : `Up to £${monthlyRentDraft.toLocaleString("en-GB")}`;
+    : `Up to £${monthlyRentDraft.toLocaleString("en-GB")} each`;
 
   return (
     <SafeAreaView className="flex-1 bg-background-screen">
@@ -124,7 +124,7 @@ export default function Filters() {
           <Box className="gap-3">
             <HStack className="items-center justify-between">
               <Text size="lg" className="font-semibold text-primary-500">
-                Price per month
+                Price per person per month
               </Text>
               <Text className="font-semibold text-primary-600">
                 {monthlyRentLabel}
@@ -134,10 +134,10 @@ export default function Filters() {
               <Slider
                 size="lg"
                 minValue={0}
-                maxValue={MAX_MONTHLY_RENT}
+                maxValue={MAX_RENT_PER_PERSON}
                 step={50}
                 onChange={setMonthlyRentDraft}
-                onChangeEnd={(value) => setValue("monthlyRentMax")(value)}
+                onChangeEnd={(value) => setValue("maxRent")(value)}
                 value={monthlyRentDraft}
               >
                 <SliderTrack>

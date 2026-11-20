@@ -83,9 +83,12 @@ function normalizeFilters(value: unknown): FilterParams {
     )]
     : [];
 
+  // monthlyRentMax (whole-property rent) was replaced by per-person maxRent.
+  const { monthlyRentMax: _legacyRentMax, ...rest } = data;
+
   return {
     ...defaultFilters,
-    ...data,
+    ...rest,
     propertyType: PROPERTY_TYPE_ALIASES[propertyTypeKey],
     amenities,
   };

@@ -349,7 +349,11 @@ export default function DetailsScreen() {
                     {formatAddress(data)}
                   </Text>
                   <Text className="pt-1 text-2xl font-bold text-primary-500">
-                    {formatMonthlyRent(data.monthlyRent)}
+                    £{Math.round(data.monthlyRent / Math.max(1, data.numOfPeople || 1))} pcm each
+                  </Text>
+                  <Text className="text-sm text-neutral-600">
+                    {formatMonthlyRent(data.monthlyRent)} total
+                    {data.billsIncluded ? " · Bills included" : ""}
                   </Text>
                 </VStack>
 
