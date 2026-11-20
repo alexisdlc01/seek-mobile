@@ -7,6 +7,8 @@ import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import axios from "axios";
 import { getAuthControllerCurrentUserQueryOptions } from "@/src/api/seek-api/auth";
+import { notificationsControllerMarkRead } from "@/src/api/seek-api/notifications";
+import { invalidateHomeQueries } from "@/hooks/use-active-tenancy";
 import { useEffect } from "react";
 import { useAuth } from "@/src/store/auth-store";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -47,7 +49,13 @@ export default function RootLayout() {
   }, [_hasHydrated, signedIn]);
   useEffect(() => {
     if (!_hasHydrated) return;
-    const open = (response: Notifications.NotificationResponse) => router.push(hrefForPushResponse(response));
+    const open = (response: Notifications.NotificationResponse) => {
+      router.push(hrefForPushResponse(response));
+      const id = response.notification.request.content.data?.notificationId;
+      if (typeof id === "string") {
+        void notificationsControllerMarkRead(id).then(() => invalidateHomeQueries(queryClient)).catch(() => {});
+      }
+    };
     void Notifications.getLastNotificationResponseAsync().then((r) => r && open(r)).catch(() => {});
     const sub = Notifications.addNotificationResponseReceivedListener(open);
     return () => sub.remove();
