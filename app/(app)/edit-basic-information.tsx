@@ -37,7 +37,6 @@ import {
 import { UserDto } from "@/src/api/seek-api/model";
 import { errorToast } from "@/src/utils/error-toast";
 import { uploadFile } from "@/src/utils/upload-file";
-import { useAuth } from "@/src/store/auth-store";
 import { SuccessToast } from "@/components/custom/success-toast";
 import { CameraIcon } from "lucide-react-native";
 import React, { useCallback, useMemo, useState } from "react";
@@ -88,7 +87,6 @@ function EditBasicInformationForm({ user }: { user: UserDto }) {
   const colors = useSeekTheme();
   const profileTypography = useProfileTypography();
   const toast = useToast();
-  const accessToken = useAuth((state) => state.accessToken);
   const [name, setName] = useState(user.name ?? "");
   const [username, setUsername] = useState(user.username ?? "");
   const [email] = useState(user.email ?? "");
@@ -144,7 +142,6 @@ function EditBasicInformationForm({ user }: { user: UserDto }) {
           mimeType: selectedImage.mimeType ?? "image/jpeg",
           name: `${user._id}-profile`,
           folder: "public",
-          access_token: accessToken,
         });
         updateProfilePicture(
           { data: { url: uploaded.fileUrl } },
@@ -164,7 +161,7 @@ function EditBasicInformationForm({ user }: { user: UserDto }) {
         setShowImagePicker(false);
       }
     },
-    [accessToken, pickImage, toast, updateProfilePicture, user._id],
+    [pickImage, toast, updateProfilePicture, user._id],
   );
 
   const save = () => {

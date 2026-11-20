@@ -3,6 +3,7 @@ import type { SeekColors } from "@/constants/seek-theme";
 import { useSeekTheme, useThemedStyles } from "@/hooks/use-seek-theme";
 import { useAuthControllerLogout } from "@/src/api/seek-api/auth";
 import { useAuth } from "@/src/store/auth-store";
+import { unregisterFromPush } from "@/src/utils/push";
 import { useRouter } from "expo-router";
 import { MonitorIcon } from "lucide-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
@@ -16,14 +17,16 @@ export function LandlordBlockedScreen() {
   const { mutate: remoteLogout, isPending } = useAuthControllerLogout();
 
   const signOut = () =>
-    remoteLogout(undefined, {
-      onSettled: () => {
-        // Navigate first: clearing auth swaps the layout tree and unmounts the navigator.
-        router.replace("/(auth)/login");
-        localLogout();
-        queryClient.clear();
-      },
-    });
+    void unregisterFromPush().then(() =>
+      remoteLogout(undefined, {
+        onSettled: () => {
+          // Navigate first: clearing auth swaps the layout tree and unmounts the navigator.
+          router.replace("/(auth)/login");
+          localLogout();
+          queryClient.clear();
+        },
+      }),
+    );
 
   return (
     <SafeAreaView style={styles.safeArea}>

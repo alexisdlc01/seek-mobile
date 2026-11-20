@@ -38,6 +38,7 @@ const SUGGESTIONS = [
 // The API reads the last few turns; older ones add cost without helping.
 const HISTORY_LIMIT = 10;
 const CARDS_SHOWN = 3;
+const RELAXED_LABELS: Record<string, string> = { billsIncluded: "bills included", minBedrooms: "the bedroom count" };
 
 type ChatItem = {
   id: string;
@@ -269,7 +270,7 @@ function AssistantResults({
       ) : null}
       {item.relaxed && item.relaxed.length > 0 ? (
         <Text style={[styles.note, { color: colors.mutedText }]}>
-          Nothing matched everything, so I loosened: {item.relaxed.join(", ")}.
+          Nothing matched everything, so I loosened: {item.relaxed.map((r) => RELAXED_LABELS[r] ?? r).join(" and ")}.
         </Text>
       ) : null}
       {listings.slice(0, CARDS_SHOWN).map((listing) => {

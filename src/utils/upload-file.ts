@@ -1,20 +1,18 @@
-import axios, { AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
+import { AXIOS_INSTANCE } from "./custom-axios";
 import { PresignResDto, UploadControllerGetPresignedUrlParams } from "../api/seek-api/model";
 
 type UploadFileProps = {
   uri: string,
   mimeType: string,
   name: string,
-  folder: "public" | "private",
-  access_token?: string
+  folder: "public" | "private"
 };
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-
-export async function uploadFile({ uri, mimeType, name, folder, access_token }: UploadFileProps) {
+export async function uploadFile({ uri, mimeType, name, folder }: UploadFileProps) {
   const response = await fetch(uri);
   const blob = await response.blob();
-  const resp = await axios.get<any, AxiosResponse<PresignResDto>, UploadControllerGetPresignedUrlParams>(`${BASE_URL}/upload/presign`, {
+  const resp = await AXIOS_INSTANCE.get<any, AxiosResponse<PresignResDto>, UploadControllerGetPresignedUrlParams>("/upload/presign", {
     params: {
       fileType: mimeType,
       filename: name,
@@ -23,10 +21,6 @@ export async function uploadFile({ uri, mimeType, name, folder, access_token }: 
       fileSize: blob.size,
       folder: folder,
     },
-    headers: {
-      Authorization: `Bearer ${access_token}`,
-      platform: "mobile",
-    }
   });
   const put = await fetch(resp.data.uploadUrl, {
     method: "PUT",
