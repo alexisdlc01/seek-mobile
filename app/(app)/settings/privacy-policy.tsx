@@ -107,7 +107,7 @@ export default function PrivacyPolicyScreen() {
             You may ask to access, correct, erase, restrict or receive your information, object to certain uses, or withdraw consent. You can also complain to the UK Information Commissioner’s Office.
           </Text>
           <Text className="text-slate-700 leading-6">
-            To delete your account, sign in, open Edit profile, select Close account, then confirm. We may first require an active tenancy or outstanding payment to be completed. You can also email privacy@seekapp.uk. Records we must keep for legal or dispute purposes remain only for the periods above.
+            To delete your account in the app, open Settings, select Delete Account, then confirm. On the website, sign in, open Edit profile, select Close account, then confirm. We may first require an active tenancy or outstanding payment to be completed. You can also email privacy@seekapp.uk. Records we must keep for legal or dispute purposes remain only for the periods above.
           </Text>
         </VStack>
 
