@@ -41,6 +41,7 @@ import {
 import { FlashList, FlashListRef } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
 import { SeekColors } from "@/constants/seek-theme";
+import { MUTED_MAP_STYLE } from "@/constants/map-style";
 import { useSeekTheme, useThemedStyles } from "@/hooks/use-seek-theme";
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { getActiveFilters, useFilterStore } from "@/src/store/filter-store";
@@ -312,6 +313,9 @@ export default function MapScreen() {
     <VStack className="flex-1">
       <MapView
         provider={Platform.OS === "android" ? PROVIDER_GOOGLE : undefined}
+        customMapStyle={MUTED_MAP_STYLE}
+        mapType={Platform.OS === "ios" ? "mutedStandard" : "standard"}
+        showsPointsOfInterest={false}
         ref={mapRef}
         style={StyleSheet.absoluteFillObject}
         onMapReady={() => setMapReady(true)}
@@ -724,16 +728,21 @@ const createStyles = (colors: SeekColors) =>
       paddingVertical: 6,
       borderRadius: 999,
       alignItems: "center",
-      backgroundColor: colors.primary,
-      borderWidth: 2,
-      borderColor: colors.surface,
+      backgroundColor: "#FFFFFF",
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: "rgba(0,0,0,0.15)",
+      shadowColor: "#000",
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+      shadowOffset: { width: 0, height: 2 },
+      elevation: 3,
     },
     pillSelected: {
-      backgroundColor: colors.surface,
-      borderColor: colors.primary,
+      backgroundColor: "#111111",
+      borderColor: "#111111",
     },
-    pillText: { fontSize: 13, fontWeight: "700", color: colors.onPrimary },
-    pillTextSelected: { color: colors.text },
+    pillText: { fontSize: 13, fontWeight: "700", color: "#111111" },
+    pillTextSelected: { color: "#FFFFFF" },
     sheetHeader: { gap: 12, paddingHorizontal: 16, paddingBottom: 12 },
     sheetTitle: {
       fontSize: 18,
