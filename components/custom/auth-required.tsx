@@ -1,7 +1,8 @@
 import type { SeekColors } from "@/constants/seek-theme";
 import { useSeekTheme, useThemedStyles } from "@/hooks/use-seek-theme";
 import { useAuth } from "@/src/store/auth-store";
-import { useRouter } from "expo-router";
+import { buildHref, useAuthRedirect } from "@/src/store/auth-redirect-store";
+import { useGlobalSearchParams, usePathname, useRouter } from "expo-router";
 import { LockKeyholeIcon } from "lucide-react-native";
 import { PropsWithChildren, useCallback } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
@@ -17,8 +18,22 @@ export function useIsAuthenticated() {
   );
 }
 
-export function useAuthRequiredAction(action: string) {
+function useGoToAuth() {
   const router = useRouter();
+  const pathname = usePathname();
+  const params = useGlobalSearchParams();
+  const setPendingHref = useAuthRedirect((state) => state.setPendingHref);
+  return useCallback(
+    (route: typeof LOGIN_ROUTE | typeof SIGN_UP_ROUTE) => {
+      setPendingHref(buildHref(pathname, params));
+      router.push(route);
+    },
+    [pathname, params, router, setPendingHref],
+  );
+}
+
+export function useAuthRequiredAction(action: string) {
+  const goToAuth = useGoToAuth();
   const isAuthenticated = useIsAuthenticated();
   const hasHydrated = useAuth((state) => state._hasHydrated);
 
@@ -31,12 +46,12 @@ export function useAuthRequiredAction(action: string) {
       `Sign up or log in to ${action}.`,
       [
         { text: "Not now", style: "cancel" },
-        { text: "Log in", onPress: () => router.push(LOGIN_ROUTE) },
-        { text: "Sign up", onPress: () => router.push(SIGN_UP_ROUTE) },
+        { text: "Log in", onPress: () => goToAuth(LOGIN_ROUTE) },
+        { text: "Sign up", onPress: () => goToAuth(SIGN_UP_ROUTE) },
       ],
     );
     return false;
-  }, [action, hasHydrated, isAuthenticated, router]);
+  }, [action, hasHydrated, isAuthenticated, goToAuth]);
 }
 
 type AuthRequiredScreenProps = PropsWithChildren<{
@@ -52,6 +67,7 @@ export function AuthRequiredScreen({
   const styles = useThemedStyles(createStyles);
   const colors = useSeekTheme();
   const router = useRouter();
+  const goToAuth = useGoToAuth();
   const hasHydrated = useAuth((state) => state._hasHydrated);
   const isAuthenticated = useIsAuthenticated();
 
@@ -73,14 +89,14 @@ export function AuthRequiredScreen({
         <View style={styles.actions}>
           <Pressable
             accessibilityRole="button"
-            onPress={() => router.push(SIGN_UP_ROUTE)}
+            onPress={() => goToAuth(SIGN_UP_ROUTE)}
             style={styles.primaryButton}
           >
             <Text style={styles.primaryButtonText}>Sign up</Text>
           </Pressable>
           <Pressable
             accessibilityRole="button"
-            onPress={() => router.push(LOGIN_ROUTE)}
+            onPress={() => goToAuth(LOGIN_ROUTE)}
             style={styles.secondaryButton}
           >
             <Text style={styles.secondaryButtonText}>Log in</Text>

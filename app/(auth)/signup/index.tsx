@@ -24,6 +24,7 @@ import { useAuth } from "@/src/store/auth-store";
 import type { CreateUserDto } from "@/src/api/seek-api/model";
 import { isValidEmail, normalizeEmail } from "@/src/utils/validate-email";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { afterAuthHref, useAuthRedirect } from "@/src/store/auth-redirect-store";
 
 export default function Signup() {
   const [name, setName] = useState("");
@@ -125,7 +126,7 @@ export default function Signup() {
               accessToken: response.access_token,
               refreshToken: response.refresh_token,
             });
-            router.replace("/(app)/(tabs)/map");
+            router.replace(afterAuthHref(useAuthRedirect.getState().pendingHref));
           }
         },
         onError: (err) => {

@@ -23,6 +23,7 @@ import {
 import { useAuth } from "@/src/store/auth-store";
 import { AuthGaurd } from "@/components/custom/auth-gaurd";
 import { usersControllerSetProfilePic } from "@/src/api/seek-api/users";
+import { afterAuthHref, useAuthRedirect } from "@/src/store/auth-redirect-store";
 
 export default function ProfilePhoto() {
   const { setProgress } = useProgress();
@@ -122,7 +123,7 @@ export default function ProfilePhoto() {
           </Avatar>
         </Pressable>
 
-        <Link href="/(app)/(tabs)/map" onPress={clearSignupState}>
+        <Link href={afterAuthHref(useAuthRedirect.getState().pendingHref)} onPress={clearSignupState}>
           <LinkText size="lg" className="text-secondary-700">
             Done for now
           </LinkText>

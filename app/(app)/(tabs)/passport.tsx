@@ -416,7 +416,7 @@ function Profile() {
                 const requestable = (Object.values(RequestReferenceDtoType) as string[]).includes(item.type)
                   ? (item.type as RequestReferenceDtoType)
                   : null;
-                const canAsk = requestable && item.status === "MISSING";
+                const canAsk = requestable && (item.status === "MISSING" || item.status === "EXPIRED" || item.status === "REJECTED" || item.source === "request");
                 return (
                   <View key={item.type}>
                     {index > 0 ? <Divider /> : null}
@@ -427,7 +427,7 @@ function Profile() {
                       right={
                         canAsk ? (
                           <SeekButton
-                            label={requestable === "GUARANTOR_AGREEMENT" ? "Invite" : "Request"}
+                            label={item.source === "request" ? "Send again" : requestable === "GUARANTOR_AGREEMENT" ? "Invite" : "Request"}
                             variant="tint"
                             compact
                             onPress={() => {
