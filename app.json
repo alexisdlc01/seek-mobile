@@ -9,9 +9,6 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "config": {
-        "googleMapsApiKey": "process.env.GOOGLE_MAPS_API_KEY"
-      },
       "associatedDomains": [
         "applinks:www.seekapp.uk"
       ],
@@ -23,11 +20,6 @@
     },
     "android": {
       "googleServicesFile": "./google-services.json",
-      "config": {
-        "googleMaps": {
-          "apiKey": "process.env.GOOGLE_MAPS_API_KEY"
-        }
-      },
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -103,7 +95,8 @@
           "color": "#ffffff"
         }
       ],
-      "./plugins/withSceneLifecycle"
+      "./plugins/withSceneLifecycle",
+      "@maplibre/maplibre-react-native"
     ],
     "experiments": {
       "typedRoutes": true,
