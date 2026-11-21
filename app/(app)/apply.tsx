@@ -26,7 +26,7 @@ import {
   useConversationControllerSendMessage,
 } from "@/src/api/seek-api/conversation";
 import { useListingsControllerGetById } from "@/src/api/seek-api/listings";
-import type { ApplicationDto, PassportDto } from "@/src/api/seek-api/model";
+import type { ApplicationDto, PassportDto, Step4ItemDto } from "@/src/api/seek-api/model";
 import { getUsersControllerListSharesQueryKey, useUsersControllerGetPassport } from "@/src/api/seek-api/users";
 import { createApplicationInvite } from "@/src/utils/application-invite";
 import { formatDate, formatInstantDate, initialsOf } from "@/src/utils/seek-format";
@@ -229,6 +229,8 @@ export default function ApplyScreen() {
     : "If offered, your acceptance deadline will be shown in Seek.";
 
   const criteria = home.criteria;
+  // The generated Listing type says string[], the API returns {name, desc, required}.
+  const requirements = ((home.requirements ?? []) as unknown) as Step4ItemDto[];
   const householdSize = Math.max(1, members.length);
   // Everyone in the household, with their passport when the server shares it
   // (drafts don't return other members' passports yet, so those show as pending).
@@ -394,6 +396,24 @@ export default function ApplyScreen() {
           </Text>
         </Card>
       </View>
+
+      {requirements.length > 0 ? (
+        <View style={styles.section}>
+          <SectionTitle>Landlord&apos;s requirements</SectionTitle>
+          <Card style={styles.shared}>
+            {requirements.map((req, index) => (
+              <View key={`${req.name}-${index}`}>
+                <Text style={[styles.sharedLabel, { color: colors.text }]}>
+                  {req.name} · {req.required ? "Required" : "Optional"}
+                </Text>
+                {req.desc?.trim() ? (
+                  <Text style={[styles.note, { color: colors.mutedText }]}>{req.desc.trim()}</Text>
+                ) : null}
+              </View>
+            ))}
+          </Card>
+        </View>
+      ) : null}
 
       <View style={styles.section}>
         <SectionTitle>Landlord&apos;s criteria, checked for you</SectionTitle>
