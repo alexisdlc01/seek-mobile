@@ -4,7 +4,7 @@ import * as Notifications from "expo-notifications";
 import { forgetPushToken, hrefForPushResponse, registerForPush } from "@/src/utils/push";
 import "react-native-reanimated";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, focusManager } from "@tanstack/react-query";
 import axios from "axios";
 import { getAuthControllerCurrentUserQueryOptions } from "@/src/api/seek-api/auth";
 import { notificationsControllerMarkRead } from "@/src/api/seek-api/notifications";
@@ -12,10 +12,13 @@ import { invalidateHomeQueries } from "@/hooks/use-active-tenancy";
 import { useEffect } from "react";
 import { useAuth } from "@/src/store/auth-store";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useColorScheme } from "react-native";
+import { AppState, useColorScheme } from "react-native";
 export { ErrorBoundary } from "expo-router";
 
 export const queryClient = new QueryClient();
+
+// React Query's focus detection relies on the browser; in React Native, tie it to the app state instead.
+AppState.addEventListener("change", (state) => focusManager.setFocused(state === "active"));
 
 axios.defaults.baseURL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 axios.defaults.headers["platform"] = "mobile";

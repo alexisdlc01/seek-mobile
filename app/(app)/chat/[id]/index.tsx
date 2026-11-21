@@ -128,6 +128,7 @@ export default function ChatScreen() {
     });
 
     clientRef.current = client;
+    let disposed = false;
 
     // A new connection (first or after a reconnect) is in no room: join again and catch up on missed messages.
     client.on("connect", () => {
@@ -145,6 +146,8 @@ export default function ChatScreen() {
       if (reason !== "io server disconnect") return;
       authControllerCurrentUser()
         .then(() => {
+          // The refresh changes accessToken, which re-runs this effect: a cleaned-up client must not be revived.
+          if (disposed) return;
           const token = useAuth.getState().accessToken;
           if (!token) return;
           client.io.opts.extraHeaders = { ...client.io.opts.extraHeaders, Authorization: `Bearer ${token}` };
@@ -158,6 +161,9 @@ export default function ChatScreen() {
     });
 
     return () => {
+      disposed = true;
+      client.removeAllListeners();
+      client.io.off("reconnect_attempt");
       client.disconnect();
       void queryClient.invalidateQueries({ queryKey: getInboxControllerThreadsQueryKey() });
     };
