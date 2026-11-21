@@ -13,7 +13,7 @@ import {
   useBillsControllerMarkPaid,
 } from "@/src/api/seek-api/bills";
 import type { BillViewDto, CreateBillDtoCategory } from "@/src/api/seek-api/model";
-import { formatDay, formatInstantDay, formatPence, pluralise } from "@/src/utils/seek-format";
+import { formatDay, formatInstantDay, formatPence, parsePoundsToPence, pluralise } from "@/src/utils/seek-format";
 import { errorMessage, tenancyTitle, type TenancyView } from "@/src/utils/tenancy-view";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
@@ -424,16 +424,16 @@ function AddExpense({ tenancy, onDone }: { tenancy: TenancyView; onDone: (text: 
 
   const submit = () => {
     setError(null);
-    const pounds = Number.parseFloat(amount.replace(",", "."));
+    const pence = parsePoundsToPence(amount);
     if (!provider.trim()) return setError("Say what the expense is for.");
-    if (!Number.isFinite(pounds) || pounds <= 0 || pounds > 10000) return setError("Enter the total you paid, in pounds.");
+    if (pence === null || pence <= 0 || pence > 1000000) return setError("Enter the total you paid, in pounds, like 1200.50.");
     create.mutate(
       {
         data: {
           tenancy: tenancy._id,
           provider: provider.trim(),
           category,
-          amount: Math.round(pounds * 100),
+          amount: pence,
           source: "MANUAL",
         },
       },
