@@ -24,6 +24,7 @@ import {
   useListingsControllerGetById,
 } from "@/src/api/seek-api/listings";
 import type {
+  Step4ItemDto,
   Listing,
 } from "@/src/api/seek-api/model";
 import { useUsersControllerDocumentTypes } from "@/src/api/seek-api/users";
@@ -129,6 +130,8 @@ export default function DetailsScreen() {
     () => data?.photos?.filter((photo) => Boolean(photo)) ?? [],
     [data?.photos],
   );
+  // The generated Listing type says string[], the API returns {name, desc, required}.
+  const requirements = (data?.requirements ?? []) as unknown as Step4ItemDto[];
   // The server decides what this home needs (aliases and "no guarantor" included).
   const missingDocuments = useMemo(() => {
     const have = new Set<string>(uploadedDocuments?.data ?? []);
@@ -375,6 +378,21 @@ export default function DetailsScreen() {
                     <Text className="text-base leading-6 text-neutral-700">
                       {data.propertyDesc.trim()}
                     </Text>
+                  </Section>
+                ) : null}
+
+                {requirements.length > 0 ? (
+                  <Section title="Landlord's requirements">
+                    {requirements.map((req, index) => (
+                      <VStack key={`${req.name}-${index}`} className="gap-0.5">
+                        <Text className="text-base font-semibold text-neutral-800">
+                          {req.name} · {req.required ? "Required" : "Optional"}
+                        </Text>
+                        {req.desc?.trim() ? (
+                          <Text className="text-base leading-6 text-neutral-700">{req.desc.trim()}</Text>
+                        ) : null}
+                      </VStack>
+                    ))}
                   </Section>
                 ) : null}
 

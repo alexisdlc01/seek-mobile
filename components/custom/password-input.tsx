@@ -57,7 +57,7 @@ export function PasswordInput({
           className="pr-3"
           accessibilityRole="button"
           accessibilityLabel={show ? "Hide password" : "Show password"}
-          onPressIn={() => setShow((c) => !c)}>
+          onPress={() => setShow((c) => !c)}>
           <InputIcon
             className="text-secondary-800"
             as={show ? EyeOffIcon : EyeIcon}

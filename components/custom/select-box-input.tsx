@@ -30,7 +30,7 @@ export function SelectBoxInput({
       {resolvedOptions.map((option) => (
         <Pressable
           key={option.value}
-          onPressIn={() => onChange(option.value)}
+          onPress={() => onChange(option.value)}
           accessibilityRole="radio"
           accessibilityState={{ selected: option.value === value }}
           hitSlop={{ top: 4, bottom: 4 }}

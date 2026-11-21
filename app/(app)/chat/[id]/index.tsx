@@ -178,7 +178,7 @@ export default function ChatScreen() {
       <SafeAreaView className="p-6">
         <VStack className="h-full gap-2">
           <Box className="z-10 flex items-center justify-between flex-row gap-4">
-            <Pressable onPressIn={() => router.back()} accessibilityRole="button" accessibilityLabel="Go back">
+            <Pressable onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Go back">
               <Icon as={ArrowLeftIcon} size="xl" />
             </Pressable>
             <Text bold
@@ -202,7 +202,7 @@ export default function ChatScreen() {
             renderItem={({ item: { sender, data } }) => (
               <Box className={`${user?._id === sender._id ? "items-end" : "items-start"}`}>
                 <Text className="w-fit flex-shrink">{sender.name}</Text>
-                <Box className="bg-gray-300 rounded-md p-2 max-w-[66%]">
+                <Box className="bg-background-100 rounded-md p-2 max-w-[66%]">
                   <Text className="w-fit flex-shrink">{data}</Text>
                 </Box>
               </Box>
@@ -219,8 +219,8 @@ export default function ChatScreen() {
                 value={message}
                 onSubmitEditing={() => sendMessage(conversationId)}
                 onChangeText={setMessage} />
-              <InputSlot className="pr-3"
-                onPressIn={() => sendMessage(conversationId)}>
+              <InputSlot className="pr-3" accessibilityRole="button" accessibilityLabel="Send"
+                onPress={() => sendMessage(conversationId)}>
                 <InputIcon as={ArrowUpIcon} size="xl" />
               </InputSlot>
             </Input>

@@ -8,7 +8,9 @@ import { StatusBar } from "expo-status-bar";
 import { ChevronRightIcon } from "lucide-react-native";
 import React, { ReactNode } from "react";
 import {
+  KeyboardAvoidingView,
   KeyboardTypeOptions,
+  Platform,
   Pressable,
   ScrollView,
   ScrollViewProps,
@@ -46,14 +48,16 @@ export function ProfileScreen({
   const styles = useThemedStyles(createStyles);
   const colors = useSeekTheme();
   const content = scroll ? (
-    <ScrollView
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}
-      {...scrollViewProps}
-      contentContainerStyle={[styles.content, contentContainerStyle]}
-    >
-      {children}
-    </ScrollView>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        {...scrollViewProps}
+        contentContainerStyle={[styles.content, contentContainerStyle]}
+      >
+        {children}
+      </ScrollView>
+    </KeyboardAvoidingView>
   ) : (
     <View style={[styles.nonScrollingContent, contentContainerStyle]}>
       {children}
