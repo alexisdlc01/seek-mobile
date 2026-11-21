@@ -43,6 +43,20 @@ export function formatInstantDate(iso: string | null | undefined): string {
   return `${day} ${year}`;
 }
 
+/**
+ * Typed pounds to whole pence, or null when the input is not clearly one amount.
+ * "1,200.50" (thousands commas) and "12,50" (decimal comma, 1-2 digits) are read; "1.200,50" or "1,20,0" are refused.
+ */
+export function parsePoundsToPence(input: string): number | null {
+  let text = input.replace(/[£\s]/g, "");
+  if (/^\d{1,3}(,\d{3})+(\.\d{1,2})?$/.test(text)) text = text.replace(/,/g, "");
+  else if (/^\d+,\d{1,2}$/.test(text)) text = text.replace(",", ".");
+  const match = /^(\d+)(?:\.(\d{1,2}))?$/.exec(text);
+  if (!match) return null;
+  // String maths, not parseFloat * 100, so 1200.50 is exactly 120050.
+  return Number(match[1]) * 100 + Number((match[2] ?? "").padEnd(2, "0"));
+}
+
 export function pluralise(count: number, singular: string, plural = `${singular}s`): string {
   return `${count} ${count === 1 ? singular : plural}`;
 }

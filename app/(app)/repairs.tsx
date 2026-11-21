@@ -1,5 +1,6 @@
 import { AuthRequiredScreen } from "@/components/custom/auth-required";
 import { EmptyState, ErrorState, LoadingState } from "@/components/seek/states";
+import { formatViewing } from "@/components/seek/viewing-slots";
 import { Badge, Card, Divider, ListRow, SectionTitle, SeekButton, SeekScreen } from "@/components/seek/ui";
 import { invalidateHomeQueries, useActiveTenancy } from "@/hooks/use-active-tenancy";
 import { useSeekTheme } from "@/hooks/use-seek-theme";
@@ -204,7 +205,7 @@ function RepairsContent({ tenancy }: { tenancy: TenancyView }) {
                     repair.status === "FIXED"
                       ? `Fixed${repair.fixedAt ? ` ${formatInstantDate(repair.fixedAt)}` : ""}`
                       : repair.status === "SCHEDULED" && repair.scheduledFor
-                        ? `Visit booked ${formatInstantDay(repair.scheduledFor)}`
+                        ? `Visit booked ${formatViewing(repair.scheduledFor)}`
                         : `Reported ${formatInstantDay(repair.createdAt)}`
                   }
                   right={

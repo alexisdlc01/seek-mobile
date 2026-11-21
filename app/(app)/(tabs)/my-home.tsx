@@ -222,7 +222,7 @@ function HomeContent({ tenancy, invites }: { tenancy: TenancyView; invites: Tena
   const paidCount = (payments.data ?? []).filter((item) => item.status === "PAID").length;
 
   const allBills = bills.data ?? [];
-  const owedBills = allBills.filter((bill) => !bill.includedInRent && bill.status === "DUE" && !bill.myPaid);
+  const owedBills = allBills.filter((bill) => !bill.includedInRent && bill.status === "DUE" && !bill.myPaid && bill.myShare !== 0);
   const owedTotal = owedBills.reduce((sum, bill) => sum + bill.myShare, 0);
   // Same condition as the council tax row in bills.tsx "Not set up" branch: no certificate yet and no council tax bill at all.
   // shortcut: tenants' full-time status isn't in the API, so the copy says "likely"; add a real check if it ever is.
