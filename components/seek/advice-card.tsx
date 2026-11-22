@@ -17,6 +17,7 @@ const ROUTE_FOR_PATH: Record<string, Href> = {
   "/connectors": "/(app)/connected-email",
   "/student/home": "/(app)/(tabs)/my-home",
   "/student/home/rent": "/(app)/(tabs)/rent",
+  "/student/home/bills": "/(app)/bills",
   "/student/home/deposit": "/(app)/deposit",
   "/student/find": "/(app)/(tabs)/map",
   "/student/rent": "/(app)/(tabs)/rent",
