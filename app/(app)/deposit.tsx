@@ -270,7 +270,7 @@ function Deductions({ tenancy }: { tenancy: TenancyView }) {
           </View>
         ) : null}
         {mine && !state ? (
-          <Text style={[styles.notice, { color: colors.success }]}>You agreed to the deductions.</Text>
+          <Text style={[styles.notice, { color: mine.accepted ? colors.success : colors.warning }]}>{mine.accepted ? "You agreed to the deductions." : "You disputed the deductions."}</Text>
         ) : null}
         {state ? (
           <Text accessibilityRole="alert" style={[styles.notice, { color: state.error ? colors.danger : colors.success }]}>
