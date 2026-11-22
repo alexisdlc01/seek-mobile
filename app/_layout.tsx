@@ -67,7 +67,12 @@ export default function RootLayout() {
     };
     void Notifications.getLastNotificationResponseAsync().then((r) => r && open(r)).catch(() => {});
     const sub = Notifications.addNotificationResponseReceivedListener(open);
-    return () => sub.remove();
+    // Push received while the app is open: refresh the notifications list and unread count.
+    const recv = Notifications.addNotificationReceivedListener(() => void invalidateHomeQueries(queryClient));
+    return () => {
+      sub.remove();
+      recv.remove();
+    };
   }, [_hasHydrated, router]);
 
   return (
