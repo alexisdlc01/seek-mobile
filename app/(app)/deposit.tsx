@@ -13,7 +13,7 @@ import {
 } from "@/src/api/seek-api/contracts";
 import { aiControllerAdvice } from "@/src/api/seek-api/ai";
 import { formatDate, formatPence } from "@/src/utils/seek-format";
-import { asTenancyView, depositCapCheck, depositDaysLeft, depositDeadline, errorMessage, openStoredFile, tenancyTitle, type TenancyView } from "@/src/utils/tenancy-view";
+import { asTenancyView, depositCapCheck, depositDaysLeft, depositDeadline, depositProtectionDays, errorMessage, openStoredFile, tenancyTitle, type TenancyView } from "@/src/utils/tenancy-view";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -84,10 +84,10 @@ function DepositContent({ tenancy }: { tenancy: TenancyView }) {
   const protectedOn = tenancy.depositProtectedAt;
   const scotland = tenancy.listing?.nation === "SCOTLAND";
   const check = depositCapCheck(tenancy, tenancy.listing?.nation);
-  const limit = scotland ? "30 working days" : "30 days";
+  const limit = scotland ? "30 working days" : `${depositProtectionDays(tenancy.listing?.nation)} days`;
   const receivedOn = tenancy.depositReceivedAt;
   const dayMs = 86_400_000;
-  // Protection is due 30 days after receipt (England/Wales) or 30 working days after the tenancy starts (Scotland).
+  // Protection is due 30 days after receipt (England/Wales, 28 in Northern Ireland) or 30 working days after the tenancy starts (Scotland).
   const daysTaken = receivedOn && protectedOn ? Math.max(0, Math.round((Date.parse(protectedOn) - Date.parse(receivedOn)) / dayMs)) : null;
   const daysLeft = protectedOn ? null : depositDaysLeft(tenancy, tenancy.listing?.nation);
   const deadline = protectedOn ? null : depositDeadline(tenancy, tenancy.listing?.nation)?.toISOString() ?? null;

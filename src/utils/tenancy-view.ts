@@ -90,29 +90,32 @@ export function errorMessage(error: unknown, fallback = "Something went wrong. P
   return fallback;
 }
 
-/** England/Wales: five weeks' rent (Tenant Fees Act 2019). Scotland: two months' rent (Rent (Scotland) Act 1984). */
+/** England/Wales: five weeks' rent (Tenant Fees Act 2019). Scotland: two months' rent (Rent (Scotland) Act 1984). Northern Ireland: one month's rent. */
 export function depositCapCheck(
   tenancy: Pick<TenancyView, "monthlyRent" | "depositAmount">,
   nation?: ListingView["nation"],
 ) {
   const weeklyRent = (tenancy.monthlyRent * 12) / 52;
   const scotland = nation === "SCOTLAND";
-  const cap = scotland ? tenancy.monthlyRent * 2 : Math.floor(weeklyRent * 5);
+  const monthsCap = scotland ? 2 : nation === "NORTHERN_IRELAND" ? 1 : 0;
+  const cap = monthsCap ? tenancy.monthlyRent * monthsCap : Math.floor(weeklyRent * 5);
   return {
     cap,
     weeks: weeklyRent > 0 ? tenancy.depositAmount / weeklyRent : 0,
     overCap: tenancy.depositAmount > cap,
-    label: scotland ? "2 months" : "5 weeks",
+    label: monthsCap ? `${monthsCap} month${monthsCap > 1 ? "s" : ""}` : "5 weeks",
   };
 }
 
-/** Scotland: 30 working days from the tenancy start (weekends skipped, bank holidays not). Elsewhere: 30 days from receipt. */
+/** Scotland: 30 working days from the tenancy start (weekends skipped, bank holidays not). Northern Ireland: 28 days from receipt. Elsewhere: 30 days. */
+export const depositProtectionDays = (nation?: ListingView["nation"]) => (nation === "NORTHERN_IRELAND" ? 28 : 30);
+
 export function depositDeadline(
   tenancy: Pick<TenancyView, "startDate" | "depositReceivedAt">,
   nation?: ListingView["nation"],
 ): Date | null {
   if (nation !== "SCOTLAND") {
-    return tenancy.depositReceivedAt ? new Date(Date.parse(tenancy.depositReceivedAt) + 30 * 86_400_000) : null;
+    return tenancy.depositReceivedAt ? new Date(Date.parse(tenancy.depositReceivedAt) + depositProtectionDays(nation) * 86_400_000) : null;
   }
   if (!tenancy.startDate) return null;
   const due = new Date(tenancy.startDate);
