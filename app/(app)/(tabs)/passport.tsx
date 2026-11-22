@@ -37,7 +37,8 @@ import { formatDate, formatInstantDate, initialsOf } from "@/src/utils/seek-form
 import { formatShareCode, isoDay, normaliseShareCode, shareCodeExpiry } from "@/src/utils/share-code";
 import { errorMessage } from "@/src/utils/tenancy-view";
 import { uploadFile } from "@/src/utils/upload-file";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { customInstance } from "@/src/utils/custom-axios";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as WebBrowser from "expo-web-browser";
 import * as DocumentPicker from "expo-document-picker";
 import { useRouter } from "expo-router";
@@ -339,9 +340,28 @@ function Profile() {
     );
   };
 
+  const shareAgain = useMutation({
+    mutationFn: (id: string) => customInstance<unknown>({ url: `/users/me/shares/${id}/reopen`, method: "POST" }),
+  });
+  const reopenShare = (id: string) => {
+    setNotice(null);
+    shareAgain.mutate(id, {
+      onSuccess() {
+        void queryClient.invalidateQueries({ queryKey: getUsersControllerListSharesQueryKey() });
+        setNotice({ text: "Sharing resumed. The landlord can open your documents again." });
+      },
+      onError(error) {
+        setNotice({ text: errorMessage(error, "We couldn't share again. Please try again."), error: true });
+      },
+    });
+  };
+
   const data = passport.data;
   const allItems = data?.sections.flatMap((section) => section.items) ?? [];
-  const activeShares = (shares.data ?? []).filter((share) => share.active);
+  // revokedBy is not in the generated type yet; only student revocations can be reopened.
+  const activeShares = ((shares.data ?? []) as ((typeof shares.data extends (infer T)[] | undefined ? T : never) & {
+    revokedBy?: "student" | "system" | null;
+  })[]).filter((share) => share.active || share.revokedBy === "student");
   const connected = (connectors.data?.connections ?? []).filter((c) => c.status === "CONNECTED");
 
   return (
@@ -507,15 +527,25 @@ function Profile() {
                   <ListRow
                     icon={<UserRoundIcon color={colors.accent} size={20} />}
                     title={place ? `${place} · ${who}` : who}
-                    subtitle={`Until ${formatInstantDate(share.expiresAt)}`}
+                    subtitle={share.revokedBy === "student" ? "Sharing stopped" : `Until ${formatInstantDate(share.expiresAt)}`}
                     right={
-                      <SeekButton
-                        label="Stop sharing"
-                        compact
-                        variant="secondary"
-                        disabled={revokeShare.isPending}
-                        onPress={() => stopSharing(share._id)}
-                      />
+                      share.revokedBy === "student" ? (
+                        <SeekButton
+                          label="Share again"
+                          compact
+                          variant="secondary"
+                          disabled={shareAgain.isPending}
+                          onPress={() => reopenShare(share._id)}
+                        />
+                      ) : (
+                        <SeekButton
+                          label="Stop sharing"
+                          compact
+                          variant="secondary"
+                          disabled={revokeShare.isPending}
+                          onPress={() => stopSharing(share._id)}
+                        />
+                      )
                     }
                   />
                 </View>
