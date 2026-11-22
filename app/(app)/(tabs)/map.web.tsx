@@ -1,4 +1,4 @@
-// Web build of the Find tab. react-native-maps is native only, so the web
+// Web build of the Find tab. The MapLibre map is native only, so the web
 // version shows an embedded OpenStreetMap and the same nearby-listings list.
 import { VerticalListingCard } from "@/components/custom/listing-card";
 import { SeekColors } from "@/constants/seek-theme";

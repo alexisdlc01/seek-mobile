@@ -2,27 +2,32 @@ import { VStack } from "@/components/ui/vstack";
 import {
   FocusIcon,
   HeartIcon,
+  HouseIcon,
   Settings2Icon,
   SparklesIcon,
   UserRoundIcon,
+  XIcon,
 } from "lucide-react-native";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Keyboard,
-  Platform,
   StyleSheet,
   TextInput,
+  useWindowDimensions,
   View,
 } from "react-native";
-import MapView, {
-  LatLng,
+import {
+  Camera,
+  type CameraRef,
+  Map as MapView,
+  type LngLatBounds,
+  type MapRef,
   Marker,
-  MarkerPressEvent,
-  PROVIDER_GOOGLE,
-  Region,
-} from "react-native-maps";
+} from "@maplibre/maplibre-react-native";
+import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text } from "@/components/ui/text";
 import { listingsControllerGetFilteredListings } from "@/src/api/seek-api/listings";
@@ -41,7 +46,12 @@ import {
 import { FlashList, FlashListRef } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
 import { SeekColors } from "@/constants/seek-theme";
-import { MUTED_MAP_STYLE } from "@/constants/map-style";
+import { SEEK_MAP_STYLE } from "@/constants/map-style";
+import { collidingPills } from "@/src/utils/map-pills";
+import { LikeButton } from "@/components/custom/like-button";
+import { useAuthRequiredAction } from "@/components/custom/auth-required";
+import { useLike, useUnlike } from "@/hooks/like";
+import { useListingLiked } from "@/hooks/use-listing-liked";
 import { useSeekTheme, useThemedStyles } from "@/hooks/use-seek-theme";
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { getActiveFilters, useFilterStore } from "@/src/store/filter-store";
@@ -67,18 +77,33 @@ const PAGE_SIZE = 5;
 const BOUNDS_PAGE_SIZE = 30;
 
 type Bounds = { minLat: number; maxLat: number; minLng: number; maxLng: number };
+type LatLng = { latitude: number; longitude: number };
 
-function boundsOf(region: Region): Bounds {
+function boundsOf([west, south, east, north]: LngLatBounds): Bounds {
   const round = (value: number) => Math.round(value * 10000) / 10000;
   return {
-    minLat: round(region.latitude - region.latitudeDelta / 2),
-    maxLat: round(region.latitude + region.latitudeDelta / 2),
-    minLng: round(region.longitude - region.longitudeDelta / 2),
-    maxLng: round(region.longitude + region.longitudeDelta / 2),
+    minLat: round(south),
+    maxLat: round(north),
+    minLng: round(west),
+    maxLng: round(east),
   };
 }
 
 type MapMarkerData = { id: string; coordinate: LatLng; price: number | null };
+type MapCardData = {
+  id: string;
+  title: string;
+  info: string;
+  photo: string | null;
+  price: number | null;
+  priceNote: string;
+};
+
+/** Per-person rent, or null when the listing has none to show. */
+function rentEach(rent: number | null | undefined, people = 1): number | null {
+  if (typeof rent !== "number" || !Number.isFinite(rent) || rent <= 0) return null;
+  return Math.round(rent / Math.max(1, people));
+}
 
 function summaryCoordinate(listing: SearchChatListingDto): LatLng | null {
   const { lat, lng } = listing;
@@ -88,6 +113,8 @@ function summaryCoordinate(listing: SearchChatListingDto): LatLng | null {
 }
 // Used to sort listings by distance until (or unless) we know where the user is.
 const DEFAULT_ORIGIN: LatLng = { latitude: 56.337111, longitude: -2.795107 };
+// MapLibre zoom matching the old 0.01° region around the user (512px tiles).
+const STREET_ZOOM = 15;
 
 export default function MapScreen() {
   const colors = useSeekTheme();
@@ -183,40 +210,100 @@ export default function MapScreen() {
         ? aiResults.flatMap((listing) => {
             const coordinate = summaryCoordinate(listing);
             return coordinate
-              ? [{ id: listing.id, coordinate, price: listing.rentPerPerson ?? listing.monthlyRent }]
+              ? [{ id: listing.id, coordinate, price: rentEach(listing.rentPerPerson ?? listing.monthlyRent) }]
               : [];
           })
         : listings.flatMap((listing) => {
             const coordinate = getListingCoordinate(listing);
             return coordinate
-              ? [{ id: listing._id, coordinate, price: Math.round(listing.monthlyRent / Math.max(1, listing.numOfPeople)) }]
+              ? [{ id: listing._id, coordinate, price: rentEach(listing.monthlyRent, listing.numOfPeople) }]
               : [];
           }),
     [aiResults, listings],
   );
 
+  // Airbnb-style card for the selected home, floating above the collapsed sheet.
+  const selectedCard = useMemo<MapCardData | null>(() => {
+    if (!selectedListingId) return null;
+    if (aiResults) {
+      const listing = aiResults.find((item) => item.id === selectedListingId);
+      if (!listing) return null;
+      const each = listing.rentPerPerson != null;
+      return {
+        id: listing.id,
+        title: listing.title,
+        info: [listing.bedrooms != null ? `${listing.bedrooms} bed` : null, listing.address ?? listing.city]
+          .filter(Boolean)
+          .join(" · "),
+        photo: listing.photo,
+        price: rentEach(listing.rentPerPerson ?? listing.monthlyRent),
+        priceNote: each ? "pcm each" : "pcm",
+      };
+    }
+    const listing = listings.find((item) => item._id === selectedListingId);
+    if (!listing) return null;
+    return {
+      id: listing._id,
+      title: listing.propertyTitle,
+      info: [listing.bedroomsCount ? `${listing.bedroomsCount} bed` : null, listing.streetAddress]
+        .filter(Boolean)
+        .join(" · "),
+      photo: listing.photos?.at(0) ?? null,
+      price: rentEach(listing.monthlyRent, listing.numOfPeople),
+      priceNote: listing.numOfPeople > 1 ? "pcm each" : "pcm",
+    };
+  }, [aiResults, listings, selectedListingId]);
+
+  // Zoom of the last finished camera move: pills that overlap there become dots.
+  const [zoom, setZoom] = useState(STREET_ZOOM);
+  const dots = useMemo(
+    () =>
+      collidingPills(
+        markers.map(({ id, coordinate, price }) => ({
+          id,
+          lng: coordinate.longitude,
+          lat: coordinate.latitude,
+          price,
+        })),
+        selectedListingId,
+        zoom,
+      ),
+    [markers, selectedListingId, zoom],
+  );
+  // Homes whose card was opened this visit get a grey price, like Airbnb.
+  const [seenIds, setSeenIds] = useState<ReadonlySet<string>>(() => new Set());
+
   const router = useRouter();
 
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<MapRef>(null);
+  const cameraRef = useRef<CameraRef>(null);
   const [mapReady, setMapReady] = useState(false);
   const fittedFirstPageKey = useRef<string | undefined>(undefined);
 
   // Frame the first page of results once per search; later pages load
   // as the user scrolls and should not move the map.
+  const { top } = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
   const frame = useCallback((coordinates: LatLng[]) => {
-    if (coordinates.length === 0) return;
-    if (coordinates.length === 1) {
-      mapRef.current?.animateToRegion(
-        { ...coordinates[0], latitudeDelta: 0.04, longitudeDelta: 0.04 },
-        350,
-      );
+    // Keep pins clear of the search bar + chips, the side buttons and the list (opens at 50%).
+    const padding = { top: top + 150, right: 90, bottom: windowHeight * 0.5 + 20, left: 40 };
+    if (coordinates.length <= 1) {
+      const { longitude, latitude } = coordinates[0] ?? DEFAULT_ORIGIN;
+      cameraRef.current?.easeTo({
+        center: [longitude, latitude],
+        zoom: coordinates.length ? 14 : STREET_ZOOM,
+        padding,
+        duration: 350,
+      });
       return;
     }
-    mapRef.current?.fitToCoordinates(coordinates, {
-      animated: true,
-      edgePadding: { top: 80, right: 50, bottom: 80, left: 50 },
-    });
-  }, []);
+    const lngs = coordinates.map((coordinate) => coordinate.longitude);
+    const lats = coordinates.map((coordinate) => coordinate.latitude);
+    cameraRef.current?.fitBounds(
+      [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)],
+      { padding, duration: 500 },
+    );
+  }, [top, windowHeight]);
 
   // Seek AI's picks ("Show on map") take over the map until cleared.
   useEffect(() => {
@@ -256,22 +343,38 @@ export default function MapScreen() {
       return;
     }
     const { coords: { longitude, latitude } } = await Location.getCurrentPositionAsync({});
-    const region = { latitude, longitude, latitudeDelta: 0.01, longitudeDelta: 0.01 };
-    mapRef.current?.animateToRegion(region, 300);
+    cameraRef.current?.easeTo({ center: [longitude, latitude], zoom: STREET_ZOOM, duration: 300 });
     clearAiResults();
-    setBounds(boundsOf(region));
+    // Search the same ~0.01° box around the user as before.
+    setBounds(boundsOf([longitude - 0.005, latitude - 0.005, longitude + 0.005, latitude + 0.005]));
   }, [clearAiResults]);
-
-  const { top } = useSafeAreaInsets();
 
   const sheetRef = useRef<BottomSheet>(null);
   const listRef = useRef<FlashListRef<Listing>>(null);
+  const [sheetIndex, setSheetIndex] = useState(1);
+  // Keep the card and attribution glued to the top edge of the sheet.
+  const sheetTop = useSharedValue(0);
+  const screenHeight = useSharedValue(0);
+  const aboveSheetStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: sheetTop.get() - screenHeight.get() }],
+  }));
 
-  function handleMarkerPress(e: MarkerPressEvent, id: string) {
+  // iOS also reports the tap (and deselect of the previous annotation) as a map press
+  // right after a Marker press, which cleared the selection at once.
+  const lastMarkerPress = useRef(0);
+  function dismissFromMap() {
+    if (Date.now() - lastMarkerPress.current < 600) return;
+    dismissSelectedListing();
+    Keyboard.dismiss();
+  }
+
+  function handleMarkerPress(id: string) {
+    lastMarkerPress.current = Date.now();
     setSelectedListingId(id);
-    sheetRef.current?.snapToIndex(1);
+    setSeenIds((seen) => (seen.has(id) ? seen : new Set(seen).add(id)));
+    // Collapse the list so the card shows over the map; the list still starts with this home.
+    sheetRef.current?.snapToIndex(0);
     listRef.current?.scrollToOffset({ offset: 0, animated: true });
-    e.stopPropagation();
   }
 
   function dismissSelectedListing() {
@@ -293,10 +396,11 @@ export default function MapScreen() {
     );
   }
 
-  function handleRegionChange(region: Region, details?: { isGesture?: boolean }) {
+  function handleRegionChange(view: { zoom: number; bounds: LngLatBounds; userInteraction: boolean }) {
+    setZoom(view.zoom);
     // Only the user's own pan or zoom re-searches; our fits and animations don't.
-    if (!details?.isGesture || aiResults) return;
-    setBounds(boundsOf(region));
+    if (!view.userInteraction || aiResults) return;
+    setBounds(boundsOf(view.bounds));
   }
 
   function handleFilterPress() {
@@ -310,39 +414,59 @@ export default function MapScreen() {
   }
 
   return (
-    <VStack className="flex-1">
+    <VStack
+      className="flex-1"
+      onLayout={(event) => {
+        screenHeight.set(event.nativeEvent.layout.height);
+      }}
+    >
       <MapView
-        provider={Platform.OS === "android" ? PROVIDER_GOOGLE : undefined}
-        customMapStyle={MUTED_MAP_STYLE}
-        mapType={Platform.OS === "ios" ? "mutedStandard" : "standard"}
-        showsPointsOfInterest={false}
+        mapStyle={SEEK_MAP_STYLE}
         ref={mapRef}
         style={StyleSheet.absoluteFillObject}
-        onMapReady={() => setMapReady(true)}
-        onRegionChangeComplete={handleRegionChange}
-        onPanDrag={() => {
-          dismissSelectedListing();
-          Keyboard.dismiss();
+        touchRotate={false}
+        touchPitch={false}
+        compass={false}
+        // Attribution is drawn by us above the sheet; the MapLibre logo is optional (BSD licence).
+        attribution={false}
+        logo={false}
+        onDidFinishLoadingMap={() => setMapReady(true)}
+        onRegionDidChange={(event) => handleRegionChange(event.nativeEvent)}
+        onRegionWillChange={(event) => {
+          if (event.nativeEvent.userInteraction) dismissFromMap();
         }}
-        onPress={() => {
-          dismissSelectedListing();
-          Keyboard.dismiss();
-        }}
-        initialRegion={{
-          ...DEFAULT_ORIGIN,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        }}
+        onPress={dismissFromMap}
       >
-        {markers.map(({ id, coordinate, price }) => (
-          <ListingMarker
-            key={id}
-            price={price}
-            coordinate={coordinate}
-            selected={id === selectedListingId}
-            onPress={(e) => handleMarkerPress(e, id)}
-          />
-        ))}
+        <Camera
+          ref={cameraRef}
+          initialViewState={{
+            center: [DEFAULT_ORIGIN.longitude, DEFAULT_ORIGIN.latitude],
+            zoom: STREET_ZOOM,
+          }}
+        />
+        {markers
+          // Dots under pills, the selected pill on top.
+          .map((marker) => ({
+            ...marker,
+            selected: marker.id === selectedListingId,
+            dot: dots.has(marker.id),
+          }))
+          .sort((a, b) => Number(b.dot) - Number(a.dot) || Number(a.selected) - Number(b.selected))
+          .map(({ id, coordinate, price, selected, dot }) => (
+            <Marker
+              key={id}
+              id={id}
+              lngLat={[coordinate.longitude, coordinate.latitude]}
+              onPress={() => handleMarkerPress(id)}
+            >
+              <PricePill
+                price={price}
+                selected={selected}
+                seen={seenIds.has(id)}
+                dot={dot}
+              />
+            </Marker>
+          ))}
       </MapView>
 
       <View
@@ -425,12 +549,40 @@ export default function MapScreen() {
         </View>
       </View>
 
+      <Animated.View
+        pointerEvents="box-none"
+        style={[StyleSheet.absoluteFill, aboveSheetStyle]}
+      >
+        <View style={styles.aboveSheet} pointerEvents="box-none">
+          {selectedCard && sheetIndex === 0 ? (
+            <MapCard
+              card={selectedCard}
+              onOpen={() => handleCardPress(selectedCard.id)}
+              onClose={dismissSelectedListing}
+            />
+          ) : null}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Map data attribution"
+            onPress={() => void mapRef.current?.showAttribution()}
+            style={styles.attribution}
+            hitSlop={6}
+          >
+            <Text style={styles.attributionText}>
+              © OpenFreeMap © OpenMapTiles © OpenStreetMap contributors
+            </Text>
+          </Pressable>
+        </View>
+      </Animated.View>
+
       <BottomSheet
         snapPoints={["12%", "50%", "88%"]}
         index={1}
         topInset={top + 2}
         enableDynamicSizing={false}
         ref={sheetRef}
+        animatedPosition={sheetTop}
+        onChange={setSheetIndex}
         backgroundStyle={{
           backgroundColor: colors.sheet,
         }}
@@ -597,44 +749,109 @@ function useUserLocation(): LatLng {
   return origin;
 }
 
-type ListingMarkerProps = {
+type PricePillProps = {
   price: number | null;
-  coordinate: LatLng;
   selected: boolean;
-  onPress?: (e: MarkerPressEvent) => void;
+  seen: boolean;
+  dot: boolean;
 };
-function ListingMarker({
-  price,
-  coordinate,
-  selected,
-  onPress,
-}: ListingMarkerProps) {
+
+/** Airbnb-style price pill; shrinks to a dot when it would overlap a kept pill. */
+function PricePill({ price, selected, seen, dot }: PricePillProps) {
   const styles = useThemedStyles(createStyles);
-  const [track, setTrack] = useState<boolean>(true);
-  // Let the marker re-render once when its price pill changes look.
-  useEffect(() => {
-    setTrack(true);
-    const timer = setTimeout(() => {
-      setTrack(false);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [selected]);
+  const label = price == null ? "Home" : `£${price} per month`;
+  if (dot && !selected) {
+    return (
+      <View style={styles.pillFrame} accessibilityLabel={label}>
+        <View style={styles.dot} />
+      </View>
+    );
+  }
+  const color = selected ? "#FFFFFF" : seen ? "#717171" : "#222222";
+  return (
+    <View style={styles.pillFrame} accessibilityLabel={label}>
+      <View
+        style={[
+          styles.pill,
+          price == null && styles.pillHome,
+          selected && styles.pillSelected,
+        ]}
+      >
+        {price == null ? (
+          <HouseIcon color={color} size={14} strokeWidth={2.4} />
+        ) : (
+          <Text style={[styles.pillText, { color }]} numberOfLines={1}>
+            £{price}
+          </Text>
+        )}
+      </View>
+    </View>
+  );
+}
+
+type MapCardProps = {
+  card: MapCardData;
+  onOpen: () => void;
+  onClose: () => void;
+};
+
+function MapCard({ card, onOpen, onClose }: MapCardProps) {
+  const styles = useThemedStyles(createStyles);
+  const requireAuth = useAuthRequiredAction("save listings");
+  const { mutate: like } = useLike();
+  const { mutate: unlike } = useUnlike();
+  const liked = useListingLiked(card.id);
 
   return (
-    <Marker
-      onPress={onPress}
-      tracksViewChanges={track}
-      coordinate={coordinate}
-    >
-      <View style={[styles.pill, selected && styles.pillSelected]}>
-        <Text
-          style={[styles.pillText, selected && styles.pillTextSelected]}
-          numberOfLines={1}
+    <View style={styles.card}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Open ${card.title}`}
+        onPress={onOpen}
+        style={styles.cardBody}
+      >
+        {card.photo ? (
+          <Image source={{ uri: card.photo }} style={styles.cardPhoto} />
+        ) : (
+          <View style={styles.cardPhoto} />
+        )}
+        <View style={styles.cardText}>
+          <Text style={styles.cardTitle} numberOfLines={1}>
+            {card.title}
+          </Text>
+          {card.info ? (
+            <Text style={styles.cardInfo} numberOfLines={1}>
+              {card.info}
+            </Text>
+          ) : null}
+          {card.price != null ? (
+            <Text style={styles.cardPrice}>
+              <Text style={styles.cardPriceAmount}>£{card.price}</Text> {card.priceNote}
+            </Text>
+          ) : null}
+        </View>
+      </Pressable>
+      <View style={styles.cardActions}>
+        <LikeButton
+          size={16}
+          liked={liked}
+          like={() => { if (requireAuth()) like({ id: card.id }); }}
+          unlike={() => { if (requireAuth()) unlike({ id: card.id }); }}
+          iconColor="#222222"
+          activeColor="#FF385C"
+          containerClassName="bg-white"
+        />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Close"
+          onPress={onClose}
+          hitSlop={8}
+          style={styles.cardClose}
         >
-          {price == null ? "–" : `£${price}`}
-        </Text>
+          <XIcon color="#222222" size={16} strokeWidth={2.4} />
+        </Pressable>
       </View>
-    </Marker>
+    </View>
   );
 }
 
@@ -722,27 +939,98 @@ const createStyles = (colors: SeekColors) =>
       elevation: 3,
     },
     sideButtons: { alignItems: "flex-end", gap: 10 },
+    // Room around the pill so its shadow is not clipped by the marker view.
+    pillFrame: { padding: 4, alignItems: "center", justifyContent: "center" },
     pill: {
-      minWidth: 56,
+      height: 28,
       paddingHorizontal: 10,
-      paddingVertical: 6,
       borderRadius: 999,
       alignItems: "center",
+      justifyContent: "center",
       backgroundColor: "#FFFFFF",
       borderWidth: StyleSheet.hairlineWidth,
-      borderColor: "rgba(0,0,0,0.15)",
+      borderColor: "rgba(0,0,0,0.08)",
       shadowColor: "#000",
-      shadowOpacity: 0.2,
+      shadowOpacity: 0.18,
       shadowRadius: 4,
       shadowOffset: { width: 0, height: 2 },
       elevation: 3,
     },
-    pillSelected: {
-      backgroundColor: "#111111",
-      borderColor: "#111111",
+    pillHome: { width: 30, paddingHorizontal: 0 },
+    pillSelected: { backgroundColor: "#222222", borderColor: "#222222" },
+    pillText: { fontSize: 13.5, fontWeight: "700" },
+    dot: {
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+      backgroundColor: "#FFFFFF",
+      borderWidth: 2,
+      borderColor: "#222222",
+      shadowColor: "#000",
+      shadowOpacity: 0.25,
+      shadowRadius: 3,
+      shadowOffset: { width: 0, height: 1 },
+      elevation: 2,
     },
-    pillText: { fontSize: 13, fontWeight: "700", color: "#111111" },
-    pillTextSelected: { color: "#FFFFFF" },
+    aboveSheet: {
+      position: "absolute",
+      left: 12,
+      right: 12,
+      bottom: 6,
+      gap: 6,
+    },
+    attribution: { alignSelf: "flex-end" },
+    attributionText: {
+      fontSize: 10,
+      color: "#717171",
+      textShadowColor: "#FFFFFF",
+      textShadowRadius: 3,
+    },
+    card: {
+      borderRadius: 16,
+      backgroundColor: "#FFFFFF",
+      shadowColor: "#000",
+      shadowOpacity: 0.2,
+      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 8,
+    },
+    cardBody: { flexDirection: "row", borderRadius: 16, overflow: "hidden" },
+    cardPhoto: { width: 112, height: 104, backgroundColor: "#EBEBEB" },
+    cardText: {
+      flex: 1,
+      minWidth: 0,
+      justifyContent: "center",
+      gap: 2,
+      paddingVertical: 8,
+      paddingLeft: 12,
+      paddingRight: 76,
+    },
+    cardTitle: { fontSize: 15, fontWeight: "600", color: "#222222" },
+    cardInfo: { fontSize: 13, color: "#717171" },
+    cardPrice: { marginTop: 4, fontSize: 14, color: "#222222" },
+    cardPriceAmount: { fontWeight: "700", color: "#222222" },
+    cardActions: {
+      position: "absolute",
+      top: 8,
+      right: 8,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+    },
+    cardClose: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "#FFFFFF",
+      shadowColor: "#000",
+      shadowOpacity: 0.2,
+      shadowRadius: 3,
+      shadowOffset: { width: 0, height: 1 },
+      elevation: 2,
+    },
     sheetHeader: { gap: 12, paddingHorizontal: 16, paddingBottom: 12 },
     sheetTitle: {
       fontSize: 18,

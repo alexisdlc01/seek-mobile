@@ -4,37 +4,12 @@ import { ExpoConfig, ConfigContext } from "expo/config";
 function getExtension(variant: string): Partial<ExpoConfig> {
   if (variant === "DEVELOPMENT") {
     return {
-      ios: {
-        bundleIdentifier: "com.seek.seekapp.dev",
-        config: {
-          googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY!,
-        },
-      },
-      android: {
-        package: "com.seek.seekapp.dev",
-        config: {
-          googleMaps: {
-            apiKey: process.env.GOOGLE_MAPS_API_KEY!,
-          },
-        },
-      },
+      ios: { bundleIdentifier: "com.seek.seekapp.dev" },
+      android: { package: "com.seek.seekapp.dev" },
     };
   }
   if (variant === "PRODUCTION") {
-    return {
-      ios: {
-        config: {
-          googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY!,
-        },
-      },
-      android: {
-        config: {
-          googleMaps: {
-            apiKey: process.env.GOOGLE_MAPS_API_KEY!,
-          },
-        },
-      },
-    };
+    return {};
   }
   throw new Error(`Invalid variant: ${variant}`);
 }
