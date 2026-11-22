@@ -54,7 +54,10 @@ export function TenancyNotice({ tenancy }: { tenancy: TenancyView }) {
   const valid = /^\d{4}-\d{2}-\d{2}$/.test(date) && !Number.isNaN(Date.parse(date));
 
   let body: React.ReactNode;
-  if (view.noticeGivenAt && tenancy.endDate) {
+  if (!tenancy.periodic && !view.noticeGivenAt && tenancy.listing?.nation === "NORTHERN_IRELAND") {
+    // The backend refuses notice on Northern Ireland fixed terms.
+    body = <Text style={[styles.text, { color: colors.text }]}>Your fixed term ends on {formatInstantDate(tenancy.endDate)}.</Text>;
+  } else if (view.noticeGivenAt && tenancy.endDate) {
     body = <Text style={[styles.text, { color: colors.text }]}>Your tenancy ends on {formatInstantDate(tenancy.endDate)}.</Text>;
   } else if (pending && mine) {
     body = (

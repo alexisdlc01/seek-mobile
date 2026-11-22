@@ -63,9 +63,9 @@ export async function unregisterFromPush(): Promise<void> {
   }
 }
 
-const NOTIFICATIONS_SCREEN = "/(app)/(tabs)/inbox" as Href;
+const NOTIFICATIONS_SCREEN = "/(app)/(tabs)/my-home" as Href;
 
-/** Where a tapped push leads: `data.path` when it is an in-app route, else the inbox. */
+/** Where a tapped push leads: `data.path` when it is an in-app route, else the My home tab (notifications list). */
 export function hrefForPushResponse(response: Notifications.NotificationResponse): Href {
   const path = response.notification.request.content.data?.path;
   return typeof path === "string" && path.startsWith("/") ? (path as Href) : NOTIFICATIONS_SCREEN;

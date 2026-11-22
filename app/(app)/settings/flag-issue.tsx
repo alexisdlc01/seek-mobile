@@ -49,7 +49,7 @@ export default function FlagIssueScreen() {
             render: (props) => (
               <SuccessToast
                 {...props}
-                message="Flag sent successfully. Thanks for reporting!"
+                message="Report emailed to Seek support. It will not appear in Previous Flags."
               />
             ),
           });

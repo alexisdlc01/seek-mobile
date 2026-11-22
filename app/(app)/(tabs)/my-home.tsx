@@ -19,7 +19,7 @@ import {
 } from "@/src/api/seek-api/payments";
 import { useRepairsControllerForTenancy } from "@/src/api/seek-api/repairs";
 import { routeForNotification } from "@/src/utils/notification-route";
-import { formatDay, formatInstantDay, formatPence, pluralise } from "@/src/utils/seek-format";
+import { formatDay, formatInstantDate, formatInstantDay, formatPence, pluralise } from "@/src/utils/seek-format";
 import {
   errorMessage,
   frequencyLabel,
@@ -265,6 +265,7 @@ function HomeContent({ tenancy, invites }: { tenancy: TenancyView; invites: Tena
         ? `${openRepairs.length} open · ${openRepairs[0].title}`
         : "Nothing open · report a problem";
 
+  const ended = tenancy.status === "ENDED";
   const scrollRef = useRef<ScrollView>(null);
   const notificationsY = useRef(0);
   const tiles = [
@@ -310,7 +311,7 @@ function HomeContent({ tenancy, invites }: { tenancy: TenancyView; invites: Tena
       detail: unread.length > 0 ? `${unread.length} new` : "All caught up",
       onPress: () => scrollRef.current?.scrollTo({ y: notificationsY.current, animated: true }),
     },
-  ];
+  ].filter((tile) => !(ended && tile.key === "repairs"));
 
   // Backend messages are written for the landlord, so only deposit items are shown, in tenant wording.
   const warnings = tenancy.compliance.filter((item) => item.kind in TENANT_COMPLIANCE_TEXT);
@@ -356,6 +357,14 @@ function HomeContent({ tenancy, invites }: { tenancy: TenancyView; invites: Tena
         </Pressable>
       ) : null}
 
+      {ended ? (
+        <Card>
+          <Text style={[styles.noticeTitle, { color: colors.text }]}>
+            Your tenancy ended on {formatInstantDate(tenancy.endDate)}.
+          </Text>
+        </Card>
+      ) : null}
+      {!ended || next ? (
       <Card tone="hero">
         {payments.isLoading ? (
           <LoadingState label="Loading your rent…" />
@@ -395,6 +404,7 @@ function HomeContent({ tenancy, invites }: { tenancy: TenancyView; invites: Tena
           />
         </View>
       </Card>
+      ) : null}
 
       <View style={styles.grid}>
         {tiles.map((tile) => {
