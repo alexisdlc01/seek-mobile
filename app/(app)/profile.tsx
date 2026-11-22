@@ -7,6 +7,7 @@ import {
 } from "@/components/custom/profile-screen";
 import { errorToast } from "@/src/utils/error-toast";
 import { Loader } from "@/components/custom/loader";
+import { ErrorState } from "@/components/seek/states";
 import {
   Avatar,
   AvatarFallbackText,
@@ -44,7 +45,7 @@ import { UserDto } from "@/src/api/seek-api/model";
 import { useUsersControllerSetProfilePic } from "@/src/api/seek-api/users";
 import { useAuth } from "@/src/store/auth-store";
 import { uploadFile } from "@/src/utils/upload-file";
-import { Redirect, useRouter, useSegments } from "expo-router";
+import { useRouter, useSegments } from "expo-router";
 import {
   CameraIcon,
   CircleHelpIcon,
@@ -75,10 +76,14 @@ export default function ProfileScreenRoute() {
 }
 
 function AuthenticatedProfileScreen() {
-  const { data, isLoading, isError } = useAuthControllerCurrentUser();
+  const { data, isLoading, isError, error, refetch } = useAuthControllerCurrentUser();
 
-  if (isError) {
-    return <Redirect href="/(app)/(tabs)/map" />;
+  if (isError && !data) {
+    return (
+      <ProfileScreen title="Profile">
+        <ErrorState error={error} onRetry={() => refetch()} />
+      </ProfileScreen>
+    );
   }
 
   return (
