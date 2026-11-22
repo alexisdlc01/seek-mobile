@@ -41,14 +41,20 @@ export default function RootLayout() {
   const signedIn = useAuth((state) => Boolean(state.accessToken));
   useEffect(() => {
     if (!_hasHydrated) return;
-    if (signedIn) {
+    if (!signedIn) {
+      forgetPushToken();
+      return;
+    }
+    const register = () =>
       // Landlords are blocked on mobile: don't register their device for push.
       void queryClient
         .fetchQuery(getAuthControllerCurrentUserQueryOptions())
         .then((me) => (me.role === "STUDENT" ? registerForPush() : undefined))
         .catch(() => {});
-    }
-    else forgetPushToken();
+    register();
+    // Retry on foreground (offline at launch, permission granted later); registerForPush no-ops once registered.
+    const sub = AppState.addEventListener("change", (state) => state === "active" && register());
+    return () => sub.remove();
   }, [_hasHydrated, signedIn]);
   useEffect(() => {
     if (!_hasHydrated) return;

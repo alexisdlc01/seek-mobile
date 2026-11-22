@@ -251,7 +251,7 @@ function EditBasicInformationForm({ user }: { user: UserDto }) {
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
-          helperText="Changing your email needs confirmation from the new address. Use Settings to start that."
+          helperText="Your email can't be changed here."
         />
         <ProfileTextField
           label="Phone"
