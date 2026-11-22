@@ -228,8 +228,7 @@ function RentPlanContent({ tenancyId, title }: { tenancyId: string; title: strin
       >
         <Text style={[styles.noticeText, { color: restricted ? colors.warning : colors.success }]}>
           {restricted
-            ? (plan.restrictionReason ??
-              "Rent can be taken at most one month in advance here, so only monthly is offered.")
+            ? (plan.restrictionReason ?? "This landlord only offers monthly rent.")
             : "Paying ahead is optional and always your choice, never required. You can always pay monthly."}
         </Text>
       </Card>

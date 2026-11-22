@@ -383,17 +383,21 @@ export default function ApplyScreen() {
               </View>
             );
           })}
-          <SeekButton
-            label={busy === "invite" ? "Creating link…" : "Invite a housemate"}
-            variant="tint"
-            compact
-            disabled={busy !== null}
-            onPress={() => void invite()}
-          />
-          <Text style={[styles.note, { color: colors.mutedText }]}>
-            Housemates join with a private link. Each one&apos;s Seek Passport is shared when they are in the group.
-            The landlord counts your household as qualified once everyone&apos;s passport is verified.
-          </Text>
+          {isOwner ? (
+            <>
+              <SeekButton
+                label={busy === "invite" ? "Creating link…" : "Invite a housemate"}
+                variant="tint"
+                compact
+                disabled={busy !== null}
+                onPress={() => void invite()}
+              />
+              <Text style={[styles.note, { color: colors.mutedText }]}>
+                Housemates join with a private link. Each one&apos;s Seek Passport is shared when they are in the group.
+                The landlord counts your household as qualified once everyone&apos;s passport is verified.
+              </Text>
+            </>
+          ) : null}
         </Card>
       </View>
 

@@ -140,7 +140,7 @@ function BillsContent({ tenancy }: { tenancy: TenancyView }) {
   }
 
   const bills = query.data ?? [];
-  const included = bills.filter((bill) => bill.includedInRent);
+  const included = [...new Map(bills.filter((bill) => bill.includedInRent).map((bill) => [bill.category, bill])).values()];
   const toPay = bills
     .filter((bill) => !bill.includedInRent && bill.status === "DUE")
     .sort((a, b) => (a.dueDate ?? "").localeCompare(b.dueDate ?? ""));

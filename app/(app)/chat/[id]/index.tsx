@@ -23,7 +23,8 @@ import { queryClient } from "@/app/_layout";
 import { ConversationDto, ErrorDto, MessageDto, UserDto } from "@/src/api/seek-api/model";
 import { Loader } from "@/components/custom/loader";
 import { getApplicationControllerGetAllMyApplicationsQueryKey, useApplicationControllerGetByConversation } from "@/src/api/seek-api/application";
-import { createApplicationInvite, isApplicationAdmin, leaveApplication } from "@/src/utils/application-invite";
+import { isAxiosError } from "axios";
+import { OPEN_STAGES, createApplicationInvite, isApplicationAdmin, leaveApplication } from "@/src/utils/application-invite";
 import { getApplicationLink } from "@/components/links";
 
 enum EventNames {
@@ -334,7 +335,10 @@ function ChatMenu({ conversationId, userId }: ChatMenuProps) {
   const isOwner = Boolean(userId) && application?.owner === userId;
   const canInvite = isApplicationAdmin(application, userId);
   const canLeave =
-    Boolean(userId) && !isOwner && Boolean(application?.applicants.includes(userId!));
+    Boolean(userId) &&
+    !isOwner &&
+    Boolean(application?.applicants.includes(userId!)) &&
+    OPEN_STAGES.includes(application!.stage);
 
   function close() {
     setOpen(false);
@@ -378,10 +382,13 @@ function ChatMenu({ conversationId, userId }: ChatMenuProps) {
               queryKey: getApplicationControllerGetAllMyApplicationsQueryKey(),
             });
             router.replace("/(app)/(tabs)/messages");
-          } catch {
+          } catch (error) {
             errorToast({
               toast,
-              data: { message: "Could not leave the group.", statusCode: -1 },
+              data: (isAxiosError<ErrorDto>(error) && error.response?.data) || {
+                message: "Could not leave the group.",
+                statusCode: -1,
+              },
             });
           }
         },
