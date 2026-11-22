@@ -1,6 +1,7 @@
 import { AuthRequiredScreen } from "@/components/custom/auth-required";
 import { AdviceCard } from "@/components/seek/advice-card";
 import { HomeAdmin } from "@/components/seek/home-admin";
+import { TenancyNotice } from "@/components/seek/tenancy-notice";
 import { EmptyState, ErrorState, LoadingState } from "@/components/seek/states";
 import { Card, SectionTitle, SeekButton, SeekScreen } from "@/components/seek/ui";
 import { useSeekTheme } from "@/hooks/use-seek-theme";
@@ -422,6 +423,8 @@ function HomeContent({ tenancy, invites }: { tenancy: TenancyView; invites: Tena
       <NotificationsSection onLayout={(y) => (notificationsY.current = y)} />
 
       <HomeAdmin tenancy={tenancy} />
+
+      <TenancyNotice tenancy={tenancy} />
 
       <AdviceCard topic="contract" tenancyId={tenancyId} heading="Seek AI · your contract" />
     </SeekScreen>
