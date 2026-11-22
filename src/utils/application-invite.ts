@@ -25,6 +25,9 @@ export async function createApplicationInvite(
   return data;
 }
 
+/** Stages where a housemate can still leave (the backend refuses otherwise). */
+export const OPEN_STAGES: readonly string[] = ["NOT_SENT", "SENT", "VIEWED"];
+
 /** Removes the current user from an application group. Hand-written, as above. */
 export async function leaveApplication(applicationId: string): Promise<void> {
   await AXIOS_INSTANCE.patch(`/application/${applicationId}/leave`);

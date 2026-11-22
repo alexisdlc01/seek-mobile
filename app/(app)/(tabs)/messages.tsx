@@ -13,13 +13,14 @@ import { useRouter } from "expo-router";
 import { getApplicationControllerGetAllMyApplicationsQueryKey, useApplicationControllerGetAllMyApplications } from "@/src/api/seek-api/application";
 import { Loader } from "@/components/custom/loader";
 import { ErrorState } from "@/components/seek/states";
-import { ApplicationDto } from "@/src/api/seek-api/model";
+import { ApplicationDto, ErrorDto } from "@/src/api/seek-api/model";
 import { useMemo } from "react";
 import { useSeekTheme } from "@/hooks/use-seek-theme";
 import { AuthRequiredScreen } from "@/components/custom/auth-required";
-import { leaveApplication } from "@/src/utils/application-invite";
+import { OPEN_STAGES, leaveApplication } from "@/src/utils/application-invite";
 import { queryClient } from "@/app/_layout";
 import { errorToast } from "@/src/utils/error-toast";
+import { isAxiosError } from "axios";
 import { useToast } from "@/components/ui/toast";
 import { useAuthControllerCurrentUser } from "@/src/api/seek-api/auth";
 
@@ -74,7 +75,10 @@ function MessageItem({ data }: MessageItemProps) {
   const toast = useToast();
   const { data: user } = useAuthControllerCurrentUser();
   const canLeave =
-    Boolean(user) && data.owner !== user?._id && data.applicants.includes(user!._id);
+    Boolean(user) &&
+    data.owner !== user?._id &&
+    data.applicants.includes(user!._id) &&
+    OPEN_STAGES.includes(data.stage);
 
   function leave() {
     Alert.alert("Leave group?", "You'll stop seeing this application's chat.", [
@@ -88,10 +92,13 @@ function MessageItem({ data }: MessageItemProps) {
             await queryClient.invalidateQueries({
               queryKey: getApplicationControllerGetAllMyApplicationsQueryKey(),
             });
-          } catch {
+          } catch (error) {
             errorToast({
               toast,
-              data: { message: "Could not leave the group.", statusCode: -1 },
+              data: (isAxiosError<ErrorDto>(error) && error.response?.data) || {
+                message: "Could not leave the group.",
+                statusCode: -1,
+              },
             });
           }
         },
