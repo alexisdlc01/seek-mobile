@@ -16,6 +16,7 @@ import {
   Keyboard,
   StyleSheet,
   TextInput,
+  useWindowDimensions,
   View,
 } from "react-native";
 import {
@@ -281,20 +282,28 @@ export default function MapScreen() {
 
   // Frame the first page of results once per search; later pages load
   // as the user scrolls and should not move the map.
+  const { top } = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
   const frame = useCallback((coordinates: LatLng[]) => {
-    if (coordinates.length === 0) return;
-    if (coordinates.length === 1) {
-      const [{ longitude, latitude }] = coordinates;
-      cameraRef.current?.easeTo({ center: [longitude, latitude], zoom: 13, duration: 350 });
+    // Keep pins clear of the search bar + chips, the side buttons and the list (opens at 50%).
+    const padding = { top: top + 150, right: 90, bottom: windowHeight * 0.5 + 20, left: 40 };
+    if (coordinates.length <= 1) {
+      const { longitude, latitude } = coordinates[0] ?? DEFAULT_ORIGIN;
+      cameraRef.current?.easeTo({
+        center: [longitude, latitude],
+        zoom: coordinates.length ? 14 : STREET_ZOOM,
+        padding,
+        duration: 350,
+      });
       return;
     }
     const lngs = coordinates.map((coordinate) => coordinate.longitude);
     const lats = coordinates.map((coordinate) => coordinate.latitude);
     cameraRef.current?.fitBounds(
       [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)],
-      { padding: { top: 80, right: 50, bottom: 80, left: 50 }, duration: 500 },
+      { padding, duration: 500 },
     );
-  }, []);
+  }, [top, windowHeight]);
 
   // Seek AI's picks ("Show on map") take over the map until cleared.
   useEffect(() => {
@@ -340,8 +349,6 @@ export default function MapScreen() {
     setBounds(boundsOf([longitude - 0.005, latitude - 0.005, longitude + 0.005, latitude + 0.005]));
   }, [clearAiResults]);
 
-  const { top } = useSafeAreaInsets();
-
   const sheetRef = useRef<BottomSheet>(null);
   const listRef = useRef<FlashListRef<Listing>>(null);
   const [sheetIndex, setSheetIndex] = useState(1);
@@ -352,7 +359,17 @@ export default function MapScreen() {
     transform: [{ translateY: sheetTop.get() - screenHeight.get() }],
   }));
 
+  // iOS also reports the tap (and deselect of the previous annotation) as a map press
+  // right after a Marker press, which cleared the selection at once.
+  const lastMarkerPress = useRef(0);
+  function dismissFromMap() {
+    if (Date.now() - lastMarkerPress.current < 600) return;
+    dismissSelectedListing();
+    Keyboard.dismiss();
+  }
+
   function handleMarkerPress(id: string) {
+    lastMarkerPress.current = Date.now();
     setSelectedListingId(id);
     setSeenIds((seen) => (seen.has(id) ? seen : new Set(seen).add(id)));
     // Collapse the list so the card shows over the map; the list still starts with this home.
@@ -416,14 +433,9 @@ export default function MapScreen() {
         onDidFinishLoadingMap={() => setMapReady(true)}
         onRegionDidChange={(event) => handleRegionChange(event.nativeEvent)}
         onRegionWillChange={(event) => {
-          if (!event.nativeEvent.userInteraction) return;
-          dismissSelectedListing();
-          Keyboard.dismiss();
+          if (event.nativeEvent.userInteraction) dismissFromMap();
         }}
-        onPress={() => {
-          dismissSelectedListing();
-          Keyboard.dismiss();
-        }}
+        onPress={dismissFromMap}
       >
         <Camera
           ref={cameraRef}
