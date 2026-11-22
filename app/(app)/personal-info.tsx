@@ -28,6 +28,7 @@ import {
 } from "@/src/api/seek-api/model";
 import {
   getUsersControllerDocumentTypesQueryKey,
+  getUsersControllerGetPassportQueryKey,
   useUsersControllerAddDocument,
   useUsersControllerDocumentTypes,
 } from "@/src/api/seek-api/users";
@@ -114,6 +115,9 @@ function PersonalInformationContent({
           onSuccess() {
             queryClient.invalidateQueries({
               queryKey: getUsersControllerDocumentTypesQueryKey(),
+            });
+            queryClient.invalidateQueries({
+              queryKey: getUsersControllerGetPassportQueryKey(),
             });
             toast.show({
               placement: "top",
