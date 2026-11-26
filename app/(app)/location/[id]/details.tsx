@@ -124,6 +124,8 @@ export default function DetailsScreen() {
   });
   // Backend `closed` (let/closed listing) is not in the generated types yet.
   const closed = (data as { closed?: boolean } | undefined)?.closed === true;
+  const complianceComplete =
+    (data as { complianceComplete?: boolean } | undefined)?.complianceComplete === true;
   // A draft (not sent yet) can still be finished on the Apply screen.
   const hasApplied = Boolean(
     id &&
@@ -360,6 +362,18 @@ export default function DetailsScreen() {
                   <Text className="text-base leading-6 text-neutral-600">
                     {formatAddress(data)}
                   </Text>
+                  {complianceComplete ? (
+                    <Box
+                      accessible
+                      accessibilityLabel={`Safety documents provided. ${COMPLIANCE_HINT}`}
+                      className="self-start rounded-full px-3 py-1"
+                      style={{ backgroundColor: colors.surface }}
+                    >
+                      <Text className="text-xs font-semibold" style={{ color: colors.accent }}>
+                        Safety documents provided
+                      </Text>
+                    </Box>
+                  ) : null}
                   <Text className="pt-1 text-2xl font-bold text-primary-500">
                     £{Math.round(data.monthlyRent / Math.max(1, data.numOfPeople || 1))} pcm each
                   </Text>
@@ -561,6 +575,9 @@ type QuickStatProps = {
   icon: LucideIcon;
   label: string;
 };
+
+const COMPLIANCE_HINT =
+  "The landlord has entered a registration number, EPC, gas and electrical safety certificates (and HMO licence where needed) that are in date. Seek does not inspect the documents.";
 
 function QuickStat({ icon: StatIcon, label }: QuickStatProps) {
   const colors = useSeekTheme();
