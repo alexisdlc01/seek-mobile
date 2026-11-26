@@ -145,3 +145,12 @@ export async function openStoredFile({ key, url }: { key?: string | null; url?: 
   if (!target || !isWebUrl(target)) throw new Error("no link");
   await WebBrowser.openBrowserAsync(target);
 }
+
+export const SCHEME_NAMES: Record<string, string> = {
+  DPS: "DPS (Deposit Protection Service)",
+  TDS: "TDS (Tenancy Deposit Scheme)",
+  MYDEPOSITS: "mydeposits",
+  SAFEDEPOSITS_SCOTLAND: "SafeDeposits Scotland",
+  LPS_SCOTLAND: "Letting Protection Service Scotland",
+  MYDEPOSITS_SCOTLAND: "mydeposits Scotland",
+};
