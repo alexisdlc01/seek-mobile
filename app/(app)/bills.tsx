@@ -377,7 +377,7 @@ function BillsContent({ tenancy }: { tenancy: TenancyView }) {
         )}
       </View>
 
-      <AddExpense tenancy={tenancy} onDone={(text) => setMessage({ tone: "success", text })} />
+      {tenancy.status !== "ENDED" ? <AddExpense tenancy={tenancy} onDone={(text) => setMessage({ tone: "success", text })} /> : null}
 
       {paid.length > 0 ? (
         <View style={styles.section}>
