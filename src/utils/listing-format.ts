@@ -70,6 +70,7 @@ export function formatListingDate(value?: string | null): string {
     day: "numeric",
     month: "long",
     year: "numeric",
+    timeZone: "UTC", // date-only values are stored as midnight UTC
   }).format(date);
 }
 
