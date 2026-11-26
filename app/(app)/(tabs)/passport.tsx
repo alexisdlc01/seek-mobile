@@ -315,7 +315,12 @@ function Profile() {
           setAsking(null);
           setRefName("");
           setRefEmail("");
-          setNotice({ text: "Sent. Their reply will be filed to your passport." });
+          const hasMailbox = (connectors.data?.connections ?? []).some((c) => c.status === "CONNECTED");
+          setNotice({
+            text: hasMailbox
+              ? "Sent. Their reply will be filed to your passport."
+              : "Sent. Their reply comes to your email. Download the PDF and add it here.",
+          });
         },
         onError(error) {
           setFormError(errorMessage(error, "We couldn't send that. Please try again."));
