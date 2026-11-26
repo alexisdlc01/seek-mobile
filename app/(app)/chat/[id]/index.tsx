@@ -220,21 +220,25 @@ export default function ChatScreen() {
           />
 
           {/* Input */}
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            keyboardVerticalOffset={top + bottom}
-          >
-            <Input variant="rounded" size="lg">
-              <InputField placeholder="Message..."
-                value={message}
-                onSubmitEditing={() => sendMessage(conversationId)}
-                onChangeText={setMessage} />
-              <InputSlot className="pr-3" accessibilityRole="button" accessibilityLabel="Send"
-                onPress={() => sendMessage(conversationId)}>
-                <InputIcon as={ArrowUpIcon} size="xl" />
-              </InputSlot>
-            </Input>
-          </KeyboardAvoidingView>
+          {conversation?.closedAt ? (
+            <Text className="text-center text-typography-500 py-3">This conversation is closed.</Text>
+          ) : (
+            <KeyboardAvoidingView
+              behavior={Platform.OS === "ios" ? "padding" : "height"}
+              keyboardVerticalOffset={top + bottom}
+            >
+              <Input variant="rounded" size="lg">
+                <InputField placeholder="Message..."
+                  value={message}
+                  onSubmitEditing={() => sendMessage(conversationId)}
+                  onChangeText={setMessage} />
+                <InputSlot className="pr-3" accessibilityRole="button" accessibilityLabel="Send"
+                  onPress={() => sendMessage(conversationId)}>
+                  <InputIcon as={ArrowUpIcon} size="xl" />
+                </InputSlot>
+              </Input>
+            </KeyboardAvoidingView>
+          )}
         </VStack>
       </SafeAreaView>
     </Loader>
