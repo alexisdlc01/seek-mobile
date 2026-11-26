@@ -148,7 +148,14 @@ export function HomeAdmin({
       </Card>
       )}
 
-      {only && only !== "councilTax" ? null : (
+      {(only && only !== "councilTax") ? null : tenancy.listing?.nation === "NORTHERN_IRELAND" ? (
+      <Card style={styles.card}>
+        <Text style={[styles.title, { color: colors.text }]}>Rates</Text>
+        <Text style={[styles.body, { color: colors.mutedText }]}>
+          Northern Ireland has domestic rates, not council tax. Check your tenancy agreement for who pays them.
+        </Text>
+      </Card>
+      ) : (
       <Card style={styles.card}>
         <View style={styles.head}>
           <Text style={[styles.title, { color: colors.text }]}>Council tax</Text>

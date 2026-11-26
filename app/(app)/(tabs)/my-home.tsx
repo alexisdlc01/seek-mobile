@@ -230,7 +230,7 @@ function HomeContent({ tenancy, invites }: { tenancy: TenancyView; invites: Tena
   // shortcut: tenants' full-time status isn't in the API, so the copy says "likely"; add a real check if it ever is.
   const hasCouncilTaxBill = allBills.some((bill) => bill.category === "COUNCIL_TAX");
   const exemptionOnFile = (tenancy.documents ?? []).some((doc) => doc.type === "COUNCIL_TAX_EXEMPTION");
-  const showCouncilTaxHint = !!bills.data && !hasCouncilTaxBill && !exemptionOnFile;
+  const showCouncilTaxHint = !!bills.data && !hasCouncilTaxBill && !exemptionOnFile && tenancy.listing?.nation !== "NORTHERN_IRELAND";
   const includedCount = new Set(allBills.filter((bill) => bill.includedInRent).map((bill) => bill.category)).size;
 
   const openRepairs = (repairs.data ?? []).filter((item) => item.status !== "FIXED");
