@@ -401,7 +401,9 @@ export function Composer({
   onChangeText,
   onSend,
   label,
+  maxLength,
 }: {
+  maxLength?: number;
   placeholder: string;
   value: string;
   onChangeText: (text: string) => void;
@@ -417,6 +419,7 @@ export function Composer({
         placeholder={placeholder}
         placeholderTextColor={colors.mutedText}
         value={value}
+        maxLength={maxLength}
         onChangeText={onChangeText}
         onSubmitEditing={onSend}
         returnKeyType="send"

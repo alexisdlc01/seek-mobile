@@ -14,4 +14,6 @@ export interface ConversationDto {
   avatar: string;
   users: PublicUserDto[];
   messages: MessageDto[];
+  // Added by hand: the generated client predates this backend field.
+  closedAt?: string | null;
 }

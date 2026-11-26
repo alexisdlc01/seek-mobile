@@ -88,7 +88,7 @@ function SeekAiChat() {
 
   const send = useCallback(
     (raw: string) => {
-      const text = raw.trim();
+      const text = raw.trim().slice(0, 2000);
       if (!text || isPending) return;
       const userItem: ChatItem = { id: `u${Date.now()}`, role: "user", text };
       const history = [...items, userItem].filter((item) => !item.failed);
@@ -118,8 +118,9 @@ function SeekAiChat() {
             ]);
           },
           onError(error) {
+            // Mark the question failed so it is not resent in the next history.
             setItems((current) => [
-              ...current,
+              ...current.map((item) => (item.id === userItem.id ? { ...item, failed: true } : item)),
               {
                 id: `e${Date.now()}`,
                 role: "assistant",
@@ -174,6 +175,7 @@ function SeekAiChat() {
             placeholder="Refine: closer, cheaper, en-suite…"
             value={draft}
             onChangeText={setDraft}
+            maxLength={2000}
             onSend={() => send(draft)}
           />
         }
