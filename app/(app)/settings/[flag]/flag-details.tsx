@@ -27,12 +27,12 @@ export default function FlagDetailsScreen() {
   const styles = useThemedStyles(createStyles);
   const profileTypography = useProfileTypography();
   const { flag: id } = useLocalSearchParams<{ flag: string }>();
-  const { data: flag, isLoading, isError, error } = useFlagsControllerFindOne(id);
+  const { data: flag, isLoading, error } = useFlagsControllerFindOne(id);
 
   return (
     <ProfileScreen title="Flag Details">
       <Loader isLoading={isLoading}>
-        {isError || !flag ? (
+        {!flag ? (
           <Text style={profileTypography.body}>
             {error?.response?.status === 404
               ? "This flag could not be found."

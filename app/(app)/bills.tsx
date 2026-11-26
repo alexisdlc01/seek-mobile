@@ -80,7 +80,7 @@ function Bills() {
       </SeekScreen>
     );
   }
-  if (query.isError) {
+  if (query.isError && !query.data) {
     return (
       <SeekScreen {...shell}>
         <ErrorState error={query.error} onRetry={() => query.refetch()} />
@@ -131,7 +131,7 @@ function BillsContent({ tenancy }: { tenancy: TenancyView }) {
       </SeekScreen>
     );
   }
-  if (query.isError) {
+  if (query.isError && !query.data) {
     return (
       <SeekScreen {...shell}>
         <ErrorState error={query.error} onRetry={() => query.refetch()} title="Couldn't load your bills" />

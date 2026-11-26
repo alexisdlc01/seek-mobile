@@ -48,7 +48,7 @@ function Documents() {
       </SeekScreen>
     );
   }
-  if (query.isError) {
+  if (query.isError && !query.data) {
     return (
       <SeekScreen {...shell}>
         <ErrorState error={query.error} onRetry={() => query.refetch()} />

@@ -69,7 +69,7 @@ function RentPlan() {
       </SeekScreen>
     );
   }
-  if (tenancyQuery.isError) {
+  if (tenancyQuery.isError && !tenancyQuery.data) {
     return (
       <SeekScreen title="Rent plan" back fallbackHref="/(app)/(tabs)/my-home">
         <ErrorState error={tenancyQuery.error} onRetry={() => tenancyQuery.refetch()} />
@@ -147,7 +147,7 @@ function RentPlanContent({ tenancyId, title }: { tenancyId: string; title: strin
       </SeekScreen>
     );
   }
-  if (planQuery.isError || !plan) {
+  if (!plan) {
     return (
       <SeekScreen title="Choose your rent plan" back fallbackHref="/(app)/(tabs)/my-home">
         <ErrorState error={planQuery.error} onRetry={() => planQuery.refetch()} title="Couldn't load your rent plan" />
@@ -352,7 +352,7 @@ function RentPlanContent({ tenancyId, title }: { tenancyId: string; title: strin
           <Card style={styles.list}>
             {previewQuery.isLoading ? (
               <LoadingState label="Working out your payments…" />
-            ) : previewQuery.isError ? (
+            ) : previewQuery.isError && !previewQuery.data ? (
               <ErrorState error={previewQuery.error} onRetry={() => previewQuery.refetch()} title="Couldn't preview this plan" />
             ) : !previewQuery.data?.length ? (
               <Text style={[styles.empty, { color: colors.mutedText }]}>Nothing scheduled.</Text>
@@ -447,7 +447,7 @@ function RentPlanContent({ tenancyId, title }: { tenancyId: string; title: strin
         <Card style={styles.list}>
           {paymentsQuery.isLoading ? (
             <LoadingState label="Loading payments…" />
-          ) : paymentsQuery.isError ? (
+          ) : paymentsQuery.isError && !paymentsQuery.data ? (
             <ErrorState error={paymentsQuery.error} onRetry={() => paymentsQuery.refetch()} title="Couldn't load your payments" />
           ) : history.length === 0 ? (
             <Text style={[styles.empty, { color: colors.mutedText }]}>No payments yet.</Text>

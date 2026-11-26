@@ -85,7 +85,7 @@ function GuarantorTip() {
     staleTime: 10 * 60 * 1000,
     retry: false,
   });
-  if (query.isError) return null;
+  if (query.isError && !query.data) return null;
   const links = (query.data?.actions ?? []).flatMap((action) => {
     const target = resolveAdviceLink(action.link);
     return target ? [{ ...action, target }] : [];
@@ -422,7 +422,7 @@ function Profile() {
 
       {passport.isLoading ? (
         <LoadingState label="Loading your passport…" />
-      ) : passport.isError || !data ? (
+      ) : !data ? (
         <ErrorState
           error={passport.error}
           onRetry={() => void passport.refetch()}
@@ -513,7 +513,7 @@ function Profile() {
         <SectionTitle hint="Documents are shared for 14 days">Who can see this</SectionTitle>
         {shares.isLoading ? (
           <LoadingState label="Loading shares…" />
-        ) : shares.isError ? (
+        ) : shares.isError && !shares.data ? (
           <ErrorState error={shares.error} onRetry={() => void shares.refetch()} title="Couldn't load shares" />
         ) : activeShares.length === 0 ? (
           <Card>

@@ -30,7 +30,7 @@ function Receipts() {
     <SeekScreen title="Receipts" back fallbackHref="/(app)/(tabs)/my-home">
       {query.isLoading ? (
         <LoadingState label="Loading your receipts…" />
-      ) : query.isError ? (
+      ) : query.isError && !query.data ? (
         <ErrorState error={query.error} onRetry={() => query.refetch()} />
       ) : paid.length === 0 ? (
         <EmptyState title="No receipts yet" body="Paid payments will appear here." />

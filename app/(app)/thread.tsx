@@ -289,7 +289,7 @@ function Thread() {
       >
         {thread.isLoading ? (
           <LoadingState label="Loading conversation…" />
-        ) : thread.isError || !data ? (
+        ) : !data ? (
           <ErrorState
             error={thread.error}
             onRetry={() => void thread.refetch()}

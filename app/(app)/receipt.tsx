@@ -42,7 +42,7 @@ function Receipt() {
     <SeekScreen title="Receipt" back fallbackHref="/(app)/receipts">
       {payments.isLoading ? (
         <LoadingState label="Loading your receipt…" />
-      ) : payments.isError ? (
+      ) : payments.isError && !payments.data ? (
         <ErrorState error={payments.error} onRetry={() => payments.refetch()} />
       ) : !payment ? (
         <EmptyState title="Receipt not found" />

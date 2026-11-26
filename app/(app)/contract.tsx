@@ -42,7 +42,7 @@ function ContractGate() {
       </SeekScreen>
     );
   }
-  if (query.isError) {
+  if (query.isError && !query.data) {
     return (
       <SeekScreen {...shell}>
         <ErrorState error={query.error} onRetry={() => query.refetch()} />
@@ -90,7 +90,7 @@ function ContractContent({ tenancy }: { tenancy: TenancyView }) {
     <SeekScreen {...shell}>
       {contracts.isLoading ? (
         <LoadingState label="Loading your contract…" />
-      ) : contracts.isError ? (
+      ) : contracts.isError && !contracts.data ? (
         <ErrorState error={contracts.error} onRetry={() => contracts.refetch()} title="Couldn't load your contract" />
       ) : visible.length === 0 && agreement ? (
         <AgreementDocCard doc={agreement} />

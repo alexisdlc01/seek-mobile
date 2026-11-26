@@ -108,7 +108,7 @@ function Inbox() {
 
       {threads.isLoading ? (
         <LoadingState label="Loading your inbox…" />
-      ) : threads.isError ? (
+      ) : threads.isError && !threads.data ? (
         <ErrorState error={threads.error} onRetry={() => void threads.refetch()} title="Couldn't load your inbox" />
       ) : visibleThreads.length === 0 ? (
         <EmptyState

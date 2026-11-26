@@ -21,6 +21,7 @@ import { getInboxControllerThreadsQueryKey } from "@/src/api/seek-api/inbox";
 import { authControllerCurrentUser, useAuthControllerCurrentUser } from "@/src/api/seek-api/auth";
 import { queryClient } from "@/app/_layout";
 import { ConversationDto, ErrorDto, MessageDto, UserDto } from "@/src/api/seek-api/model";
+import { ErrorState } from "@/components/seek/states";
 import { Loader } from "@/components/custom/loader";
 import { getApplicationControllerGetAllMyApplicationsQueryKey, useApplicationControllerGetByConversation } from "@/src/api/seek-api/application";
 import { isAxiosError } from "axios";
@@ -71,21 +72,15 @@ export default function ChatScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const conversationId = id ?? "";
 
-  const { data: conversation, isError, isLoading: loadingMessages } = useConversationControllerGetConversation(conversationId, {});
-  const { data: user, isError: isUserError, isLoading: loadingUser } = useAuthControllerCurrentUser();
+  const { data: conversation, isError, error, refetch, isLoading: loadingMessages } = useConversationControllerGetConversation(conversationId, {});
+  const { data: user, isError: isUserError, refetch: refetchUser, isLoading: loadingUser } = useAuthControllerCurrentUser();
   const isLoading = loadingMessages || loadingUser;
 
   const { mutate } = useSendMessage(user, conversationId);
   const addMessage = useAddMessage(conversationId, user?._id);
   const listRef = useRef<FlatList<MessageDto>>(null);
 
-  useEffect(() => {
-    // A failed background refetch keeps the cached conversation: only leave when there is nothing to show.
-    if ((isError && !conversation) || isUserError) {
-      console.log("failed to get messages")
-      router.navigate("/(app)/(tabs)/map");
-    }
-  }, [isError, conversation, isUserError, router]);
+  const loadFailed = (isError && !conversation) || (isUserError && !user);
 
   const [message, setMessage] = useState<string>("");
   function sendMessage(id: string) {
@@ -172,6 +167,20 @@ export default function ChatScreen() {
 
   if (!conversationId) {
     return <Redirect href="/(app)/(tabs)/map" />;
+  }
+
+  if (loadFailed) {
+    return (
+      <SafeAreaView className="p-6">
+        <ErrorState
+          error={error}
+          onRetry={() => {
+            void refetch();
+            void refetchUser();
+          }}
+        />
+      </SafeAreaView>
+    );
   }
 
   return (

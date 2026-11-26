@@ -82,7 +82,7 @@ function MyHome() {
       </SeekScreen>
     );
   }
-  if (isError) {
+  if (isError && !data) {
     return (
       <SeekScreen title="My home">
         <ErrorState error={error} onRetry={() => refetch()} title="Couldn't load your home" />
@@ -168,7 +168,7 @@ function NotificationsSection({ onLayout }: { onLayout?: (y: number) => void }) 
         <Card style={styles.list}>
           {notifications.isLoading ? (
             <LoadingState label="Loading notifications…" />
-          ) : notifications.isError ? (
+          ) : notifications.isError && !notifications.data ? (
             <ErrorState error={notifications.error} onRetry={() => notifications.refetch()} title="Couldn't load notifications" />
           ) : (notifications.data ?? []).length === 0 ? (
             <Text style={[styles.empty, { color: colors.mutedText }]}>No notifications yet.</Text>
@@ -368,7 +368,7 @@ function HomeContent({ tenancy, invites }: { tenancy: TenancyView; invites: Tena
       <Card tone="hero">
         {payments.isLoading ? (
           <LoadingState label="Loading your rent…" />
-        ) : payments.isError ? (
+        ) : payments.isError && !payments.data ? (
           <ErrorState error={payments.error} onRetry={() => payments.refetch()} title="Couldn't load your rent" />
         ) : next ? (
           <>
