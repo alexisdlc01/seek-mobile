@@ -52,6 +52,7 @@ export function HomeAdmin({
   const add = async (kind: Kind) => {
     if (!user || busy) return;
     setNotice(null);
+    let failing = "";
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: kind === "photos" ? ["image/*"] : ["application/pdf", "image/*"],
@@ -64,6 +65,7 @@ export function HomeAdmin({
         kind === "photos" ? "INVENTORY" : kind === "councilTax" ? "COUNCIL_TAX_EXEMPTION" : "OTHER";
       const title = kind === "photos" ? photoTitle : kind === "insurance" ? INSURANCE : "Council tax exemption";
       for (const [index, asset] of result.assets.entries()) {
+        failing = asset.name;
         const uploaded = await uploadFile({
           uri: asset.uri,
           mimeType: asset.mimeType ?? "application/pdf",
@@ -82,12 +84,12 @@ export function HomeAdmin({
           },
         });
       }
-      await invalidateHomeQueries(queryClient);
       setNotice({ text: kind === "photos" ? "Photos saved to your tenancy." : "Saved to your tenancy documents." });
     } catch (error) {
-      setNotice({ text: errorMessage(error, "We couldn't upload that file. Please try again."), error: true });
+      setNotice({ text: (failing ? `${failing}: ` : "") + errorMessage(error, "We couldn't upload that file. Please try again."), error: true });
     } finally {
       setBusy(null);
+      await invalidateHomeQueries(queryClient);
     }
   };
 

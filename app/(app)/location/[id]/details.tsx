@@ -122,6 +122,8 @@ export default function DetailsScreen() {
   } = useUsersControllerDocumentTypes({
     query: { enabled: isAuthenticated },
   });
+  // Backend `closed` (let/closed listing) is not in the generated types yet.
+  const closed = (data as { closed?: boolean } | undefined)?.closed === true;
   // A draft (not sent yet) can still be finished on the Apply screen.
   const hasApplied = Boolean(
     id &&
@@ -234,7 +236,7 @@ export default function DetailsScreen() {
 
   function handleApply() {
     if (!requireApplyAuth()) return;
-    if (!data || hasApplied || isCheckingDocuments) return;
+    if (closed || !data || hasApplied || isCheckingDocuments) return;
 
     if (documentsError) {
       Alert.alert(
@@ -530,11 +532,13 @@ export default function DetailsScreen() {
             >
               <Button
                 className="h-14 flex-1 rounded-full bg-primary-500"
-                disabled={hasApplied || isCheckingDocuments}
+                disabled={closed || hasApplied || isCheckingDocuments}
                 onPress={handleApply}
               >
                 <ButtonText className="font-bold text-typography-0">
-                  {!isAuthenticated
+                  {closed
+                    ? "No longer available"
+                    : !isAuthenticated
                     ? "Sign Up to Apply"
                     : hasApplied
                     ? "Applied"
