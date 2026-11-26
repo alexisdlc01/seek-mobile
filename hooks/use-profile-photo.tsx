@@ -50,7 +50,7 @@ export const useProfilePicture = (initalValue?: string) => {
 
     const pickImage = async (useCamera: boolean, crop = true) => {
         const image = await _pickImage(useCamera, crop);
-        setImage(image?.uri);
+        if (image) setImage(image.uri);
         return image;
     }
 

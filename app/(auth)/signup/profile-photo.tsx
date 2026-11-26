@@ -52,10 +52,6 @@ export default function ProfilePhoto() {
 
       const image = await pickImage(camera);
       if (image == null) {
-        errorToast({
-          toast,
-          data: { message: "No file data found.", statusCode: -1 },
-        });
         setShow(false);
         return;
       }
