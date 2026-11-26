@@ -63,6 +63,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   FlatList,
+  Linking,
   LayoutChangeEvent,
   ScrollView,
   StatusBar,
@@ -393,6 +394,35 @@ export default function DetailsScreen() {
                         ) : null}
                       </VStack>
                     ))}
+                  </Section>
+                ) : null}
+
+                {data.floorPlanImage ? (
+                  <Section title="Floor plan">
+                    <Box
+                      className="h-64 overflow-hidden rounded-2xl"
+                      style={{ backgroundColor: colors.surface }}
+                    >
+                      <Image
+                        alt="Floor plan"
+                        resizeMode="contain"
+                        size="full"
+                        source={{ uri: data.floorPlanImage }}
+                      />
+                    </Box>
+                  </Section>
+                ) : null}
+
+                {data.videoTourLink?.startsWith("https://") ? (
+                  <Section title="Video tour">
+                    <Button
+                      className="h-12 rounded-full bg-primary-500"
+                      onPress={() => void Linking.openURL(data.videoTourLink)}
+                    >
+                      <ButtonText className="font-bold text-typography-0">
+                        Watch video tour
+                      </ButtonText>
+                    </Button>
                   </Section>
                 ) : null}
 

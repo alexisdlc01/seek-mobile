@@ -355,9 +355,10 @@ function ChatMenu({ conversationId, userId }: ChatMenuProps) {
     try {
       // A fresh invite each time, so any link shared before stops working.
       const { inviteToken } = await createApplicationInvite(application._id);
+      const link = getApplicationLink(application._id, inviteToken);
       await Share.share({
-        message: "Join my application on Seek!",
-        url: getApplicationLink(application._id, inviteToken),
+        message: `Join my application on Seek: ${link}`,
+        url: link,
       });
     } catch {
       errorToast({
