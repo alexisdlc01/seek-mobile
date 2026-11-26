@@ -26,6 +26,7 @@ import {
   asTenancyView,
   idOf,
   nextPayment,
+  SCHEME_NAMES,
   tenancyTitle,
   type TenancyView,
 } from "@/src/utils/tenancy-view";
@@ -244,7 +245,7 @@ function HomeContent({ tenancy, invites }: { tenancy: TenancyView; invites: Tena
     deposit === 0
       ? "No deposit"
       : tenancy.depositProtectedAt
-        ? `${formatPence(deposit)} protected · ${tenancy.depositScheme ?? "scheme"}`
+        ? `${formatPence(deposit)} protected · ${(tenancy.depositScheme && SCHEME_NAMES[tenancy.depositScheme]) ?? "scheme"}`
         : `${formatPence(deposit)} · not protected yet`;
 
   const billsDetail = bills.isError

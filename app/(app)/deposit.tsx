@@ -13,20 +13,11 @@ import {
 } from "@/src/api/seek-api/contracts";
 import { aiControllerAdvice } from "@/src/api/seek-api/ai";
 import { formatDate, formatPence } from "@/src/utils/seek-format";
-import { asTenancyView, depositCapCheck, depositDaysLeft, depositDeadline, depositProtectionDays, errorMessage, openStoredFile, tenancyTitle, type TenancyView } from "@/src/utils/tenancy-view";
+import { asTenancyView, depositCapCheck, depositDaysLeft, depositDeadline, depositProtectionDays, errorMessage, openStoredFile, SCHEME_NAMES, tenancyTitle, type TenancyView } from "@/src/utils/tenancy-view";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-
-const SCHEME_NAMES: Record<string, string> = {
-  DPS: "DPS (Deposit Protection Service)",
-  TDS: "TDS (Tenancy Deposit Scheme)",
-  MYDEPOSITS: "mydeposits",
-  SAFEDEPOSITS_SCOTLAND: "SafeDeposits Scotland",
-  LPS_SCOTLAND: "Letting Protection Service Scotland",
-  MYDEPOSITS_SCOTLAND: "mydeposits Scotland",
-};
 
 export default function DepositScreen() {
   return (
