@@ -75,9 +75,10 @@ export default function ChatDetails() {
       // previously shared link stops working. The route id is the
       // conversation; invites and joins work on the application.
       const { inviteToken } = await createApplicationInvite(application._id);
+      const link = getApplicationLink(application._id, inviteToken);
       await Share.share({
-        message: `Join my application on Seek!`,
-        url: getApplicationLink(application._id, inviteToken),
+        message: `Join my application on Seek: ${link}`,
+        url: link,
       });
     } catch {
       errorToast({
