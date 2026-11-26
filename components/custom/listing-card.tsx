@@ -55,7 +55,11 @@ export function ListingCard({ data, left }: ListingCardProps) {
                 {data.propertyTitle}
               </Text>
               <Text className="text-sm text-typography-700 line-clamp-1">{data.streetAddress}</Text>
-              <Text className="text-base font-semibold text-primary-500">£{data.monthlyRent} pcm</Text>
+              <Text className="text-base font-semibold text-primary-500">
+                {data.numOfPeople > 1
+                  ? `£${Math.round(data.monthlyRent / data.numOfPeople)} pcm each`
+                  : `£${data.monthlyRent} pcm`}
+              </Text>
             </VStack>
           </HStack>
         </Pressable>

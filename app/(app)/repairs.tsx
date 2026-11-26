@@ -102,6 +102,11 @@ function RepairsContent({ tenancy }: { tenancy: TenancyView }) {
       back
       fallbackHref="/(app)/(tabs)/my-home"
     >
+      {tenancy.status === "ENDED" ? (
+        <Card>
+          <Text style={[styles.note, { color: colors.mutedText }]}>Your tenancy has ended.</Text>
+        </Card>
+      ) : (
       <View style={styles.section}>
         <SectionTitle>Report a problem</SectionTitle>
         <Card>
@@ -182,6 +187,7 @@ function RepairsContent({ tenancy }: { tenancy: TenancyView }) {
           />
         </Card>
       </View>
+      )}
 
       <View style={styles.section}>
         <SectionTitle hint={repairs.length > 0 ? String(repairs.length) : undefined}>Your reports</SectionTitle>
