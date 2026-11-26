@@ -147,12 +147,17 @@ function BillsContent({ tenancy }: { tenancy: TenancyView }) {
   const paid = bills
     .filter((bill) => !bill.includedInRent && bill.status === "PAID")
     .sort((a, b) => (b.paidAt ?? "").localeCompare(a.paidAt ?? ""));
-  const allowanceBill = bills.find((bill) => bill.allowance);
+  // Latest billing period first: synced bills arrive newest-first, so list order is not chronological.
+  const billTime = (bill: (typeof bills)[number]) => new Date(bill.periodEnd ?? bill.periodStart ?? bill.dueDate ?? 0).getTime();
+  const allowanceBill = bills.filter((bill) => bill.allowance).sort((a, b) => billTime(b) - billTime(a))[0];
   const allowance = allowanceBill?.allowance;
   const allowanceMonth = formatDay(allowanceBill?.periodEnd ?? allowanceBill?.periodStart ?? allowanceBill?.dueDate).split(" ")[1];
   const councilTaxBill = bills.find((bill) => bill.category === "COUNCIL_TAX");
   const exemptionOnFile = (tenancy.documents ?? []).some((doc) => doc.type === "COUNCIL_TAX_EXEMPTION");
-  const councilTax = councilTaxBill?.includedInRent
+  const ni = tenancy.listing?.nation === "NORTHERN_IRELAND";
+  const councilTax = ni
+    ? { badge: "", tone: "success" as const, note: "Northern Ireland has domestic rates, not council tax. Check your tenancy agreement for who pays them." }
+    : councilTaxBill?.includedInRent
     ? { badge: "Included in rent", tone: "success" as const, note: "Nothing to pay." }
     : exemptionOnFile
       ? { badge: "Exempt", tone: "success" as const, note: "Student exemption certificate on file." }
@@ -280,7 +285,7 @@ function BillsContent({ tenancy }: { tenancy: TenancyView }) {
             title="Council tax"
             subtitle={councilTax.note}
             right={
-              councilTax.badge === "Exempt" || councilTax.badge === "Included in rent" ? (
+              ni ? undefined : councilTax.badge === "Exempt" || councilTax.badge === "Included in rent" ? (
                 <Badge label={councilTax.badge} tone={councilTax.tone} />
               ) : (
                 <SeekButton

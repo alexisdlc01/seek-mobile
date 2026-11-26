@@ -18,7 +18,7 @@ export function useActiveTenancy() {
   return { ...query, tenancy };
 }
 
-const HOME_QUERY_PREFIXES = ["/tenancies", "/payments", "/bills", "/repairs", "/notifications"];
+const HOME_QUERY_PREFIXES = ["/tenancies", "/payments", "/bills", "/repairs", "/notifications", "ai-advice"];
 
 /** Refetch everything the My home screens show (call after a mutation). */
 export function invalidateHomeQueries(queryClient: QueryClient) {
