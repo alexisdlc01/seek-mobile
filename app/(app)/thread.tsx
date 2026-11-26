@@ -193,6 +193,12 @@ function Thread() {
   const providerName =
     mailbox?.provider === "GMAIL" ? "Gmail" : mailbox?.provider === "OUTLOOK" ? "Outlook" : null;
 
+  // Opening a thread marks it read server-side: refresh the list so its unread dot clears.
+  const loaded = Boolean(data);
+  useEffect(() => {
+    if (loaded) void queryClient.invalidateQueries({ queryKey: getInboxControllerThreadsQueryKey() });
+  }, [loaded, threadId, queryClient]);
+
   useEffect(() => {
     scrollRef.current?.scrollToEnd({ animated: false });
   }, [data?.messages.length]);
