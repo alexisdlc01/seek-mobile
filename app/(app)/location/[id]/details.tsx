@@ -2,6 +2,7 @@ import { queryClient } from "@/app/_layout";
 import { useSeekTheme } from "@/hooks/use-seek-theme";
 import { shareListing } from "@/components/links";
 import { LikeButton } from "@/components/custom/like-button";
+import { ErrorState } from "@/components/seek/states";
 import { Loader } from "@/components/custom/loader";
 import { ScrollDots } from "@/components/custom/scroll-dots";
 import { Box } from "@/components/ui/box";
@@ -38,6 +39,7 @@ import {
   formatPropertyType,
   normalizeListingToken,
 } from "@/src/utils/listing-format";
+import { isAxiosError } from "axios";
 import { useFocusEffect } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -94,6 +96,8 @@ export default function DetailsScreen() {
     data,
     isLoading,
     isError,
+    error,
+    refetch,
   } = useListingsControllerGetById(id, {
     query: {
       initialData: () =>
@@ -161,15 +165,17 @@ export default function DetailsScreen() {
     if (!isAuthenticated) setSavedOverride(null);
   }, [isAuthenticated]);
 
+  const notFound = isError && !data && isAxiosError(error) && error.response?.status === 404;
+
   useEffect(() => {
-    if (!isError) return;
+    if (!notFound) return;
 
     errorToast({
       toast,
       data: { message: "Unable to find listing.", statusCode: -1 },
     });
     router.replace("/(app)/(tabs)/map");
-  }, [isError, router, toast]);
+  }, [notFound, router, toast]);
 
   const handleViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken<string>[] }) => {
@@ -539,6 +545,8 @@ export default function DetailsScreen() {
               </Button>
             </HStack>
           </>
+        ) : isError && !notFound ? (
+          <ErrorState error={error} onRetry={() => void refetch()} />
         ) : null}
       </Loader>
     </Box>

@@ -261,7 +261,7 @@ function ConnectedEmail() {
     >
       {overview.isLoading ? (
         <LoadingState label="Loading your email connections…" />
-      ) : overview.isError || !data ? (
+      ) : !data ? (
         <ErrorState
           error={overview.error}
           onRetry={() => void overview.refetch()}

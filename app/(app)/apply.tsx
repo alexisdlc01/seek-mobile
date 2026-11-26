@@ -173,7 +173,7 @@ export default function ApplyScreen() {
       </SeekScreen>
     );
   }
-  if (listing.isError || passport.isError || mine.isError || !listing.data || !passport.data) {
+  if (!listing.data || !passport.data || (mine.isError && !mine.data)) {
     return (
       <SeekScreen title="Apply" back>
         <ErrorState

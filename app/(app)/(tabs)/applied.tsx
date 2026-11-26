@@ -48,7 +48,7 @@ function Applied() {
       </SeekScreen>
     );
   }
-  if (mine.isError) {
+  if (mine.isError && !mine.data) {
     return (
       <SeekScreen title="Applied">
         <ErrorState error={mine.error} onRetry={() => void mine.refetch()} title="Couldn't load your applications" />

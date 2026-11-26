@@ -39,7 +39,7 @@ function Repairs() {
       </SeekScreen>
     );
   }
-  if (query.isError) {
+  if (query.isError && !query.data) {
     return (
       <SeekScreen {...shell}>
         <ErrorState error={query.error} onRetry={() => query.refetch()} />
@@ -193,7 +193,7 @@ function RepairsContent({ tenancy }: { tenancy: TenancyView }) {
         <SectionTitle hint={repairs.length > 0 ? String(repairs.length) : undefined}>Your reports</SectionTitle>
         {query.isLoading ? (
           <LoadingState label="Loading your repairs…" />
-        ) : query.isError ? (
+        ) : query.isError && !query.data ? (
           <ErrorState error={query.error} onRetry={() => query.refetch()} title="Couldn't load your repairs" />
         ) : repairs.length === 0 ? (
           <Card>

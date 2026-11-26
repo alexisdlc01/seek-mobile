@@ -94,7 +94,7 @@ export default function PreviousFlagsScreen() {
   return (
     <ProfileScreen title="Previous Flags" scroll={false}>
       <Loader isLoading={isLoading}>
-        {isError ? (
+        {isError && !data ? (
           <Text style={profileTypography.body}>
             We could not load your flags. Please try again later.
           </Text>
