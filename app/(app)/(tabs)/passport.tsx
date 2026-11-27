@@ -364,10 +364,10 @@ function Profile() {
 
   const data = passport.data;
   const allItems = data?.sections.flatMap((section) => section.items) ?? [];
-  // revokedBy is not in the generated type yet; only student revocations can be reopened.
+  // revokedBy is not in the generated type yet. Live, stopped by the student, or expired after 14 days: the last two can be reopened.
   const activeShares = ((shares.data ?? []) as ((typeof shares.data extends (infer T)[] | undefined ? T : never) & {
     revokedBy?: "student" | "system" | null;
-  })[]).filter((share) => share.active || share.revokedBy === "student");
+  })[]).filter((share) => !share.revokedAt || share.revokedBy === "student");
   const connected = (connectors.data?.connections ?? []).filter((c) => c.status === "CONNECTED");
 
   return (
@@ -533,9 +533,15 @@ function Profile() {
                   <ListRow
                     icon={<UserRoundIcon color={colors.accent} size={20} />}
                     title={place ? `${place} · ${who}` : who}
-                    subtitle={share.revokedBy === "student" ? "Sharing stopped" : `Until ${formatInstantDate(share.expiresAt)}`}
+                    subtitle={
+                      share.revokedBy === "student"
+                        ? "Sharing stopped"
+                        : share.active
+                          ? `Until ${formatInstantDate(share.expiresAt)}`
+                          : `Expired ${formatInstantDate(share.expiresAt)}`
+                    }
                     right={
-                      share.revokedBy === "student" ? (
+                      !share.active ? (
                         <SeekButton
                           label="Share again"
                           compact
