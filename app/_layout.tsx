@@ -8,7 +8,6 @@ import { QueryClient, QueryClientProvider, focusManager } from "@tanstack/react-
 import axios from "axios";
 import { getAuthControllerCurrentUserQueryOptions } from "@/src/api/seek-api/auth";
 import { notificationsControllerMarkRead } from "@/src/api/seek-api/notifications";
-import { invalidateHomeQueries } from "@/hooks/use-active-tenancy";
 import { useEffect } from "react";
 import { useAuth } from "@/src/store/auth-store";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -62,13 +61,13 @@ export default function RootLayout() {
       router.push(hrefForPushResponse(response));
       const id = response.notification.request.content.data?.notificationId;
       if (typeof id === "string") {
-        void notificationsControllerMarkRead(id).then(() => invalidateHomeQueries(queryClient)).catch(() => {});
+        void notificationsControllerMarkRead(id).then(() => queryClient.invalidateQueries()).catch(() => {});
       }
     };
     void Notifications.getLastNotificationResponseAsync().then((r) => r && open(r)).catch(() => {});
     const sub = Notifications.addNotificationResponseReceivedListener(open);
     // Push received while the app is open: refresh the notifications list and unread count.
-    const recv = Notifications.addNotificationReceivedListener(() => void invalidateHomeQueries(queryClient));
+    const recv = Notifications.addNotificationReceivedListener(() => void queryClient.invalidateQueries());
     return () => {
       sub.remove();
       recv.remove();
