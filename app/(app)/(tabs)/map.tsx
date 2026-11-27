@@ -166,9 +166,11 @@ export default function MapScreen() {
   const listings = useMemo(() => {
     if (!fromSeptember) return loadedListings;
     const by = new Date(nextSeptember()).getTime();
+    const from = Date.UTC(new Date(by).getUTCFullYear(), 8, 1);
     return loadedListings.filter((listing) => {
       const free = new Date(listing.availableFrom).getTime();
-      return Number.isNaN(free) || free <= by;
+      const until = !listing.availableUntil || new Date(listing.availableUntil).getTime() >= from;
+      return (Number.isNaN(free) || free <= by) && until;
     });
   }, [loadedListings, fromSeptember]);
   // Match % and the "why" line of every home, best match first.
