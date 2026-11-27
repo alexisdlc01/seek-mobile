@@ -57,17 +57,19 @@ export default function RootLayout() {
   }, [_hasHydrated, signedIn]);
   useEffect(() => {
     if (!_hasHydrated) return;
+    // AI advice is excluded from refreshes: each refetch is a paid model call (300/day quota).
+    const notAdvice = { predicate: (q: { queryKey: readonly unknown[] }) => q.queryKey[0] !== "ai-advice" };
     const open = (response: Notifications.NotificationResponse) => {
       router.push(hrefForPushResponse(response));
       const id = response.notification.request.content.data?.notificationId;
       if (typeof id === "string") {
-        void notificationsControllerMarkRead(id).then(() => queryClient.invalidateQueries()).catch(() => {});
+        void notificationsControllerMarkRead(id).then(() => queryClient.invalidateQueries(notAdvice)).catch(() => {});
       }
     };
     void Notifications.getLastNotificationResponseAsync().then((r) => r && open(r)).catch(() => {});
     const sub = Notifications.addNotificationResponseReceivedListener(open);
     // Push received while the app is open: refresh the notifications list and unread count.
-    const recv = Notifications.addNotificationReceivedListener(() => void queryClient.invalidateQueries());
+    const recv = Notifications.addNotificationReceivedListener(() => void queryClient.invalidateQueries(notAdvice));
     return () => {
       sub.remove();
       recv.remove();
