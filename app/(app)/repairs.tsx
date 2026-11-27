@@ -83,7 +83,7 @@ function RepairsContent({ tenancy }: { tenancy: TenancyView }) {
     },
   });
 
-  const canSend = title.trim().length > 0 && !create.isPending && !sending;
+  const canSend = title.trim().length >= 3 && !create.isPending && !sending;
   const repairs = [...(query.data ?? [])].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const notice = message
     ? message.tone === "success"
