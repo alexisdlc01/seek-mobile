@@ -65,10 +65,12 @@ export default function MapScreen() {
   const ranked = useMemo(() => {
     const loaded = data ?? [];
     const by = new Date(nextSeptember()).getTime();
+    const from = Date.UTC(new Date(by).getUTCFullYear(), 8, 1);
     const kept = fromSeptember
       ? loaded.filter((listing) => {
           const free = new Date(listing.availableFrom).getTime();
-          return Number.isNaN(free) || free <= by;
+          const until = !listing.availableUntil || new Date(listing.availableUntil).getTime() >= from;
+          return (Number.isNaN(free) || free <= by) && until;
         })
       : loaded;
     return kept
