@@ -577,7 +577,7 @@ type QuickStatProps = {
 };
 
 const COMPLIANCE_HINT =
-  "The landlord has entered a registration number, EPC, gas and electrical safety certificates (and HMO licence where needed) that are in date. Seek does not inspect the documents.";
+  "The landlord has entered a registration number and an in-date electrical safety certificate, and none of the certificates they added has expired. Seek does not inspect the documents.";
 
 function QuickStat({ icon: StatIcon, label }: QuickStatProps) {
   const colors = useSeekTheme();
