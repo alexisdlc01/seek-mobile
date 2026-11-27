@@ -13,7 +13,7 @@ export function useActiveTenancy() {
     const current = active
       .filter((item) => !item.endDate || new Date(item.endDate).getTime() >= now)
       .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())[0];
-    return current ?? active[0] ?? all[0] ?? null;
+    return current ?? active[0] ?? all.find((t) => t.status === "PENDING_ACCEPTANCE") ?? all[0] ?? null;
   }, [query.data]);
   return { ...query, tenancy };
 }
