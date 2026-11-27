@@ -3,7 +3,7 @@ import { ErrorState, LoadingState, EmptyState } from "@/components/seek/states";
 import { Card, Divider, ListRow, SeekScreen } from "@/components/seek/ui";
 import { usePaymentsControllerMine } from "@/src/api/seek-api/payments";
 import { formatDate, formatInstantDate, formatPence } from "@/src/utils/seek-format";
-import type { TenancyView } from "@/src/utils/tenancy-view";
+import type { ListingView, TenancyView } from "@/src/utils/tenancy-view";
 import { tenancyTitle } from "@/src/utils/tenancy-view";
 import { useLocalSearchParams } from "expo-router";
 import React from "react";
@@ -26,6 +26,11 @@ function Receipt() {
   const payment = payments.data?.find((item) => item._id === id);
   // The API populates `tenancy` (with its listing) although the generated type says string.
   const tenancy = payment?.tenancy as unknown as TenancyView | null | undefined;
+  // Holding deposits have no tenancy; the API populates `application.listing` instead.
+  const applicationListing = (payment?.application as unknown as { listing?: ListingView } | undefined)?.listing;
+  const property = tenancy?.listing
+    ? tenancyTitle(tenancy)
+    : applicationListing?.propertyTitle || applicationListing?.streetAddress;
   const rows: [string, string][] = payment
     ? [
         ["Paid on", payment.paidAt ? formatInstantDate(payment.paidAt) : formatDate(payment.dueDate)],
@@ -33,7 +38,7 @@ function Receipt() {
         ...(payment.holdingDepositCredit
           ? ([["Holding deposit credited", formatPence(payment.holdingDepositCredit)]] as [string, string][])
           : []),
-        ...(tenancy?.listing ? ([["Property", tenancyTitle(tenancy)]] as [string, string][]) : []),
+        ...(property ? ([["Property", property]] as [string, string][]) : []),
         ["Reference", payment._id],
       ]
     : [];
