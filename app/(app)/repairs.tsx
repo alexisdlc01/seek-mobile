@@ -10,7 +10,7 @@ import { errorMessage, tenancyTitle, type TenancyView } from "@/src/utils/tenanc
 import { uploadFile } from "@/src/utils/upload-file";
 import { useQueryClient } from "@tanstack/react-query";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { WrenchIcon } from "lucide-react-native";
 import React, { useState } from "react";
 import { Image, Linking, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
@@ -28,7 +28,8 @@ export default function RepairsScreen() {
 
 function Repairs() {
   const router = useRouter();
-  const query = useActiveTenancy();
+  const { tenancy: tenancyParam } = useLocalSearchParams<{ tenancy?: string }>();
+  const query = useActiveTenancy(tenancyParam);
   const tenancy = query.tenancy;
   const shell = { title: "Repairs", back: true, fallbackHref: "/(app)/(tabs)/my-home" } as const;
 
