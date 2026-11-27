@@ -70,6 +70,7 @@ export function StudentVerificationCard({ user }: { user: UserDto }) {
           queryClient.invalidateQueries({ queryKey: getAuthControllerCurrentUserQueryKey() });
           // Student status is a passport item, and the Passport tab stays mounted.
           queryClient.invalidateQueries({ queryKey: getUsersControllerGetPassportQueryKey() });
+          queryClient.invalidateQueries({ queryKey: ["ai-advice"] });
         },
         onError: (e) => setError(messageOf(e, "We couldn't check the code.")),
       },

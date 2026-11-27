@@ -119,6 +119,7 @@ function PersonalInformationContent({
             queryClient.invalidateQueries({
               queryKey: getUsersControllerGetPassportQueryKey(),
             });
+            queryClient.invalidateQueries({ queryKey: ["ai-advice"] });
             toast.show({
               placement: "top",
               render: (props) => (

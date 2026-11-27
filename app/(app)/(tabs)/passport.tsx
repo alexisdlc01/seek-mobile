@@ -223,6 +223,7 @@ function Profile() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: getUsersControllerGetPassportQueryKey() }),
         queryClient.invalidateQueries({ queryKey: getUsersControllerDocumentTypesQueryKey() }),
+        queryClient.invalidateQueries({ queryKey: ["ai-advice"] }),
       ]);
       setPicking(false);
       setDetailsFor(null);

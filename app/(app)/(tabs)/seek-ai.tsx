@@ -33,7 +33,7 @@ import {
 const SUGGESTIONS = [
   "4 beds near the university under £700, bills included",
   "2 bed flat in St Andrews from September",
-  "Cheapest room with a garden",
+  "Room under £600 near the university",
 ];
 // The API reads the last few turns; older ones add cost without helping.
 const HISTORY_LIMIT = 10;
@@ -172,7 +172,7 @@ function SeekAiChat() {
         footer={
           <Composer
             label={`Message ${name}`}
-            placeholder="Refine: closer, cheaper, en-suite…"
+            placeholder="Refine: under £600, from September, bills included…"
             value={draft}
             onChangeText={setDraft}
             maxLength={2000}
