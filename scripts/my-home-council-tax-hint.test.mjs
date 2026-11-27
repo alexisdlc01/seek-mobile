@@ -9,6 +9,6 @@ assert.ok(src.includes('bill.category === "COUNCIL_TAX");'), "any COUNCIL_TAX bi
 assert.ok(!src.includes('"COUNCIL_TAX" && bill.includedInRent'), "no included-only check");
 assert.ok(src.includes('doc.type === "COUNCIL_TAX_EXEMPTION"'), "hidden once certificate uploaded");
 assert.ok(src.includes("!hasCouncilTaxBill && !exemptionOnFile"), "hidden when any council tax bill exists (included or due)");
-assert.ok(src.includes('router.push("/(app)/bills")'), "links to Bills where the upload lives");
+assert.ok(src.includes('pathname: "/(app)/bills"'), "links to Bills where the upload lives");
 assert.ok(!/Seek (can|will) (request|file)/.test(src), "no claim Seek files with council");
 console.log("ok");

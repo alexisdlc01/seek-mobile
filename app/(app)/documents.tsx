@@ -7,7 +7,7 @@ import { useSeekTheme } from "@/hooks/use-seek-theme";
 import type { TenancyDocument } from "@/src/api/seek-api/model";
 import { formatInstantDate } from "@/src/utils/seek-format";
 import { errorMessage, openStoredFile, tenancyTitle, type TenancyView } from "@/src/utils/tenancy-view";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { FileTextIcon } from "lucide-react-native";
 import React, { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
@@ -37,7 +37,8 @@ export default function DocumentsScreen() {
 
 function Documents() {
   const router = useRouter();
-  const query = useActiveTenancy();
+  const { tenancy: tenancyParam } = useLocalSearchParams<{ tenancy?: string }>();
+  const query = useActiveTenancy(tenancyParam);
   const tenancy = query.tenancy;
   const shell = { title: "Contract & documents", back: true, fallbackHref: "/(app)/(tabs)/my-home" } as const;
 

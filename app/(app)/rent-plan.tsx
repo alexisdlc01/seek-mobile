@@ -27,7 +27,7 @@ import {
   tenancyTitle,
 } from "@/src/utils/tenancy-view";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { LockIcon, MinusIcon, PlusIcon } from "lucide-react-native";
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Switch, Text, View } from "react-native";
@@ -59,7 +59,8 @@ export default function RentPlanScreen() {
 
 function RentPlan() {
   const router = useRouter();
-  const tenancyQuery = useActiveTenancy();
+  const { tenancy: tenancyParam } = useLocalSearchParams<{ tenancy?: string }>();
+  const tenancyQuery = useActiveTenancy(tenancyParam);
   const tenancy = tenancyQuery.tenancy;
 
   if (tenancyQuery.isLoading) {

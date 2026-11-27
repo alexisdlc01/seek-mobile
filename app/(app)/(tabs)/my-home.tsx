@@ -31,7 +31,7 @@ import {
   type TenancyView,
 } from "@/src/utils/tenancy-view";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   BellIcon,
   FileTextIcon,
@@ -64,8 +64,25 @@ const TENANT_COMPLIANCE_TEXT: Record<string, string> = {
 
 function MyHome() {
   const router = useRouter();
-  const { tenancy, data, isLoading, isError, error, refetch } = useActiveTenancy();
+  // A notification can point at another tenancy of the student (e.g. next year's); links below pass it on.
+  const { tenancy: tenancyParam } = useLocalSearchParams<{ tenancy?: string }>();
+  const { tenancy, data, isLoading, isError, error, refetch } = useActiveTenancy(tenancyParam);
   const { data: user } = useAuthControllerCurrentUser();
+  // Same cached query without the param: the tenancy My home shows by default.
+  const current = useActiveTenancy().tenancy;
+  const viewingOther = !!tenancyParam && !!tenancy && !!current && current._id !== tenancy._id;
+  // Another tenancy still running or starting later than the one shown (e.g. next year's home).
+  const upcoming = tenancy
+    ? (data ?? [])
+        .map(asTenancyView)
+        .filter(
+          (item) =>
+            item._id !== tenancy._id &&
+            item.status === "ACTIVE" &&
+            new Date(item.startDate).getTime() > new Date(tenancy.startDate).getTime() &&
+            (!item.endDate || new Date(item.endDate).getTime() >= Date.now()),
+        )
+    : [];
   // A follow-on tenancy (renewal) the user can still accept while another one is current.
   const invites = (data ?? [])
     .map(asTenancyView)
@@ -104,7 +121,7 @@ function MyHome() {
     );
   }
   if (tenancy.status === "PENDING_ACCEPTANCE") return <PendingTenancy tenancy={tenancy} />;
-  return <HomeContent tenancy={tenancy} invites={invites} />;
+  return <HomeContent tenancy={tenancy} invites={invites} upcoming={upcoming} viewingOther={viewingOther} />;
 }
 
 /** A landlord-created tenancy waiting for this student: rent, deposit and bills stay hidden until it is ACTIVE. */
@@ -207,7 +224,7 @@ function NotificationsSection({ onLayout }: { onLayout?: (y: number) => void }) 
   );
 }
 
-function HomeContent({ tenancy, invites }: { tenancy: TenancyView; invites: TenancyView[] }) {
+function HomeContent({ tenancy, invites, upcoming, viewingOther }: { tenancy: TenancyView; invites: TenancyView[]; upcoming: TenancyView[]; viewingOther: boolean }) {
   const colors = useSeekTheme();
   const router = useRouter();
   const tenancyId = tenancy._id;
@@ -275,28 +292,28 @@ function HomeContent({ tenancy, invites }: { tenancy: TenancyView; invites: Tena
       icon: FileTextIcon,
       title: "Contract",
       detail: contractDetail,
-      onPress: () => router.push("/(app)/contract"),
+      onPress: () => router.push({ pathname: "/(app)/contract", params: { tenancy: tenancy._id } }),
     },
     {
       key: "deposit",
       icon: PiggyBankIcon,
       title: "Deposit",
       detail: depositDetail,
-      onPress: () => router.push("/(app)/deposit"),
+      onPress: () => router.push({ pathname: "/(app)/deposit", params: { tenancy: tenancy._id } }),
     },
     {
       key: "bills",
       icon: ZapIcon,
       title: "Bills",
       detail: billsDetail,
-      onPress: () => router.push("/(app)/bills"),
+      onPress: () => router.push({ pathname: "/(app)/bills", params: { tenancy: tenancy._id } }),
     },
     {
       key: "repairs",
       icon: WrenchIcon,
       title: "Repairs",
       detail: repairsDetail,
-      onPress: () => router.push("/(app)/repairs"),
+      onPress: () => router.push({ pathname: "/(app)/repairs", params: { tenancy: tenancy._id } }),
     },
     {
       key: "receipts",
@@ -323,8 +340,31 @@ function HomeContent({ tenancy, invites }: { tenancy: TenancyView; invites: Tena
       title="My home"
       subtitle={`${tenancyTitle(tenancy)} · since ${formatDay(tenancy.startDate)}`}
     >
+      {viewingOther ? (
+        <SeekButton label="← Current home" variant="light" compact onPress={() => router.setParams({ tenancy: undefined })} />
+      ) : null}
       {invites.map((invite) => (
         <TenancyInvite key={invite._id} tenancy={invite} />
+      ))}
+      {upcoming.map((item) => (
+        <Card key={item._id}>
+          <Text style={[styles.noticeTitle, { color: colors.text }]}>
+            Next year&apos;s home — {tenancyTitle(item)}, from {formatDay(item.startDate)}
+          </Text>
+          <View style={styles.row}>
+            <SeekButton
+              label="Contract"
+              compact
+              onPress={() => router.push({ pathname: "/(app)/contract", params: { tenancy: item._id } })}
+            />
+            <SeekButton
+              label="Rent plan"
+              variant="light"
+              compact
+              onPress={() => router.push({ pathname: "/(app)/rent-plan", params: { tenancy: item._id } })}
+            />
+          </View>
+        </Card>
       ))}
       {warnings.length > 0 ? (
         <Card style={{ backgroundColor: colors.warningBg, borderColor: "transparent" }}>
@@ -344,7 +384,7 @@ function HomeContent({ tenancy, invites }: { tenancy: TenancyView; invites: Tena
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="You likely owe no council tax"
-          onPress={() => router.push("/(app)/bills")}
+          onPress={() => router.push({ pathname: "/(app)/bills", params: { tenancy: tenancy._id } })}
         >
           <Card tone="tint">
             <View style={styles.row}>
@@ -395,7 +435,7 @@ function HomeContent({ tenancy, invites }: { tenancy: TenancyView; invites: Tena
           </>
         )}
         <View style={styles.heroActions}>
-          <SeekButton label="Rent plan" variant="light" compact onPress={() => router.push("/(app)/rent-plan")} />
+          <SeekButton label="Rent plan" variant="light" compact onPress={() => router.push({ pathname: "/(app)/rent-plan", params: { tenancy: tenancy._id } })} />
           <SeekButton
             label="Receipts"
             variant="outlineOnHero"

@@ -14,7 +14,7 @@ import type { Contract, TenancyDocument } from "@/src/api/seek-api/model";
 import { formatInstantDate } from "@/src/utils/seek-format";
 import { errorMessage, idOf, isWebUrl, openStoredFile, tenancyTitle, type TenancyView } from "@/src/utils/tenancy-view";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import React, { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
@@ -32,7 +32,8 @@ export default function ContractScreen() {
 
 function ContractGate() {
   const router = useRouter();
-  const query = useActiveTenancy();
+  const { tenancy: tenancyParam } = useLocalSearchParams<{ tenancy?: string }>();
+  const query = useActiveTenancy(tenancyParam);
   const shell = { title: "Contract", back: true, fallbackHref: "/(app)/(tabs)/my-home" } as const;
 
   if (query.isLoading) {

@@ -3,18 +3,20 @@ import { useMemo } from "react";
 import { useTenanciesControllerMine } from "@/src/api/seek-api/tenancies";
 import { asTenancyView } from "@/src/utils/tenancy-view";
 
-/** The student's active tenancy running now or starting next (earliest start not yet ended). */
-export function useActiveTenancy() {
+/** The student's active tenancy running now or starting next (earliest start not yet ended), or the one asked for by id when it is theirs. */
+export function useActiveTenancy(wantedId?: string) {
   const query = useTenanciesControllerMine({ query: { retry: 1 } });
   const tenancy = useMemo(() => {
     const all = (query.data ?? []).map(asTenancyView);
+    const wanted = wantedId ? all.find((item) => item._id === wantedId) : undefined;
+    if (wanted) return wanted;
     const now = Date.now();
     const active = all.filter((item) => item.status === "ACTIVE");
     const current = active
       .filter((item) => !item.endDate || new Date(item.endDate).getTime() >= now)
       .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())[0];
     return current ?? active[0] ?? all.find((t) => t.status === "PENDING_ACCEPTANCE") ?? all[0] ?? null;
-  }, [query.data]);
+  }, [query.data, wantedId]);
   return { ...query, tenancy };
 }
 
