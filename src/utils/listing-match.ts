@@ -25,6 +25,9 @@ export type MatchPrefs = {
 
 export type Match = { percent: number; why: string };
 
+/** Beyond this distance (e.g. a GPS fix in another city) travel time says nothing useful. */
+export const MAX_RELEVANT_DISTANCE_KM = 15;
+
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 /** The 30 September that starts the next (or current) academic year. */
@@ -86,7 +89,7 @@ export function matchHome(
   let score = 70;
   const reasons: { rank: number; text: string }[] = [];
 
-  if (home.distanceKm != null) {
+  if (home.distanceKm != null && home.distanceKm <= MAX_RELEVANT_DISTANCE_KM) {
     if (home.distanceKm <= 1) score += 8;
     else if (home.distanceKm <= 2.5) score += 5;
     else if (home.distanceKm <= 4) score += 2;
